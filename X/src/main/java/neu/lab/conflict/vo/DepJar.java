@@ -178,46 +178,46 @@ public class DepJar {
 		return allMethods;
 	}
 	
-	public boolean containsMthd(String mthd) {
+	public boolean containMethod(String mthd) {
 		return getallMethods().contains(mthd);
 	}
 	
-	/**
-	 * 得到本depjar独有的cls
-	 * @param otherJar
-	 * @return
-	 */
-	public Set<String> getOnlyClses(DepJar otherJar) {
-		Set<String> onlyCls = new HashSet<String>();
-		Set<String> otherAll = otherJar.getAllCls(true);
-		for (String clsSig : getAllCls(true)) {
-			if (!otherAll.contains(clsSig)) {
-				onlyCls.add(clsSig);
-			}
-		}
-		return onlyCls;
-	}
+//	/**
+//	 * 得到本depjar独有的cls
+//	 * @param otherJar
+//	 * @return
+//	 */
+//	public Set<String> getOnlyClses(DepJar otherJar) {
+//		Set<String> onlyCls = new HashSet<String>();
+//		Set<String> otherAll = otherJar.getAllCls(true);
+//		for (String clsSig : getAllCls(true)) {
+//			if (!otherAll.contains(clsSig)) {
+//				onlyCls.add(clsSig);
+//			}
+//		}
+//		return onlyCls;
+//	}
 	
-	/**
-	 * 得到本depjar独有的mthds
-	 * @param otherJar
-	 * @return
-	 */
-	public Set<String> getOnlyMthds(DepJar otherJar) {
-		Set<String> onlyMthds = new HashSet<String>();
-		for (String clsSig : getAllClass().keySet()) {
-			ClassVO otherCls = otherJar.getClassVO(clsSig);
-			if (otherCls != null) {
-				ClassVO cls = getClassVO(clsSig);
-				for (MethodVO mthd : cls.getMethods()) {
-					if (!otherCls.hasMethod(mthd.getMthdSig())) {
-						onlyMthds.add(mthd.getMthdSig());
-					}
-				}
-			}
-		}
-		return onlyMthds;
-	}
+//	/**
+//	 * 得到本depjar独有的mthds
+//	 * @param otherJar
+//	 * @return
+//	 */
+//	public Set<String> getOnlyMthds(DepJar otherJar) {
+//		Set<String> onlyMthds = new HashSet<String>();
+//		for (String clsSig : getAllClass().keySet()) {
+//			ClassVO otherCls = otherJar.getClassVO(clsSig);
+//			if (otherCls != null) {
+//				ClassVO cls = getClassVO(clsSig);
+//				for (MethodVO mthd : cls.getMethods()) {
+//					if (!otherCls.hasMethod(mthd.getMthdSig())) {
+//						onlyMthds.add(mthd.getMthdSig());
+//					}
+//				}
+//			}
+//		}
+//		return onlyMthds;
+//	}
 
 
 
@@ -261,19 +261,21 @@ public class DepJar {
 		return classifier;
 	}
 
-	public boolean isSame(String groupId2, String artifactId2, String version2, String classifier2) {
-		return groupId.equals(groupId2) && artifactId.equals(artifactId2) && version.equals(version2)
-				&& classifier.equals(classifier2);
-	}
-
+	
 	/**
 	 * 是否为同一个
 	 * @param dep
 	 * @return
 	 */
-	public boolean isSelf(DepJar dep) {
-		return isSame(dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), dep.getClassifier());
+	public boolean isSelf(DepJar depJar) {
+		return isSame(depJar.getGroupId(), depJar.getArtifactId(), depJar.getVersion(), depJar.getClassifier());
 	}
+	
+	public boolean isSame(String groupId2, String artifactId2, String version2, String classifier2) {
+		return groupId.equals(groupId2) && artifactId.equals(artifactId2) && version.equals(version2)
+				&& classifier.equals(classifier2);
+	}
+
 /**
  * 没有比较版本
  * @param depJar
@@ -287,24 +289,24 @@ public class DepJar {
 		this.allClass = allClass;
 	}
 
-	public boolean hasallClass() {
-		return null != this.allClass;
-	}
+//	public boolean hasallClass() {
+//		return null != this.allClass;
+//	}
 	
-	/**
-	 * 得到testMthds中哪些mthds存在于本jar
-	 * @param testMthds
-	 * @return
-	 */
-	public List<String> getInnerMthds(Collection<String> testMthds) {
-		Set<String> jarMthds = getallMethods();
-		List<String> innerMthds = new ArrayList<String>();
-		for (String mthd : testMthds) {
-			if (jarMthds.contains(mthd))
-				innerMthds.add(mthd);
-		}
-		return innerMthds;
-	}
+//	/**
+//	 * 得到testMthds中哪些mthds存在于本jar
+//	 * @param testMthds
+//	 * @return
+//	 */
+//	public List<String> getInnerMthds(Collection<String> testMthds) {
+//		Set<String> jarMthds = getallMethods();
+//		List<String> innerMthds = new ArrayList<String>();
+//		for (String mthd : testMthds) {
+//			if (jarMthds.contains(mthd))
+//				innerMthds.add(mthd);
+//		}
+//		return innerMthds;
+//	}
 
 	/**
 	 * note:from the view of usedJar. e.g.
@@ -313,17 +315,17 @@ public class DepJar {
 	 * @param testMthds
 	 * @return
 	 */
-	public Set<String> getRiskMthds(Collection<String> testMthds) {
+	public Set<String> getRiskMthds(Collection<String> entryMethods) {
 		Set<String> riskMthds = new HashSet<String>();
-		for (String testMthd : testMthds) {
-			if (!this.containsMthd(testMthd) && AllRefedCls.i().contains(SootUtil.mthdSig2cls(testMthd))) {
+		for (String testMethod : entryMethods) {
+			if (!this.containMethod(testMethod) && AllRefedCls.i().contains(SootUtil.mthdSig2cls(testMethod))) {
 				// don't have method,and class is used. 使用这个类，但是没有方法
-				if (this.containClass(SootUtil.mthdSig2cls(testMthd))) {
+				if (this.containClass(SootUtil.mthdSig2cls(testMethod))) {
 					// has class.don't have method.	有这个类，没有方法
-					riskMthds.add(testMthd);
-				} else if (!AllCls.i().contains(SootUtil.mthdSig2cls(testMthd))) {
+					riskMthds.add(testMethod);
+				} else if (!AllCls.i().contains(SootUtil.mthdSig2cls(testMethod))) {
 					// This jar don't have class,and all jar don't have class.	这个jar没有这个class，所有的jar都没有
-					riskMthds.add(testMthd);
+					riskMthds.add(testMethod);
 				}
 			}
 		}
@@ -333,7 +335,7 @@ public class DepJar {
 	public Set<String> getRiskMthds(Collection<String> testMthds, DepJar depJar) {
 		Set<String> riskMthds = new HashSet<String>();
 		for (String testMthd : testMthds) {
-			if (!this.containsMthd(testMthd) && AllRefedCls.i(depJar).contains(SootUtil.mthdSig2cls(testMthd))) {
+			if (!this.containMethod(testMthd) && AllRefedCls.i(depJar).contains(SootUtil.mthdSig2cls(testMthd))) {
 				// don't have method,and class is used. 使用这个类，但是没有方法
 				if (this.containClass(SootUtil.mthdSig2cls(testMthd))) {
 					// has class.don't have method.	有这个类，没有方法
