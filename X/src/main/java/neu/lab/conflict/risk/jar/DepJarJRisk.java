@@ -111,13 +111,13 @@ public class DepJarJRisk {
 	public Collection<String> getPrcDirPaths() throws Exception {
 		List<String> classpaths;
 		if (GlobalVar.useAllJar) {
-			classpaths = depJar.getRepalceCp();
+			classpaths = depJar.getRepalceClassPath();
 		} else {
 			MavenUtil.i().getLog().info("not add all jar to process");
 			classpaths = new ArrayList<String>();
 			// keep first is self
 			classpaths.addAll(this.depJar.getJarFilePaths(true));
-			classpaths.addAll(this.depJar.getFatherJarCps(false));
+			classpaths.addAll(this.depJar.getFatherJarClassPaths(false));
 
 		}
 		return classpaths;

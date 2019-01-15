@@ -24,7 +24,7 @@ public class DepJar {
 	private String groupId;
 	private String artifactId;// artifactId
 	private String version;// version
-	private String classifier;	//附属构件
+	private String classifier; // 附属构件
 	private List<String> jarFilePaths;// host project may have multiple source.
 	private Map<String, ClassVO> allClass;// all class in jar
 	private Set<NodeAdapter> nodeAdapters;// all
@@ -39,18 +39,18 @@ public class DepJar {
 	}
 
 	/**
-	 * get jar may have risk thinking same class in different dependency,selected jar may have risk; 
-	 * Not thinking same class in different dependency,selected jar is safe
-	 * jar可能存在不同依赖项中考虑同一类的风险，所选的jar可能存在风险；如果不以不同的依赖关系考虑相同的类，则选择的jar是安全的。
+	 * get jar may have risk thinking same class in different dependency,selected
+	 * jar may have risk; Not thinking same class in different dependency,selected
+	 * jar is safe jar可能存在不同依赖项中考虑同一类的风险，所选的jar可能存在风险；如果不以不同的依赖关系考虑相同的类，则选择的jar是安全的。
 	 * 
 	 * @return
 	 */
 	public boolean isRisk() {
 		return !this.isSelected();
 	}
-	
+
 	/**
-	 *	all class in jar中是不是包含某一class 
+	 * all class in jar中是不是包含某一class
 	 *
 	 */
 	public boolean containClass(String classSig) {
@@ -75,7 +75,6 @@ public class DepJar {
 //		}
 //		return nodeEle;
 //	}
-
 
 	public Set<NodeAdapter> getNodeAdapters() {
 		if (nodeAdapters == null)
@@ -137,6 +136,7 @@ public class DepJar {
 
 	/**
 	 * 得到这个jar所有类的集合
+	 * 
 	 * @return
 	 */
 	public Map<String, ClassVO> getAllClass() {
@@ -164,6 +164,7 @@ public class DepJar {
 
 	/**
 	 * 得到这个jar的所有方法
+	 * 
 	 * @return
 	 */
 	public Set<String> getallMethods() {
@@ -177,11 +178,11 @@ public class DepJar {
 		}
 		return allMethods;
 	}
-	
+
 	public boolean containMethod(String mthd) {
 		return getallMethods().contains(mthd);
 	}
-	
+
 //	/**
 //	 * 得到本depjar独有的cls
 //	 * @param otherJar
@@ -197,7 +198,7 @@ public class DepJar {
 //		}
 //		return onlyCls;
 //	}
-	
+
 //	/**
 //	 * 得到本depjar独有的mthds
 //	 * @param otherJar
@@ -218,8 +219,6 @@ public class DepJar {
 //		}
 //		return onlyMthds;
 //	}
-
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -261,26 +260,27 @@ public class DepJar {
 		return classifier;
 	}
 
-	
 	/**
 	 * 是否为同一个
+	 * 
 	 * @param dep
 	 * @return
 	 */
 	public boolean isSelf(DepJar depJar) {
 		return isSame(depJar.getGroupId(), depJar.getArtifactId(), depJar.getVersion(), depJar.getClassifier());
 	}
-	
+
 	public boolean isSame(String groupId2, String artifactId2, String version2, String classifier2) {
 		return groupId.equals(groupId2) && artifactId.equals(artifactId2) && version.equals(version2)
 				&& classifier.equals(classifier2);
 	}
 
-/**
- * 没有比较版本
- * @param depJar
- * @return
- */
+	/**
+	 * 没有比较版本
+	 * 
+	 * @param depJar
+	 * @return
+	 */
 	public boolean isSameLib(DepJar depJar) {
 		return getGroupId().equals(depJar.getGroupId()) && getArtifactId().equals(depJar.getArtifactId());
 	}
@@ -292,7 +292,7 @@ public class DepJar {
 //	public boolean hasallClass() {
 //		return null != this.allClass;
 //	}
-	
+
 //	/**
 //	 * 得到testMthds中哪些mthds存在于本jar
 //	 * @param testMthds
@@ -321,10 +321,11 @@ public class DepJar {
 			if (!this.containMethod(testMethod) && AllRefedCls.i().contains(SootUtil.mthdSig2cls(testMethod))) {
 				// don't have method,and class is used. 使用这个类，但是没有方法
 				if (this.containClass(SootUtil.mthdSig2cls(testMethod))) {
-					// has class.don't have method.	有这个类，没有方法
+					// has class.don't have method. 有这个类，没有方法
 					riskMthds.add(testMethod);
 				} else if (!AllCls.i().contains(SootUtil.mthdSig2cls(testMethod))) {
-					// This jar don't have class,and all jar don't have class.	这个jar没有这个class，所有的jar都没有
+					// This jar don't have class,and all jar don't have class.
+					// 这个jar没有这个class，所有的jar都没有
 					riskMthds.add(testMethod);
 				}
 			}
@@ -332,23 +333,23 @@ public class DepJar {
 		// if (diffMthd.contains("<init>") || diffMthd.contains("<clinit>")) {
 		return riskMthds;
 	}
-	public Set<String> getRiskMthds(Collection<String> testMthds, DepJar depJar) {
-		Set<String> riskMthds = new HashSet<String>();
-		for (String testMthd : testMthds) {
-			if (!this.containMethod(testMthd) && AllRefedCls.i(depJar).contains(SootUtil.mthdSig2cls(testMthd))) {
-				// don't have method,and class is used. 使用这个类，但是没有方法
-				if (this.containClass(SootUtil.mthdSig2cls(testMthd))) {
-					// has class.don't have method.	有这个类，没有方法
-					riskMthds.add(testMthd);
-				} else if (!AllCls.i().contains(SootUtil.mthdSig2cls(testMthd))) {
-					// This jar don't have class,and all jar don't have class.	这个jar没有这个class，所有的jar都没有
-					riskMthds.add(testMthd);
-				}
-			}
-		}
-		// if (diffMthd.contains("<init>") || diffMthd.contains("<clinit>")) {
-		return riskMthds;
-	}
+//	public Set<String> getRiskMthds(Collection<String> testMthds, DepJar depJar) {
+//		Set<String> riskMthds = new HashSet<String>();
+//		for (String testMthd : testMthds) {
+//			if (!this.containMethod(testMthd) && AllRefedCls.i(depJar).contains(SootUtil.mthdSig2cls(testMthd))) {
+//				// don't have method,and class is used. 使用这个类，但是没有方法
+//				if (this.containClass(SootUtil.mthdSig2cls(testMthd))) {
+//					// has class.don't have method.	有这个类，没有方法
+//					riskMthds.add(testMthd);
+//				} else if (!AllCls.i().contains(SootUtil.mthdSig2cls(testMthd))) {
+//					// This jar don't have class,and all jar don't have class.	这个jar没有这个class，所有的jar都没有
+//					riskMthds.add(testMthd);
+//				}
+//			}
+//		}
+//		// if (diffMthd.contains("<init>") || diffMthd.contains("<clinit>")) {
+//		return riskMthds;
+//	}
 //	/**
 //	 * 暂时不明白用途
 //	 * @param usedJar
@@ -382,26 +383,23 @@ public class DepJar {
 //	}
 //	
 
-	
-
 	public Set<String> getAllCls(boolean useTarget) {
 		return SootUtil.getJarsClasses(this.getJarFilePaths(useTarget));
 	}
 
 	/**
-	 * @param useTarget:
-	 *            host-class-name can get from source directory(false) or target
-	 *            directory(true). using source directory: advantage: get class
-	 *            before maven-package disadvantage:class can't deconstruct by
-	 *            soot;miss class that generated.
+	 * @param useTarget: host-class-name can get from source directory(false) or
+	 *        target directory(true). using source directory: advantage: get class
+	 *        before maven-package disadvantage:class can't deconstruct by soot;miss
+	 *        class that generated.
+	 *        主机类名称可以从源目录(False)或目标目录(True)获得.使用源目录。优点：获取类之前maven包的缺点：类不能被soot解构，错过类生成。
 	 * @return
 	 */
 	public List<String> getJarFilePaths(boolean useTarget) {
-		if (!useTarget) {// use source directory
+		if (!useTarget && isHost()) {// use source directory
 			// if node is inner project,will return source directory(using source directory
 			// can get classes before maven-package)
-			if (isHost())
-				return MavenUtil.i().getSrcPaths();
+			return MavenUtil.i().getSrcPaths();
 		}
 		return jarFilePaths;
 	}
@@ -417,19 +415,19 @@ public class DepJar {
 
 	/**
 	 * use this jar replace version of used-version ,then return path of
-	 * all-used-jar
-	 * 使用这个jar替代了旧版本，然后返回所有的旧jar的路径
+	 * all-used-jar 使用这个jar替代了旧版本，然后返回所有的旧jar的路径
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
-	public List<String> getRepalceCp() throws Exception {
+	public List<String> getRepalceClassPath() throws Exception {
 		List<String> paths = new ArrayList<String>();
 		paths.addAll(this.getJarFilePaths(true));
 		boolean hasRepalce = false;
 		for (DepJar usedDepJar : DepJars.i().getUsedDepJars()) {
 			if (this.isSameLib(usedDepJar)) {// used depJar instead of usedDepJar.
 				if (hasRepalce) {
-					MavenUtil.i().getLog().warn("when cg, find multiple usedLib for " + toString());	//有重复的使用路径
+					MavenUtil.i().getLog().warn("when cg, find multiple usedLib for " + toString()); // 有重复的使用路径
 					throw new Exception("when cg, find multiple usedLib for " + toString());
 				}
 				hasRepalce = true;
@@ -450,7 +448,7 @@ public class DepJar {
 	/**
 	 * @return include self
 	 */
-	public Set<String> getFatherJarCps(boolean includeSelf) {
+	public Set<String> getFatherJarClassPaths(boolean includeSelf) {
 		Set<String> fatherJarCps = new HashSet<String>();
 		for (NodeAdapter node : this.nodeAdapters) {
 			fatherJarCps.addAll(node.getAncestorJarCps(includeSelf));
