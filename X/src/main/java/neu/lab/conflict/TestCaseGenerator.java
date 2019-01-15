@@ -65,7 +65,7 @@ public class TestCaseGenerator {
 		String projectSig = (MavenUtil.i().getProjectCor()).replace(":", "+"); // 项目标记
 		for (Conflict conflict : Conflicts.i().getConflicts()) {
 			String conflictSig = conflict.getSig().replace(":", "+");
-			for (DepJarJRisk jarRisk : conflict.getJRisk().getJarRisks()) {
+			for (DepJarJRisk jarRisk : conflict.getJarRisks()) {
 				// String outPath = outDir +"p_"+ projectSig + "@" + conflictSig + "@" +
 				// jarRisk.getVersion() + ".txt";
 				boolean hasPrint = writeJarRisk(jarRisk, outDir, projectSig + "@" + conflictSig, append);

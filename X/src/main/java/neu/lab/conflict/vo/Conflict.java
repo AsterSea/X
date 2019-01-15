@@ -15,7 +15,6 @@ import neu.lab.conflict.graph.Dog;
 import neu.lab.conflict.graph.Graph4distance;
 import neu.lab.conflict.graph.IBook;
 import neu.lab.conflict.graph.Dog.Strategy;
-import neu.lab.conflict.risk.jar.ConflictJRisk;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
@@ -35,10 +34,6 @@ public class Conflict {
 		nodeAdapters = new HashSet<NodeAdapter>();
 		this.groupId = groupId;
 		this.artifactId = artifactId;
-		jarRisks = new ArrayList<DepJarJRisk>();
-		for (DepJar jar : getDepJars()) {
-			jarRisks.add(new DepJarJRisk(jar, this));
-		}
 	}
 
 	/**
@@ -113,10 +108,6 @@ public class Conflict {
 		return getDepJars().size() > 1;
 	}
 
-	public ConflictJRisk getJRisk() {
-		return new ConflictJRisk(this);
-	}
-
 	@Override
 	public String toString() {
 		String str = groupId + ":" + artifactId + " conflict version:";
@@ -158,7 +149,17 @@ public class Conflict {
 
 
 	public List<DepJarJRisk> getJarRisks() {
-		return jarRisks;
+		if(jarRisks == null) {
+			jarRisks = new ArrayList<DepJarJRisk>();
+			for (DepJar depJar : getDepJars()) {
+				if (usedDepJar.isSelf(depJar)) {
+				}else {
+					jarRisks.add(new DepJarJRisk(depJar, usedDepJar));
+				}
+				
+			}
+		}
+			return jarRisks;
 	}
 
 
@@ -181,9 +182,9 @@ public class Conflict {
 			AllCls.init(DepJars.i(), depJar);
 			AllRefedCls.init(depJar);
 
-			for (DepJarJRisk depJarJRisk : jarRisks) {
+			for (DepJarJRisk depJarJRisk : getJarRisks()) {
 				bottomMethods = new HashSet<String>();
-				if (depJarJRisk.getConflictJar() != getUsedDepJar()) {
+				if (depJarJRisk.getConflictDepJar() != getUsedDepJar()) {
 					isUsedDepJar = false;
 					if (depJar.isSelf(usedDepJar)) {
 						isUsedDepJar = true;
@@ -193,7 +194,7 @@ public class Conflict {
 
 					if (distanceGraph.getAllNode().isEmpty()) {
 						MavenUtil.i().getLog().info("distanceGraph is empty");
-						nowUsedDepJarMethod.put(depJarJRisk.getConflictJar().toString(), bottomMethods);
+						nowUsedDepJarMethod.put(depJarJRisk.getConflictDepJar().toString(), bottomMethods);
 						break;
 					}
 
@@ -203,7 +204,7 @@ public class Conflict {
 					if (isUsedDepJar) {
 						usedDepJarSet.addAll(bottomMethods);
 					} else {
-						nowUsedDepJarMethod.put(depJarJRisk.getConflictJar().toString(), bottomMethods);
+						nowUsedDepJarMethod.put(depJarJRisk.getConflictDepJar().toString(), bottomMethods);
 					}
 				}
 
@@ -276,7 +277,7 @@ public class Conflict {
 	 */
 	public Set<String> getConflictLevel() {
 		Set<String> usedRiskMethods = new HashSet<String>(); // 被使用的usedDepJar风险方法集合
-		for (DepJarJRisk depJarJRisk : jarRisks) {
+		for (DepJarJRisk depJarJRisk : getJarRisks()) {
 			Graph4distance distanceGraph = depJarJRisk.getGraph4distance();
 			Map<String, IBook> distanceBooks = new Dog(distanceGraph).findRlt(distanceGraph.getHostNds(),
 					Conf.DOG_DEP_FOR_DIS, Strategy.NOT_RESET_BOOK);

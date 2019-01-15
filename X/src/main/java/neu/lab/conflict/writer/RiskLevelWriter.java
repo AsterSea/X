@@ -14,7 +14,6 @@ import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultElement;
 
 import neu.lab.conflict.container.Conflicts;
-import neu.lab.conflict.risk.jar.ConflictJRisk;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.Conflict;
@@ -74,11 +73,10 @@ public class RiskLevelWriter {
 		elements.add(element);
 		element.addAttribute("groupId-artifactId", conflict.getSig());
 		element.addAttribute("versions", conflict.getVersions().toString());
-		ConflictJRisk conflictJRisk = conflict.getJRisk();
 		int riskLevel = 0;
-		Set<String> usedRiskMethods = conflictJRisk.getConflictLevel();
+		Set<String> usedRiskMethods = conflict.getConflictLevel();
 		if (subdivisionLevel) {
-			Map<Integer, String> result = conflictJRisk.getRiskLevel();
+			Map<Integer, String> result = conflict.getRiskLevel();
 			riskLevel = result.keySet().iterator().next();
 		} else {
 			if (usedRiskMethods.isEmpty()) {
@@ -116,15 +114,14 @@ public class RiskLevelWriter {
 	private Element AddPath(Conflict conflict) {
 		Element elements = new DefaultElement("versions");
 		// 冲突的jar包
-		ConflictJRisk conflictJRisk = conflict.getJRisk();
-		for (DepJarJRisk jarRisk : conflictJRisk.getJarRisks()) {
+		for (DepJarJRisk jarRisk : conflict.getJarRisks()) {
 			Element element = new DefaultElement("version");
 			elements.add(element);
 			element.addAttribute("versionId", jarRisk.getVersion());
-			element.addAttribute("loaded", "" + jarRisk.getConflictJar().isSelected());
+			element.addAttribute("loaded", "" + jarRisk.getConflictDepJar().isSelected());
 			Element path = new DefaultElement("path");
 			element.add(path);
-			path.addText(jarRisk.getConflictJar().getAllDepPath());
+			path.addText(jarRisk.getConflictDepJar().getAllDepPath());
 		}
 		return elements;
 	}

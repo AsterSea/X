@@ -21,7 +21,6 @@ import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultElement;
 
 import neu.lab.conflict.container.Conflicts;
-import neu.lab.conflict.risk.jar.ConflictJRisk;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.Conflict;
 
@@ -44,10 +43,9 @@ public class RepairWriter {
 		}
 		printer.println("项目>>>>" + projectName);
 		for (Conflict conflict : Conflicts.i().getConflicts()) {
-			ConflictJRisk conflictJRisk = conflict.getJRisk();
 			int riskLevel = 0;
 			Map<Integer, String> result = new HashMap<Integer, String>();
-			result = conflictJRisk.getRiskLevel();
+			result = conflict.getRiskLevel();
 			riskLevel = result.keySet().iterator().next();
 			safeJar = result.get(riskLevel);
 			printer.println("冲突>>>>" + conflict.toString());

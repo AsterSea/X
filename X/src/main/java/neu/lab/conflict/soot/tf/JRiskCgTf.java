@@ -31,8 +31,8 @@ public abstract class JRiskCgTf extends SceneTransformer {
 	public JRiskCgTf(DepJarJRisk depJarJRisk) {
 		super();
 		// this.depJarJRisk = depJarJRisk;
-		entryClses = depJarJRisk.getEntryJar().getAllCls(true);
-		conflictJarClses = depJarJRisk.getConflictJar().getAllCls(true);
+		entryClses = depJarJRisk.getEntryDepJar().getAllCls(true);
+		conflictJarClses = depJarJRisk.getConflictDepJar().getAllCls(true);
 		riskMthds = depJarJRisk.getThrownMthds();
 		rchMthds = new HashSet<String>();
 
@@ -45,8 +45,8 @@ public abstract class JRiskCgTf extends SceneTransformer {
 	public JRiskCgTf(DepJarJRisk depJarJRisk, Set<String> thrownMethods) {
 		super();
 		// this.depJarJRisk = depJarJRisk;
-		entryClses = depJarJRisk.getEntryJar().getAllCls(true);
-		conflictJarClses = depJarJRisk.getConflictJar().getAllCls(true);
+		entryClses = depJarJRisk.getEntryDepJar().getAllCls(true);
+		conflictJarClses = depJarJRisk.getConflictDepJar().getAllCls(true);
 		riskMthds = thrownMethods;
 		rchMthds = new HashSet<String>();
 

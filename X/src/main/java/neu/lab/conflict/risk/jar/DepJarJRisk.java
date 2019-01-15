@@ -35,7 +35,7 @@ import neu.lab.conflict.vo.MethodCall;
  */
 public class DepJarJRisk {
 	private DepJar depJar; // 依赖jar
-	private ConflictJRisk conflictRisk; // 有风险的冲突jar
+	private DepJar usedDepJar; // 依赖jar
 	private Set<String> thrownMthds; // 抛弃的方法
 	// private Set<String> rchedMthds;
 	private Graph4distance graph4distance; // 图
@@ -44,13 +44,11 @@ public class DepJarJRisk {
 	/*
 	 * 构造函数
 	 */
-	public DepJarJRisk(DepJar depJar, ConflictJRisk conflictRisk) {
+	public DepJarJRisk(DepJar depJar, DepJar usedDepJar) {
 		this.depJar = depJar;
-		this.conflictRisk = conflictRisk;
+		this.usedDepJar = usedDepJar;
 		// calculate thrownMthd
-
 		// calculate call-graph
-
 	}
 
 	/*
@@ -67,7 +65,7 @@ public class DepJarJRisk {
 	 */
 	public Set<String> getThrownMthds() {
 		// e.g.:"<neu.lab.plug.testcase.homemade.host.prob.ProbBottom: void m()>"
-		thrownMthds = conflictRisk.getUsedDepJar().getRiskMthds(depJar.getallMethods());
+		thrownMthds = usedDepJar.getRiskMthds(depJar.getallMethods());
 		MavenUtil.i().getLog().info("riskMethod size before filter: " + thrownMthds.size());
 		if (thrownMthds.size() > 0)
 			new SootRiskMthdFilter().filterRiskMthds(thrownMthds);
@@ -85,7 +83,7 @@ public class DepJarJRisk {
 	 * @return
 	 */
 	public Set<String> getThrownMthds(DepJar enterDepJar) {
-		thrownMthds = conflictRisk.getUsedDepJar().getRiskMthds(depJar.getallMethods());
+		thrownMthds = usedDepJar.getRiskMthds(depJar.getallMethods());
 		MavenUtil.i().getLog().info("riskMethod size before filter: " + thrownMthds.size());
 		if (thrownMthds.size() > 0)
 				new SootRiskMthdFilter().filterRiskMthds(thrownMthds, enterDepJar);
@@ -110,7 +108,7 @@ public class DepJarJRisk {
 
 	public Collection<String> getPrcDirPaths() throws Exception {
 		List<String> classpaths;
-		if (GlobalVar.useAllJar) {
+		if (GlobalVar.useAllJar) {	//default:true
 			classpaths = depJar.getRepalceClassPath();
 		} else {
 			MavenUtil.i().getLog().info("not add all jar to process");
@@ -124,11 +122,11 @@ public class DepJarJRisk {
 
 	}
 
-	public DepJar getEntryJar() {
+	public DepJar getEntryDepJar() {
 		return DepJars.i().getHostDepJar();
 	}
 
-	public DepJar getConflictJar() {
+	public DepJar getConflictDepJar() {
 		return depJar;
 	}
 
@@ -222,7 +220,7 @@ public class DepJarJRisk {
 
 	@Override
 	public String toString() {
-		return depJar.toString() + " in conflict " + conflictRisk.getConflict().toString();
+		return depJar.toString() + " in conflict " + usedDepJar.toString();
 	}
 
 }
