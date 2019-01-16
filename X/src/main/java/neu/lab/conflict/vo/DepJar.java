@@ -312,7 +312,8 @@ public class DepJar {
 	 * note:from the view of usedJar. e.g.
 	 * getReplaceJar().getRiskMthds(getRchedMthds());
 	 * 
-	 * @param testMthds
+	 * @param entryMethods
+	 * 			-depJar.getallMethods()
 	 * @return
 	 */
 	public Set<String> getRiskMthds(Collection<String> entryMethods) {
@@ -332,6 +333,17 @@ public class DepJar {
 		}
 		// if (diffMthd.contains("<init>") || diffMthd.contains("<clinit>")) {
 		return riskMthds;
+	}
+	
+	
+	public Set<String> getCommonMethods(Collection<String> entryMethods){
+		Set<String> commonMethods = new HashSet<String>();
+		for (String testMethod : entryMethods) {
+			if (this.containMethod(testMethod)) {
+				commonMethods.add(testMethod);
+			}
+		}
+		return commonMethods;
 	}
 //	public Set<String> getRiskMthds(Collection<String> testMthds, DepJar depJar) {
 //		Set<String> riskMthds = new HashSet<String>();

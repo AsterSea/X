@@ -15,21 +15,21 @@ import neu.lab.conflict.vo.DepJar;
  */
 public class AllRefedCls {
 	private static AllRefedCls instance;
-	private Set<String> refedClses;
+	private Set<String> referencedClasses;
 
 	private AllRefedCls() {
 		long start = System.currentTimeMillis();	//记录运行时间
-		refedClses = new HashSet<String>();
+		referencedClasses = new HashSet<String>();
 		try {
 			ClassPool pool = new ClassPool();
 			for (String path : DepJars.i().getUsedJarPaths()) {
 				pool.appendClassPath(path);
 			}
 			for (String cls : AllCls.i().getAllCls()) {
-				refedClses.add(cls);
+				referencedClasses.add(cls);
 				if (pool.getOrNull(cls) != null) {	//	getOrNull()在pool中没有发现这个class
 //					System.out.println();
-					refedClses.addAll(pool.get(cls).getRefClasses());
+					referencedClasses.addAll(pool.get(cls).getRefClasses());
 				} else {
 					MavenUtil.i().getLog().warn("can't find " + cls + " in pool when form reference.");
 				}
@@ -42,17 +42,17 @@ public class AllRefedCls {
 	}
 	private AllRefedCls(DepJar depJar) {
 		long start = System.currentTimeMillis();
-		refedClses = new HashSet<String>();
+		referencedClasses = new HashSet<String>();
 		try {
 			ClassPool pool = new ClassPool();
 			for (String path : DepJars.i().getUsedJarPaths(depJar)) {
 				pool.appendClassPath(path);
 			}
 			for (String cls : AllCls.i().getAllCls()) {
-				refedClses.add(cls);
+				referencedClasses.add(cls);
 				if (pool.getOrNull(cls) != null) {
 //					System.out.println();
-					refedClses.addAll(pool.get(cls).getRefClasses());
+					referencedClasses.addAll(pool.get(cls).getRefClasses());
 				} else {
 					MavenUtil.i().getLog().warn("can't find " + cls + " in pool when form reference.");
 				}
@@ -81,7 +81,7 @@ public class AllRefedCls {
 	}
 
 	public boolean contains(String cls) {
-		return refedClses.contains(cls);
+		return referencedClasses.contains(cls);
 	}
 
 }

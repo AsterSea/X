@@ -17,11 +17,13 @@ import neu.lab.conflict.graph.IBook;
 import neu.lab.conflict.graph.IGraph;
 import neu.lab.conflict.graph.IRecord;
 import neu.lab.conflict.graph.Node4distance;
+import neu.lab.conflict.graph.Node4path;
 import neu.lab.conflict.graph.Record4distance;
 import neu.lab.conflict.soot.SootJRiskCg;
 import neu.lab.conflict.soot.SootRiskMthdFilter;
 import neu.lab.conflict.soot.SootRiskMthdFilter2;
 import neu.lab.conflict.soot.tf.JRiskDistanceCgTf;
+import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
 import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.DepJar;
@@ -37,6 +39,7 @@ public class DepJarJRisk {
 	private DepJar depJar; // 依赖jar
 	private DepJar usedDepJar; // 依赖jar
 	private Set<String> thrownMthds; // 抛弃的方法
+	private Set<String> semantemeRiskMethods;	//语义风险方法集合
 	// private Set<String> rchedMthds;
 	private Graph4distance graph4distance; // 图
 	private Map<String, IBook> books; // book记录用
@@ -93,7 +96,28 @@ public class DepJarJRisk {
 		MavenUtil.i().getLog().info("riskMethod size after filter2: " + thrownMthds.size());
 		return thrownMthds;
 	}
-
+	
+/**
+ * 语义冲突得到相关方法
+ * @return
+ */
+public Set<String> getSemantemeRiskMethods(){
+	semantemeRiskMethods = usedDepJar.getCommonMethods(depJar.getallMethods());
+	MavenUtil.i().getLog().info("semantemeRiskMethods size for common methods: " + semantemeRiskMethods.size());
+	semantemeRiskMethods.addAll(getThrownMthds());
+	MavenUtil.i().getLog().info("semantemeRiskMethods size for thrown methods before filter: " + semantemeRiskMethods.size());
+	if (semantemeRiskMethods.size() > 0) {
+		Set<String> deleteMethods = new HashSet<String>();
+		for (String method : semantemeRiskMethods) {
+			if (method.contains("init>") || method.contains("cinit>")) {
+				deleteMethods.add(method);
+			}
+		}
+		semantemeRiskMethods.removeAll(deleteMethods);
+		MavenUtil.i().getLog().info("semantemeRiskMethods size after filterInit: " + semantemeRiskMethods.size());
+	}
+	return semantemeRiskMethods;
+}
 
 	public Set<String> getMethodBottom(Map<String, IBook> books) {
 		Set<String> bottomMethods = new HashSet<String>();
@@ -136,19 +160,10 @@ public class DepJarJRisk {
 	 * @return
 	 */
 	public Graph4distance getGraph4distance() {
-		// if (graph4distance == null) {
+		if (graph4distance == null) {
 		Set<String> thrownmethods = getThrownMthds();
 		if (thrownmethods.size() > 0) {
-//				for(String riskMthd:getThrownMthds()) {
-//					System.out.println(riskMthd);
-//				}
-//			for (String mthd : getThrownMthds()) {
-//				MavenUtil.i().getLog().info("first riskmthd:" + mthd);
-//				// 测试
-//			}
-			// MavenUtil.i().getLog().info("first riskmthd:" +
-			// getThrownMthds().iterator().next());
-			IGraph iGraph = SootJRiskCg.i().getGraph4distance(this, new JRiskDistanceCgTf(this, thrownmethods));
+			IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskDistanceCgTf(this, thrownmethods));
 			if (iGraph != null) {
 				graph4distance = (Graph4distance) iGraph;
 			} else {
@@ -157,7 +172,7 @@ public class DepJarJRisk {
 		} else {
 			graph4distance = new Graph4distance(new HashMap<String, Node4distance>(), new ArrayList<MethodCall>());
 		}
-		// }
+		}
 		return graph4distance;
 	}
 
@@ -167,56 +182,54 @@ public class DepJarJRisk {
 	 * @return
 	 */
 	public Graph4distance getGraph4distance(DepJar useDepJar) {
-		// if (graph4distance == null) {
 		Set<String> thrownmethods = getThrownMthds(useDepJar);
 		if (thrownmethods.size() > 0) {
-//				for(String riskMthd:getThrownMthds()) {
-//					System.out.println(riskMthd);
-//				}
-//			for (String mthd : getThrownMthds()) {
-//				MavenUtil.i().getLog().info("first riskmthd:" + mthd);
-//				// 测试
-//			}
-			// MavenUtil.i().getLog().info("first riskmthd:" +
-			// getThrownMthds().iterator().next());
-			IGraph iGraph = SootJRiskCg.i().getGraph4distance(this, new JRiskDistanceCgTf(this, thrownmethods));
+			IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskDistanceCgTf(this, thrownmethods));
 			if (iGraph != null) {
-				graph4distance = (Graph4distance) iGraph;
+				return (Graph4distance) iGraph;
 			} else {
-				graph4distance = new Graph4distance(new HashMap<String, Node4distance>(), new ArrayList<MethodCall>());
+				return new Graph4distance(new HashMap<String, Node4distance>(), new ArrayList<MethodCall>());
 			}
 		} else {
-			graph4distance = new Graph4distance(new HashMap<String, Node4distance>(), new ArrayList<MethodCall>());
+			return new Graph4distance(new HashMap<String, Node4distance>(), new ArrayList<MethodCall>());
 		}
-		// }
-		return graph4distance;
 	}
 
 	public Graph4path getGraph4mthdPath() {
+		Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
+		if (semantemeRiskMethods.size() > 0) {
+			IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, semantemeRiskMethods));
+			if (iGraph != null) {
+				return (Graph4path) iGraph;
+			} else {
+				return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
+			}
+		} else {
+			return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
+		}
 //		if (getThrownMthds().size() > 0) {
 //			IGraph iGraph = SootJRiskCg.i().getGraph4branch(this,new JRiskMthdPathCgTf(this));
 //			if(iGraph!=null)
 //				return (Graph4path)iGraph;
 //		}
 //		return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
-		return getGraph4distance().getGraph4path();
 	}
 
-	private Map<String, IBook> getBooks4distance() {
-		if (this.books == null) {
-			if (getThrownMthds().size() > 0) {
-				// calculate distance
-
-				books = new Dog(getGraph4distance()).findRlt(getGraph4distance().getHostNds(), Conf.DOG_DEP_FOR_DIS,
-						Dog.Strategy.NOT_RESET_BOOK);
-
-//				GraphPrinter.printGraph(graph4branch, "d:\\graph_distance.txt",getGraph4branch().getHostNds());
-			} else {
-				books = new HashMap<String, IBook>();
-			}
-		}
-		return books;
-	}
+//	private Map<String, IBook> getBooks4distance() {
+//		if (this.books == null) {
+//			if (getThrownMthds().size() > 0) {
+//				// calculate distance
+//
+//				books = new Dog(getGraph4distance()).findRlt(getGraph4distance().getHostNds(), Conf.DOG_DEP_FOR_DIS,
+//						Dog.Strategy.NOT_RESET_BOOK);
+//
+////				GraphPrinter.printGraph(graph4branch, "d:\\graph_distance.txt",getGraph4branch().getHostNds());
+//			} else {
+//				books = new HashMap<String, IBook>();
+//			}
+//		}
+//		return books;
+//	}
 
 	@Override
 	public String toString() {

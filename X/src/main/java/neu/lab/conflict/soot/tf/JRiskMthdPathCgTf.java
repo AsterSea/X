@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.Node4path;
@@ -21,7 +22,9 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 	public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk) {
 		super(depJarJRisk);
 	}
-
+	public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk, Set<String> entryMethods) {
+		super(depJarJRisk, entryMethods);
+	}
 	@Override
 	protected void formGraph() {
 		if (graph == null) {

@@ -23,7 +23,7 @@ public class SootJRiskCg extends SootAna {
 		return instance;
 	}
 
-	public IGraph getGraph4distance(DepJarJRisk depJarJRisk,JRiskCgTf transformer) {
+	public IGraph getGraph(DepJarJRisk depJarJRisk,JRiskCgTf transformer) {
 		MavenUtil.i().getLog().info("use soot to compute reach methods for " + depJarJRisk.toString());
 		IGraph graph = null;
 		long start = System.currentTimeMillis();
