@@ -13,6 +13,7 @@ import neu.lab.conflict.container.AllRefedCls;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.graph.Dog;
 import neu.lab.conflict.graph.Graph4distance;
+import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.IBook;
 import neu.lab.conflict.graph.Dog.Strategy;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
@@ -275,16 +276,26 @@ public class Conflict {
 	 * 
 	 * @return
 	 */
+//	public Set<String> getConflictLevel() {
+//		Set<String> usedRiskMethods = new HashSet<String>(); // 被使用的usedDepJar风险方法集合
+//		for (DepJarJRisk depJarJRisk : getJarRisks()) {
+//			Graph4distance distanceGraph = depJarJRisk.getGraph4distance();
+//			Map<String, IBook> distanceBooks = new Dog(distanceGraph).findRlt(distanceGraph.getHostNds(),
+//					Conf.DOG_DEP_FOR_DIS, Strategy.NOT_RESET_BOOK);
+//			Set<String> bottomMethods = depJarJRisk.getMethodBottom(distanceBooks);
+//			usedRiskMethods.addAll(bottomMethods);
+//		}
+//		return usedRiskMethods;
+//	}
 	public Set<String> getConflictLevel() {
 		Set<String> usedRiskMethods = new HashSet<String>(); // 被使用的usedDepJar风险方法集合
 		for (DepJarJRisk depJarJRisk : getJarRisks()) {
-			Graph4distance distanceGraph = depJarJRisk.getGraph4distance();
-			Map<String, IBook> distanceBooks = new Dog(distanceGraph).findRlt(distanceGraph.getHostNds(),
+			 Graph4path pathGraph = depJarJRisk.getMethodPathGraphForSemanteme();
+			Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(pathGraph.getHostNds(),
 					Conf.DOG_DEP_FOR_DIS, Strategy.NOT_RESET_BOOK);
-			Set<String> bottomMethods = depJarJRisk.getMethodBottom(distanceBooks);
+			Set<String> bottomMethods = depJarJRisk.getMethodBottomForPath(pathBooks);
 			usedRiskMethods.addAll(bottomMethods);
 		}
 		return usedRiskMethods;
 	}
-
 }

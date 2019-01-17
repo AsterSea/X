@@ -17,6 +17,7 @@ import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.Conflict;
+import neu.lab.conflict.vo.DepJar;
 
 public class RiskLevelWriter {
 
@@ -114,15 +115,31 @@ public class RiskLevelWriter {
 	private Element AddPath(Conflict conflict) {
 		Element elements = new DefaultElement("versions");
 		// 冲突的jar包
-		for (DepJarJRisk jarRisk : conflict.getJarRisks()) {
+		for (DepJar depJar : conflict.getDepJars()) {
 			Element element = new DefaultElement("version");
 			elements.add(element);
-			element.addAttribute("versionId", jarRisk.getVersion());
-			element.addAttribute("loaded", "" + jarRisk.getConflictDepJar().isSelected());
+			element.addAttribute("versionId", depJar.getVersion());
+			element.addAttribute("loaded", "" + depJar.isSelected());
 			Element path = new DefaultElement("path");
 			element.add(path);
-			path.addText(jarRisk.getConflictDepJar().getAllDepPath());
+			path.addText(depJar.getAllDepPath());
 		}
+//		for (DepJarJRisk jarRisk : conflict.getJarRisks()) {
+//			Element element = new DefaultElement("version");
+//			elements.add(element);
+//			element.addAttribute("versionId", jarRisk.getVersion());
+//			element.addAttribute("loaded", "" + jarRisk.getConflictDepJar().isSelected());
+//			Element path = new DefaultElement("path");
+//			element.add(path);
+//			path.addText(jarRisk.getConflictDepJar().getAllDepPath());
+//		}
+//		Element element = new DefaultElement("version");
+//		elements.add(element);
+//		element.addAttribute("versionId", conflict.getUsedDepJar().getVersion());
+//		element.addAttribute("loaded", "" + conflict.getUsedDepJar().isSelected());
+//		Element path = new DefaultElement("path");
+//		element.add(path);
+//		path.addText(conflict.getUsedDepJar().getAllDepPath());
 		return elements;
 	}
 }

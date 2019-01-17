@@ -19,7 +19,9 @@ public class Record4path extends IRecord {
 	public int getPathlen() {
 		return pathlen;
 	}
-
+	public String getName() {
+		return riskMthd;
+	}
 	@Override
 	public IRecord clone() {
 		return null;

@@ -8,6 +8,7 @@ import neu.lab.conflict.graph.IGraph;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.SootUtil;
+import neu.lab.conflict.vo.DepJar;
 import neu.lab.conflict.soot.tf.JRiskCgTf;
 import soot.PackManager;
 import soot.Transform;
@@ -45,7 +46,28 @@ public class SootJRiskCg extends SootAna {
 		GlobalVar.time2cg += runtime;
 		return graph;
 	}
+	public IGraph getGraph(DepJar entryDepJar,JRiskCgTf transformer) {
+		MavenUtil.i().getLog().info("use soot to form methods graph for " + entryDepJar.toString());
+		IGraph graph = null;
+		long start = System.currentTimeMillis();
+		try {
 
+			SootUtil.modifyLogOut();
+
+			PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", transformer));
+
+			soot.Main.main(getArgs(entryDepJar.getJarFilePaths(true).toArray(new String[0])).toArray(new String[0]));
+
+			graph = transformer.getGraph();
+
+		} catch (Exception e) {
+			MavenUtil.i().getLog().warn("cg error: ", e);
+		}
+		soot.G.reset();
+		long runtime = (System.currentTimeMillis() - start) / 1000;
+		GlobalVar.time2cg += runtime;
+		return graph;
+	}
 	@Override
 	protected void addCgArgs(List<String> argsList) {
 		argsList.addAll(Arrays.asList(new String[] { "-p", "cg", "off", }));

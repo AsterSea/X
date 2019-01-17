@@ -52,6 +52,13 @@ public abstract class JRiskCgTf extends SceneTransformer {
 
 	}
 
+	public JRiskCgTf(Set<String> thrownMethods) {
+		super();
+		// this.depJarJRisk = depJarJRisk;
+		riskMthds = thrownMethods;
+	}
+	
+	
 	@Override
 	protected void internalTransform(String arg0, Map<String, String> arg1) {
 

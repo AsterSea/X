@@ -32,11 +32,15 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 			// get call-graph.
 			Map<String, Node4path> name2node = new HashMap<String, Node4path>();
 			List<MethodCall> mthdRlts = new ArrayList<MethodCall>();
+			
 			CallGraph cg = Scene.v().getCallGraph();
+			
 			Iterator<Edge> ite = cg.iterator();
 			while (ite.hasNext()) {
 				Edge edge = ite.next();
 
+				
+				
 				String srcMthdName = edge.src().getSignature();
 				String tgtMthdName = edge.tgt().getSignature();
 				// //TODO1
@@ -48,10 +52,15 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 				String tgtClsName = edge.tgt().getDeclaringClass().getName();
 				if (edge.src().isJavaLibraryMethod() || edge.tgt().isJavaLibraryMethod()) {
 					// filter relation contains javaLibClass
-				} else if (conflictJarClses.contains(SootUtil.mthdSig2cls(srcMthdName))
-						&& conflictJarClses.contains(SootUtil.mthdSig2cls(tgtMthdName))) {
+//				} else if (conflictJarClses.contains(SootUtil.mthdSig2cls(srcMthdName))
+//						&& conflictJarClses.contains(SootUtil.mthdSig2cls(tgtMthdName))) {
 					// filter relation inside conflictJar
 				} else {
+					if (edge.src().isConcrete() || edge.tgt().isConcrete()) {
+//						if (riskMthds.contains(srcMthdName)) {
+//							System.out.println(edge.src().getSignature());
+//							System.out.println(edge.src().getActiveBody().getAllUnitBoxes());
+//						}
 					if (!name2node.containsKey(srcMthdName)) {
 						name2node.put(srcMthdName, new Node4path(srcMthdName, isHostClass(srcClsName)&&!edge.src().isPrivate(),
 								riskMthds.contains(srcMthdName)));
@@ -61,7 +70,7 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 								riskMthds.contains(tgtMthdName)));
 					}
 					mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
-				}
+				}}
 			}
 			graph = new Graph4path(name2node, mthdRlts);
 			MavenUtil.i().getLog().info("end form graph.");

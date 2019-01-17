@@ -13,16 +13,19 @@ import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.graph.Dog;
 import neu.lab.conflict.graph.Graph4distance;
 import neu.lab.conflict.graph.Graph4path;
+import neu.lab.conflict.graph.GraphForMethodOutPath;
 import neu.lab.conflict.graph.IBook;
 import neu.lab.conflict.graph.IGraph;
 import neu.lab.conflict.graph.IRecord;
 import neu.lab.conflict.graph.Node4distance;
 import neu.lab.conflict.graph.Node4path;
 import neu.lab.conflict.graph.Record4distance;
+import neu.lab.conflict.graph.Record4path;
 import neu.lab.conflict.soot.SootJRiskCg;
 import neu.lab.conflict.soot.SootRiskMthdFilter;
 import neu.lab.conflict.soot.SootRiskMthdFilter2;
 import neu.lab.conflict.soot.tf.JRiskDistanceCgTf;
+import neu.lab.conflict.soot.tf.JRiskMethodOutPathCgTf;
 import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
 import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
@@ -129,7 +132,16 @@ public Set<String> getSemantemeRiskMethods(){
 		}
 		return bottomMethods;
 	}
-
+	public Set<String> getMethodBottomForPath(Map<String, IBook> books) {
+		Set<String> bottomMethods = new HashSet<String>();
+		for (IBook book : books.values()) {
+			for (IRecord iRecord : book.getRecords()) {
+				Record4path record = (Record4path) iRecord;
+				bottomMethods.add(record.getName());
+			}
+		}
+		return bottomMethods;
+	}
 	public Collection<String> getPrcDirPaths() throws Exception {
 		List<String> classpaths;
 		if (GlobalVar.useAllJar) {	//default:true
@@ -214,7 +226,33 @@ public Set<String> getSemantemeRiskMethods(){
 //		}
 //		return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
 	}
-
+	
+	public Graph4path getMethodPathGraphForSemanteme() {
+		Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
+		if (semantemeRiskMethods.size() > 0) {
+			GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+			System.out.println(depJarGraphForMethodOutPath.getMethodOutPath().size());
+			GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+			System.out.println(usedDepJarGraphForMethodOutPath.getMethodOutPath().size());
+			Set<String> riskMethods = usedDepJarGraphForMethodOutPath.comparedMethodOutPath(depJarGraphForMethodOutPath.getMethodOutPath());
+			depJarGraphForMethodOutPath = null;
+			usedDepJarGraphForMethodOutPath = null;
+			System.out.println("riskMethods size " + riskMethods.size());
+			if (riskMethods.size() > 0) {
+				IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, riskMethods));
+			if (iGraph != null) {
+				return (Graph4path) iGraph;
+			} else {
+				return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
+			}
+		} else {
+			return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
+		}
+			}
+		else {
+			return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
+		}
+	}
 //	private Map<String, IBook> getBooks4distance() {
 //		if (this.books == null) {
 //			if (getThrownMthds().size() > 0) {
