@@ -9,6 +9,7 @@ import neu.lab.conflict.graph.IGraph;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.LibCopyInfo;
 import neu.lab.conflict.util.MavenUtil;
+import neu.lab.conflict.vo.DepJar;
 import soot.SceneTransformer;
 import soot.jimple.toolkits.callgraph.CHATransformer;
 
@@ -27,6 +28,7 @@ public abstract class JRiskCgTf extends SceneTransformer {
 	protected Set<String> rchMthds;
 	protected IGraph graph;
 	protected Map<String, Integer> mthd2branch;
+	protected Set<String> parentDepJarClasses;
 
 	public JRiskCgTf(DepJarJRisk depJarJRisk) {
 		super();
@@ -58,6 +60,16 @@ public abstract class JRiskCgTf extends SceneTransformer {
 		riskMthds = thrownMethods;
 	}
 	
+	public JRiskCgTf(Set<DepJar> parentDepJars, Set<String> thrownMethods) {
+		super();
+		parentDepJarClasses = new HashSet<String>();
+		// this.depJarJRisk = depJarJRisk;
+		for (DepJar depJar : parentDepJars) {
+			parentDepJarClasses.addAll(depJar.getAllCls(true));
+			System.out.println("has add depJar all classes" + depJar.toString());
+		}
+		riskMthds = thrownMethods;
+	}
 	
 	@Override
 	protected void internalTransform(String arg0, Map<String, String> arg1) {

@@ -467,4 +467,25 @@ public class DepJar {
 		}
 		return fatherJarCps;
 	}
+	
+	/**
+	 * 得到所有这个jar包节点的一层父节点的jar class path
+	 * @param includeSelf
+	 * @return
+	 */
+	public Set<String> getAllParentJarClassPaths(boolean includeSelf) {
+		Set<String> parentJarClassPaths = new HashSet<String>();
+		for (NodeAdapter node : this.nodeAdapters) {
+			parentJarClassPaths.addAll(node.getParentJarClassPath(includeSelf));
+		}
+		return parentJarClassPaths;
+	}
+	
+	public Set<DepJar> getAllParentDepJar(){
+		Set<DepJar> parentDepJar = new HashSet<DepJar>();
+		for (NodeAdapter node : this.nodeAdapters) {
+			parentDepJar.add(node.getParent().getDepJar());
+		}
+		return parentDepJar;
+ 	}
 }

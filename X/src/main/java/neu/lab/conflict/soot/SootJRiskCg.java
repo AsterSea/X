@@ -46,7 +46,7 @@ public class SootJRiskCg extends SootAna {
 		GlobalVar.time2cg += runtime;
 		return graph;
 	}
-	public IGraph getGraph(DepJar entryDepJar,JRiskCgTf transformer) {
+	public IGraph getGraph(DepJar entryDepJar,JRiskCgTf transformer, boolean needParentDepJar) {
 		MavenUtil.i().getLog().info("use soot to form methods graph for " + entryDepJar.toString());
 		IGraph graph = null;
 		long start = System.currentTimeMillis();
@@ -56,7 +56,11 @@ public class SootJRiskCg extends SootAna {
 
 			PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", transformer));
 
-			soot.Main.main(getArgs(entryDepJar.getJarFilePaths(true).toArray(new String[0])).toArray(new String[0]));
+			if(needParentDepJar) {
+				soot.Main.main(getArgs(entryDepJar.getAllParentJarClassPaths(true).toArray(new String[0])).toArray(new String[0]));
+			}else {
+				soot.Main.main(getArgs(entryDepJar.getJarFilePaths(true).toArray(new String[0])).toArray(new String[0]));
+			}
 
 			graph = transformer.getGraph();
 

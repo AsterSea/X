@@ -1,54 +1,103 @@
 package neu.lab.conflict.graph;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import neu.lab.conflict.vo.MethodCall;
 
 public class GraphForMethodOutPath implements IGraph{
 	
 	Map<String,List<String>> methodOutPath;
+	
 	public GraphForMethodOutPath(Map<String,List<String>> methodOutPath) {
 		this.methodOutPath = methodOutPath;
 	}
 
-public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOutPath){
-	HashSet<String> differenceMethod = new HashSet<String>();
+public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOutPath, Set<String> thrownMethods){
+	Map<String, Integer> differenceMethod = new TreeMap<String, Integer>();
 	for (String method : methodOutPath.keySet()) {
-		if (differenceMethod.size() > 100) {
-			break;
-		}
+//		if (differenceMethod.size() >= 100) {
+//			break;
+//		}
 		List<String> entryOutPath = entryMehtodOutPath.get(method);
 		List<String> thisOutPath = methodOutPath.get(method);
 		if (entryOutPath == null && thisOutPath == null) {
 		}
-		else if (entryOutPath == null || thisOutPath == null) {
-			differenceMethod.add(method);
-		}else {
-			if (entryOutPath.size() <= 12 || thisOutPath.size() <= 12) {
-				continue;
-			}
+		else if (entryOutPath == null) {
+			differenceMethod.put(method, thisOutPath.size());
+		}
+		else if (thisOutPath == null) {
+			differenceMethod.put(method, entryOutPath.size());
+		}
+		else {
+//			if (entryOutPath.size() <= 12 || thisOutPath.size() <= 12) {
+//				continue;
+//			}
 			if (thisOutPath.size() != entryOutPath.size()) {
-				differenceMethod.add(method);
-			}else {
-				for (String outMethod : entryOutPath) {
-					if (thisOutPath.contains(outMethod)) {
-					}else {
-						differenceMethod.add(method);
-						break;
-					}
-				}
+				differenceMethod.put(method, Math.abs(thisOutPath.size() - entryOutPath.size()));
 			}
+//			else {
+//				for (String outMethod : entryOutPath) {
+//					if (!thisOutPath.contains(outMethod)) {
+//						differenceMethod.put(method, 1);
+//						break;
+//					}
+//				}
+//			}
 		}
 //		System.out.println("thisOutPath" + thisOutPath.size() + ">>>>>" + "entryOutPath" + entryOutPath.size());
 	}
-	return differenceMethod;
+	
+	enhancedLevelForInheritanceMethod(differenceMethod, thrownMethods);
+	
+	Set<String> differenceMethodBySort = sortMap(differenceMethod);
+	
+	return differenceMethodBySort;
 }
+
+/**
+ * 提高来自动态绑定、多态导致的来自父类的方法
+ * @param differenceMethod
+ */
+public void enhancedLevelForInheritanceMethod(Map<String, Integer> differenceMethod, Set<String> thrownMethods) {
+	for (String method : thrownMethods) {
+		if (differenceMethod.containsKey(method)) {
+			System.out.println("enhancedLevelForInheritanceMethod>>>>>" + method);
+			differenceMethod.replace(method, 100);
+		}
+	}
+}
+
+/**
+ * 对Map排序后，输出前N个Intger最大的method
+ * @param map
+ * @return
+ */
+public Set<String>  sortMap(Map<String,Integer> map){ 
+	Set<String> afterSortMethods = new HashSet<String>();
+    List<Map.Entry<String, Integer>> entries = new ArrayList<Map.Entry<String, Integer>>(map.entrySet());  
+    Collections.sort(entries, new Comparator<Map.Entry<String, Integer>>() {  
+        public int compare(Map.Entry<String, Integer> obj1 , Map.Entry<String, Integer> obj2) {  
+            return obj2.getValue() - obj1.getValue();  
+        }  
+    }); 
+    
+    for( int i=0;i<50;i++){  
+        System.out.print(entries.get(i).getKey() + ":" + entries.get(i).getValue());
+        afterSortMethods.add(entries.get(i).getKey());
+  } 
+     return afterSortMethods;  
+   }  
+
 
 @Override
 public INode getNode(String nodeName) {

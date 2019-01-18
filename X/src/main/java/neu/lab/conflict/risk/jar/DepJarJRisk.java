@@ -228,13 +228,19 @@ public Set<String> getSemantemeRiskMethods(){
 	}
 	
 	public Graph4path getMethodPathGraphForSemanteme() {
+		
 		Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
+		
+		Set<String> thrownMethods = getThrownMthds();
+		
 		if (semantemeRiskMethods.size() > 0) {
-			GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+			GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar, new JRiskMethodOutPathCgTf(depJar.getAllParentDepJar(), semantemeRiskMethods), true);
 			System.out.println(depJarGraphForMethodOutPath.getMethodOutPath().size());
-			GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+			
+			GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods), false);
 			System.out.println(usedDepJarGraphForMethodOutPath.getMethodOutPath().size());
-			Set<String> riskMethods = usedDepJarGraphForMethodOutPath.comparedMethodOutPath(depJarGraphForMethodOutPath.getMethodOutPath());
+			
+			Set<String> riskMethods = usedDepJarGraphForMethodOutPath.comparedMethodOutPath(depJarGraphForMethodOutPath.getMethodOutPath(), thrownMethods);
 			depJarGraphForMethodOutPath = null;
 			usedDepJarGraphForMethodOutPath = null;
 			System.out.println("riskMethods size " + riskMethods.size());

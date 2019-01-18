@@ -2,6 +2,7 @@ package neu.lab.conflict.soot.tf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import neu.lab.conflict.graph.Node4path;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.SootUtil;
+import neu.lab.conflict.vo.DepJar;
 import neu.lab.conflict.vo.MethodCall;
 import soot.Scene;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -26,7 +28,9 @@ public class JRiskMethodOutPathCgTf extends JRiskCgTf{
 	public JRiskMethodOutPathCgTf(Set<String> entryMethods) {
 		super(entryMethods);
 	}
-	
+	public JRiskMethodOutPathCgTf(Set<DepJar> parentDepJars, Set<String> entryMethods) {
+		super(parentDepJars, entryMethods);
+	}
 	@Override
 	protected void formGraph() {
 		if (graph == null) {
@@ -37,14 +41,19 @@ public class JRiskMethodOutPathCgTf extends JRiskCgTf{
 			
 			CallGraph cg = Scene.v().getCallGraph();
 			
+			if (parentDepJarClasses != null) {
+				reservedFromConflictParentJarMethod(cg);
+			}
+			
 			Iterator<Edge> ite = cg.iterator();
 			
 			while (ite.hasNext()) {
 				Edge edge = ite.next();
 //				System.out.println("Edge " + edge.toString());
 				if (edge.src().isJavaLibraryMethod() || !edge.src().isConcrete()) {
-				} 
+				}
 				else {
+					
 					String srcMethodName = edge.src().getSignature();
 //					System.out.println("before riskMthds" + srcMethodName);
 					if (riskMthds.contains(srcMethodName)) {
@@ -55,11 +64,11 @@ public class JRiskMethodOutPathCgTf extends JRiskCgTf{
 							methodsOutPath.put(srcMethodName, outMethodPath);
 						}
 						String tgtMthdName = edge.tgt().getSignature();
-						if (outMethodPath.contains(tgtMthdName)) {
-						}else {
-							outMethodPath.add(tgtMthdName);
-						}
-						//outMethodPath.add(tgtMthdName);
+//						if (outMethodPath.contains(tgtMthdName)) {
+//						}else {
+//							outMethodPath.add(tgtMthdName);
+//						}
+						outMethodPath.add(tgtMthdName);
 					}
 				}
 				
@@ -86,6 +95,32 @@ public class JRiskMethodOutPathCgTf extends JRiskCgTf{
 		}
 	}
 
+	/**
+	 * 保留来自冲突jar父类的路径，去掉来自usedDepJar的路径
+	 * @param cg
+	 */
+	public void reservedFromConflictParentJarMethod(CallGraph cg) {
+		
+		Set<String> reservedMethod = new HashSet<String>();
+		
+		Iterator<Edge> ite = cg.iterator();
+		
+		while (ite.hasNext()) {
+			Edge edge = ite.next();
+			if (edge.src().isJavaLibraryMethod() || !edge.src().isConcrete()) {
+			}
+			else {
+//		if (parentDepJarClasses != null) {
+			String srcClassName = edge.src().getDeclaringClass().getName();
+			String tgtMethodName = edge.tgt().getSignature();
+			if (parentDepJarClasses.contains(srcClassName) && riskMthds.contains(tgtMethodName)) {
+				reservedMethod.add(tgtMethodName);
+			}
+		}
+		}
+		riskMthds = null;
+		riskMthds = reservedMethod;
+	}
 	@Override
 	protected void initMthd2branch() {
 		

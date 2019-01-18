@@ -2,8 +2,10 @@ package neu.lab.conflict.vo;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
@@ -141,7 +143,7 @@ public class NodeAdapter {
 
 	/**
 	 * jarClasspaths
-	 * 
+	 * 得到所有祖先节点的JarClassPath
 	 * @param includeSelf
 	 * @return
 	 */
@@ -156,7 +158,20 @@ public class NodeAdapter {
 		}
 		return jarCps;
 	}
-
+	
+	/**
+	 * 得到父节点的jar classpath
+	 * 只得到一层
+	 * @param includeSelf
+	 */
+public Set<String> getParentJarClassPath(boolean includeSelf) {
+		Set<String> jarClassPath = new HashSet<String>();
+		if (includeSelf)
+			jarClassPath.addAll(this.getFilePath());
+		NodeAdapter father = getParent();
+		jarClassPath.addAll(father.getFilePath());
+		return jarClassPath;
+	}
 	/**
 	 * 得到父节点
 	 * 
@@ -168,6 +183,7 @@ public class NodeAdapter {
 		return NodeAdapters.i().getNodeAdapter(node.getParent());
 	}
 
+	
 	/**
 	 * 得到文件路径
 	 * 
