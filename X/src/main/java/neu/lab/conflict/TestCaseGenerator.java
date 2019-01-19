@@ -1,7 +1,6 @@
 package neu.lab.conflict;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,7 +22,6 @@ import neu.lab.conflict.graph.Record4path;
 import neu.lab.conflict.graph.Dog.Strategy;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.Conf;
-import neu.lab.conflict.util.DebugUtil;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.MySortedMap;
 import neu.lab.conflict.util.SootUtil;

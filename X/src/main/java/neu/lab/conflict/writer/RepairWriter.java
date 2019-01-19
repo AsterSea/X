@@ -8,17 +8,13 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.Maven;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
-import org.dom4j.tree.DefaultElement;
 
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.util.MavenUtil;
@@ -88,6 +84,7 @@ public class RepairWriter {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Element deleteDupJar(Element dependencies) {
 		String[] jarSig = safeJar.split(":");
 		for (Iterator it = dependencies.elements("dependency").iterator(); it.hasNext();) {

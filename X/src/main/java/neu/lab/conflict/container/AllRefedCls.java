@@ -17,6 +17,7 @@ public class AllRefedCls {
 	private static AllRefedCls instance;
 	private Set<String> referencedClasses;
 
+	@SuppressWarnings("unchecked")
 	private AllRefedCls() {
 		long start = System.currentTimeMillis();	//记录运行时间
 		referencedClasses = new HashSet<String>();
@@ -40,6 +41,7 @@ public class AllRefedCls {
 		long runtime = (System.currentTimeMillis() - start) / 1000;
 		GlobalVar.time2calRef+=runtime;
 	}
+	@SuppressWarnings("unchecked")
 	private AllRefedCls(DepJar depJar) {
 		long start = System.currentTimeMillis();
 		referencedClasses = new HashSet<String>();

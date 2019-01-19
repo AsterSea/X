@@ -5,14 +5,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import neu.lab.conflict.vo.MethodCall;
 
 public class GraphForMethodOutPath implements IGraph{
 	
@@ -24,6 +21,7 @@ public class GraphForMethodOutPath implements IGraph{
 
 public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOutPath, Set<String> thrownMethods){
 	Map<String, Integer> differenceMethod = new TreeMap<String, Integer>();
+	int intersection;
 	for (String method : methodOutPath.keySet()) {
 //		if (differenceMethod.size() >= 100) {
 //			break;
@@ -43,7 +41,13 @@ public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOut
 //				continue;
 //			}
 			if (thisOutPath.size() != entryOutPath.size()) {
-				differenceMethod.put(method, Math.abs(thisOutPath.size() - entryOutPath.size()));
+				intersection = 0;
+				for (String intersectionMethod : thisOutPath) {
+					if (entryOutPath.contains(intersectionMethod)) {
+						intersection ++;
+					}
+				}
+				differenceMethod.put(method, /*Math.abs(*/Math.abs(thisOutPath.size() - entryOutPath.size()) - intersection);
 			}
 //			else {
 //				for (String outMethod : entryOutPath) {

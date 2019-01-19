@@ -10,7 +10,6 @@ import java.util.Set;
 
 import neu.lab.conflict.GlobalVar;
 import neu.lab.conflict.container.DepJars;
-import neu.lab.conflict.graph.Dog;
 import neu.lab.conflict.graph.Graph4distance;
 import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.GraphForMethodOutPath;
@@ -27,7 +26,6 @@ import neu.lab.conflict.soot.SootRiskMthdFilter2;
 import neu.lab.conflict.soot.tf.JRiskDistanceCgTf;
 import neu.lab.conflict.soot.tf.JRiskMethodOutPathCgTf;
 import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
-import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.DepJar;
 import neu.lab.conflict.vo.MethodCall;
@@ -45,7 +43,7 @@ public class DepJarJRisk {
 	private Set<String> semantemeRiskMethods;	//语义风险方法集合
 	// private Set<String> rchedMthds;
 	private Graph4distance graph4distance; // 图
-	private Map<String, IBook> books; // book记录用
+//	private Map<String, IBook> books; // book记录用
 
 	/*
 	 * 构造函数

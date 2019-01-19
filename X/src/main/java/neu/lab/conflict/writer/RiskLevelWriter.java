@@ -14,7 +14,6 @@ import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultElement;
 
 import neu.lab.conflict.container.Conflicts;
-import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.Conflict;
 import neu.lab.conflict.vo.DepJar;

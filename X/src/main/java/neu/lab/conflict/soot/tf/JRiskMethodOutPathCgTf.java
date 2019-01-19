@@ -8,14 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.GraphForMethodOutPath;
-import neu.lab.conflict.graph.Node4path;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
-import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.DepJar;
-import neu.lab.conflict.vo.MethodCall;
 import soot.Scene;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
@@ -64,11 +60,11 @@ public class JRiskMethodOutPathCgTf extends JRiskCgTf{
 							methodsOutPath.put(srcMethodName, outMethodPath);
 						}
 						String tgtMthdName = edge.tgt().getSignature();
-//						if (outMethodPath.contains(tgtMthdName)) {
-//						}else {
-//							outMethodPath.add(tgtMthdName);
-//						}
-						outMethodPath.add(tgtMthdName);
+						if (outMethodPath.contains(tgtMthdName)) {
+						}else {
+							outMethodPath.add(tgtMthdName);
+						}
+//						outMethodPath.add(tgtMthdName);
 					}
 				}
 				

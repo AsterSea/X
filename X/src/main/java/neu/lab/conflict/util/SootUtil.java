@@ -22,6 +22,7 @@ import soot.SourceLocator;
  *
  */
 public class SootUtil {
+	@SuppressWarnings("deprecation")
 	public static void modifyLogOut() {
 		File outDir = MavenUtil.i().getBuildDir();
 		if (!outDir.exists()) {

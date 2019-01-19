@@ -5,14 +5,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import neu.lab.conflict.soot.JarAna;
 import neu.lab.conflict.vo.ClassVO;
 import neu.lab.conflict.vo.MethodVO;
-import neu.lab.conflict.vo.Conflict;
 
 public class Cmp {
 	public static void cmp() {
