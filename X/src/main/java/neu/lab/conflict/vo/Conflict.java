@@ -152,6 +152,7 @@ public class Conflict {
 	public List<DepJarJRisk> getJarRisks() {
 		if(jarRisks == null) {
 			jarRisks = new ArrayList<DepJarJRisk>();
+			getUsedDepJar();
 			for (DepJar depJar : getDepJars()) {
 				if (usedDepJar.isSelf(depJar)) {
 				}else {
