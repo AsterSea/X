@@ -67,6 +67,7 @@ public class RiskMethodPathWriter {
 									SemantemeMethod semantemeMethod = semantemeMethods.get(record.getRiskMthd());
 									printer.println("\n" + "conflict:" + conflict.toString());
 									printer.println("risk method name:" + semantemeMethod.getMethodName());
+									printer.println("来自冲突版本:" + depJarRisk.getConflictDepJar().toString());
 									printer.println("交集:" + semantemeMethod.getIntersection());
 									printer.println("差集:" + semantemeMethod.getDifference());
 									printer.println("是否为子类父类继承丢失模式:" + semantemeMethod.isThrownMethod());
