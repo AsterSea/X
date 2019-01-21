@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
+import neu.lab.conflict.vo.SemantemeMethod;
 
 
 public class GraphForMethodOutPath implements IGraph{
@@ -18,8 +21,15 @@ public class GraphForMethodOutPath implements IGraph{
 	public GraphForMethodOutPath(Map<String,List<String>> methodOutPath) {
 		this.methodOutPath = methodOutPath;
 	}
+	
+	Map<String, SemantemeMethod> semantemeMethods;
+	
+public Map<String, SemantemeMethod> getSemantemeMethods() {
+		return semantemeMethods;
+	}
 
 public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOutPath, Set<String> thrownMethods){
+	semantemeMethods = new HashMap<String, SemantemeMethod>();
 	Map<String, Integer> differenceMethod = new TreeMap<String, Integer>();
 	int intersection;
 	for (String method : methodOutPath.keySet()) {
@@ -32,9 +42,11 @@ public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOut
 		}
 		else if (entryOutPath == null) {
 			differenceMethod.put(method, thisOutPath.size());
+			semantemeMethods.put(method, new SemantemeMethod(method, 0, thisOutPath.size(), thrownMethods.contains(method)));
 		}
 		else if (thisOutPath == null) {
 			differenceMethod.put(method, entryOutPath.size());
+			semantemeMethods.put(method, new SemantemeMethod(method, 0, entryOutPath.size(), thrownMethods.contains(method)));
 		}
 		else {
 //			if (entryOutPath.size() <= 12 || thisOutPath.size() <= 12) {
@@ -47,7 +59,8 @@ public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOut
 						intersection ++;
 					}
 				}
-				differenceMethod.put(method, /*Math.abs(*/Math.abs(thisOutPath.size() - entryOutPath.size()) - intersection);
+				semantemeMethods.put(method, new SemantemeMethod(method, intersection, Math.abs(thisOutPath.size() - entryOutPath.size()), thrownMethods.contains(method)));
+				differenceMethod.put(method, /*Math.abs(*/Math.abs(thisOutPath.size() - entryOutPath.size())/* - intersection*/);		//仅以差集排序，不算交集
 			}
 //			else {
 //				for (String outMethod : entryOutPath) {
@@ -64,6 +77,7 @@ public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOut
 	enhancedLevelForInheritanceMethod(differenceMethod, thrownMethods);
 	
 	Set<String> differenceMethodBySort = sortMap(differenceMethod);
+	
 	
 	return differenceMethodBySort;
 }
@@ -94,9 +108,15 @@ public Set<String>  sortMap(Map<String,Integer> map){
             return obj2.getValue() - obj1.getValue();  
         }  
     }); 
-    
-    for( int i=0;i<50;i++){  
-        System.out.print(entries.get(i).getKey() + ":" + entries.get(i).getValue());
+    int size = 0;
+    if (map.size() > 100) {
+    	size = 100;
+    }
+    else {
+    	size = map.size();
+    }
+    for( int i=0;i<size;i++){  
+//        System.out.print(entries.get(i).getKey() + ":" + entries.get(i).getValue());
         afterSortMethods.add(entries.get(i).getKey());
   } 
      return afterSortMethods;  

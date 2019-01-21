@@ -29,6 +29,7 @@ import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.DepJar;
 import neu.lab.conflict.vo.MethodCall;
+import neu.lab.conflict.vo.SemantemeMethod;
 
 /**
  * 依赖风险jar
@@ -225,6 +226,14 @@ public Set<String> getSemantemeRiskMethods(){
 //		return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
 	}
 	
+	//语义冲突 封装类集合
+	Map<String, SemantemeMethod> semantemeMethods;
+	
+	
+	public Map<String, SemantemeMethod> getSemantemeMethods() {
+		return semantemeMethods;
+	}
+
 	public Graph4path getMethodPathGraphForSemanteme() {
 		
 		Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
@@ -237,8 +246,19 @@ public Set<String> getSemantemeRiskMethods(){
 			GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods), false);
 			
 			Set<String> riskMethods = usedDepJarGraphForMethodOutPath.comparedMethodOutPath(depJarGraphForMethodOutPath.getMethodOutPath(), thrownMethods);
+			
+			/*Map<String, SemantemeMethod>*/ 
+			semantemeMethods = usedDepJarGraphForMethodOutPath.getSemantemeMethods();
+			
+//			for (String riskMethod : riskMethods) {
+//				if (semantemeMethodsForMap.containsKey(riskMethod)) {
+//					semantemeMethods.put(riskMethod, semantemeMethodsForMap.get(riskMethod));
+//				}
+//			}
+			
 			depJarGraphForMethodOutPath = null;
 			usedDepJarGraphForMethodOutPath = null;
+			
 			if (riskMethods.size() > 0) {
 				IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, riskMethods));
 			if (iGraph != null) {

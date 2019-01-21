@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +23,7 @@ import neu.lab.conflict.util.MySortedMap;
 import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.Conflict;
 import neu.lab.conflict.vo.DepJar;
+import neu.lab.conflict.vo.SemantemeMethod;
 
 public class RiskMethodPathWriter {
 
@@ -33,15 +33,15 @@ public class RiskMethodPathWriter {
 	 * @param outPath
 	 */
 	public void writeRiskMethodPathToFile(String outPath) {
+		PrintWriter printer = null;
 		try {
-			PrintWriter printer;
+			
 			String fileName = MavenUtil.i().getProjectGroupId() + ":" + MavenUtil.i().getProjectArtifactId() + ":"
 					+ MavenUtil.i().getProjectVersion();
 				printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "path_" + fileName.replace('.', '_').replace(':', '_') + ".txt")));
 
 				for (Conflict conflict : Conflicts.i().getConflicts()) {
-					List<DepJarJRisk> depJarRisks = conflict.getJarRisks();
-					for (DepJarJRisk depJarRisk : depJarRisks) {
+					for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
 						Graph4path pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
 						Set<String> hostNds = pathGraph.getHostNds();
 						Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(hostNds, Conf.DOG_DEP_FOR_PATH,
@@ -56,14 +56,21 @@ public class RiskMethodPathWriter {
 								}
 							}
 						}
+						Map<String, SemantemeMethod> semantemeMethods = depJarRisk.getSemantemeMethods();
 						if (dis2records.size() > 0) {
 							Set<String> hasWriterRiskMethodPath = new HashSet<String>();
-							printer.println("conflict:" + conflict.getSig());
+							
 							printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
 							printer.println("pomPath:" + MavenUtil.i().getBaseDir());
 							for (Record4path record : dis2records.flat()) {
 								if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
-									printer.println("pathLen:" + record.getPathlen() + "\n"+ "risk method name:" + record.getRiskMthd() + "\n" + addJarPath(record.getPathStr()));
+									SemantemeMethod semantemeMethod = semantemeMethods.get(record.getRiskMthd());
+									printer.println("\n" + "conflict:" + conflict.toString());
+									printer.println("risk method name:" + semantemeMethod.getMethodName());
+									printer.println("交集:" + semantemeMethod.getIntersection());
+									printer.println("差集:" + semantemeMethod.getDifference());
+									printer.println("是否为子类父类继承丢失模式:" + semantemeMethod.isThrownMethod());
+									printer.println("pathLen:" + record.getPathlen() + "\n" + addJarPath(record.getPathStr()));
 									hasWriterRiskMethodPath.add(record.getRiskMthd());
 								}
 								
@@ -71,12 +78,11 @@ public class RiskMethodPathWriter {
 					}
 					}
 				}
-			printer.close();
+			
 		} catch (Exception e) {
 			MavenUtil.i().getLog().error("can't write jar duplicate risk:", e);
-		} finally{
-			
 		}
+		printer.close();
 	}
 	
 	private String addJarPath(String mthdCallPath) {
