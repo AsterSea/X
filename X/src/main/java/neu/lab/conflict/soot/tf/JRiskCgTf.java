@@ -24,6 +24,7 @@ public abstract class JRiskCgTf extends SceneTransformer {
 	// private DepJarJRisk depJarJRisk;
 	protected Set<String> entryClses;	//入口类集合
 	protected Set<String> conflictJarClses;		//冲突jar类集合
+	protected Set<String> usedJarClses;		//使用的jar类集合
 	protected Set<String> riskMthds;	//风险方法集合
 	protected Set<String> rchMthds;
 	protected IGraph graph;
@@ -51,9 +52,19 @@ public abstract class JRiskCgTf extends SceneTransformer {
 		conflictJarClses = depJarJRisk.getConflictDepJar().getAllCls(true);
 		riskMthds = thrownMethods;
 		rchMthds = new HashSet<String>();
-
 	}
-
+	public JRiskCgTf(DepJarJRisk depJarJRisk,Set<DepJar> allParentDepJar, Set<String> thrownMethods) {
+		super();
+		// this.depJarJRisk = depJarJRisk;
+		entryClses = depJarJRisk.getEntryDepJar().getAllCls(true);
+		conflictJarClses = depJarJRisk.getConflictDepJar().getAllCls(true);
+		riskMthds = thrownMethods;
+		rchMthds = new HashSet<String>();
+		usedJarClses = new HashSet<String>();
+		for (DepJar parentDepJar : allParentDepJar) {
+			usedJarClses.addAll(parentDepJar.getAllCls(true));
+		}
+	}
 	public JRiskCgTf(Set<String> thrownMethods) {
 		super();
 		// this.depJarJRisk = depJarJRisk;

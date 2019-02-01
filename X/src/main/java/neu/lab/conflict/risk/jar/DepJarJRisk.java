@@ -63,6 +63,14 @@ public class DepJarJRisk {
 		return depJar.getVersion();
 	}
 
+	public DepJar getUsedDepJar() {
+		return usedDepJar;
+	}
+
+	public void setUsedDepJar(DepJar usedDepJar) {
+		this.usedDepJar = usedDepJar;
+	}
+
 	/**
 	 * 得到抛弃的方法
 	 * 
@@ -260,7 +268,7 @@ public Set<String> getSemantemeRiskMethods(){
 			usedDepJarGraphForMethodOutPath = null;
 			
 			if (riskMethods.size() > 0) {
-				IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, riskMethods));
+				IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, true, riskMethods));
 			if (iGraph != null) {
 				return (Graph4path) iGraph;
 			} else {

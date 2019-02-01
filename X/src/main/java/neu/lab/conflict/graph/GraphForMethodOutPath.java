@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.SemantemeMethod;
 
 
@@ -42,11 +43,11 @@ public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOut
 		}
 		else if (entryOutPath == null) {
 			differenceMethod.put(method, thisOutPath.size());
-			semantemeMethods.put(method, new SemantemeMethod(method, 0, thisOutPath.size(), thrownMethods.contains(method)));
+			semantemeMethods.put(method, new SemantemeMethod(method, 0, thisOutPath.size(), thrownMethods.contains(SootUtil.mthdSig2name(method))));
 		}
 		else if (thisOutPath == null) {
 			differenceMethod.put(method, entryOutPath.size());
-			semantemeMethods.put(method, new SemantemeMethod(method, 0, entryOutPath.size(), thrownMethods.contains(method)));
+			semantemeMethods.put(method, new SemantemeMethod(method, 0, entryOutPath.size(), thrownMethods.contains(SootUtil.mthdSig2name(method))));
 		}
 		else {
 //			if (entryOutPath.size() <= 12 || thisOutPath.size() <= 12) {
@@ -59,7 +60,7 @@ public Set<String> comparedMethodOutPath(Map<String,List<String>> entryMehtodOut
 						intersection ++;
 					}
 				}
-				semantemeMethods.put(method, new SemantemeMethod(method, intersection, Math.abs(thisOutPath.size() - entryOutPath.size()), thrownMethods.contains(method)));
+				semantemeMethods.put(method, new SemantemeMethod(method, intersection, Math.abs(thisOutPath.size() - entryOutPath.size()), thrownMethods.contains(SootUtil.mthdSig2name(method))));
 				differenceMethod.put(method, /*Math.abs(*/Math.abs(thisOutPath.size() - entryOutPath.size())/* - intersection*/);		//仅以差集排序，不算交集
 			}
 //			else {

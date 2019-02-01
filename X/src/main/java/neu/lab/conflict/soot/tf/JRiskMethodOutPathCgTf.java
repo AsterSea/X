@@ -37,9 +37,9 @@ public class JRiskMethodOutPathCgTf extends JRiskCgTf{
 			
 			CallGraph cg = Scene.v().getCallGraph();
 			
-			if (parentDepJarClasses != null) {
-				reservedFromConflictParentJarMethod(cg);
-			}
+//			if (parentDepJarClasses != null) {
+//				reservedFromConflictParentJarMethod(cg);
+//			}
 			
 			Iterator<Edge> ite = cg.iterator();
 			
@@ -106,11 +106,16 @@ public class JRiskMethodOutPathCgTf extends JRiskCgTf{
 			if (edge.src().isJavaLibraryMethod() || !edge.src().isConcrete()) {
 			}
 			else {
-//		if (parentDepJarClasses != null) {
 			String srcClassName = edge.src().getDeclaringClass().getName();
 			String tgtMethodName = edge.tgt().getSignature();
 			if (parentDepJarClasses.contains(srcClassName) && riskMthds.contains(tgtMethodName)) {
 				reservedMethod.add(tgtMethodName);
+			}
+			else {
+				String srcMethodName = edge.src().getSignature();
+				if (riskMthds.contains(srcMethodName) && !reservedMethod.contains(srcMethodName)) {
+					reservedMethod.add(srcMethodName);
+				}
 			}
 		}
 		}

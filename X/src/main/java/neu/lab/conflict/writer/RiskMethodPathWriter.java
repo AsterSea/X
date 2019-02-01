@@ -38,7 +38,7 @@ public class RiskMethodPathWriter {
 			
 			String fileName = MavenUtil.i().getProjectGroupId() + ":" + MavenUtil.i().getProjectArtifactId() + ":"
 					+ MavenUtil.i().getProjectVersion();
-				printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "path_" + fileName.replace('.', '_').replace(':', '_') + ".txt")));
+				printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "path_" + fileName.replace('.', '_').replace(':', '_') + ".txt", true)));
 
 				for (Conflict conflict : Conflicts.i().getConflicts()) {
 					for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
@@ -58,12 +58,13 @@ public class RiskMethodPathWriter {
 						}
 						Map<String, SemantemeMethod> semantemeMethods = depJarRisk.getSemantemeMethods();
 						if (dis2records.size() > 0) {
-							Set<String> hasWriterRiskMethodPath = new HashSet<String>();
-							
+//							Set<String> hasWriterRiskMethodPath = new HashSet<String>();
+							String conflictDepJarVersion = depJarRisk.getConflictDepJar().getVersion();
 							printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
 							printer.println("pomPath:" + MavenUtil.i().getBaseDir());
 							for (Record4path record : dis2records.flat()) {
-								if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
+//								if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
+//								if(addJarPath(record.getPathStr()).contains(conflictDepJarVersion)) {
 									SemantemeMethod semantemeMethod = semantemeMethods.get(record.getRiskMthd());
 									printer.println("\n" + "conflict:" + conflict.toString());
 									printer.println("risk method name:" + semantemeMethod.getMethodName());
@@ -72,9 +73,9 @@ public class RiskMethodPathWriter {
 									printer.println("差集:" + semantemeMethod.getDifference());
 									printer.println("是否为子类父类继承丢失模式:" + semantemeMethod.isThrownMethod());
 									printer.println("pathLen:" + record.getPathlen() + "\n" + addJarPath(record.getPathStr()));
-									hasWriterRiskMethodPath.add(record.getRiskMthd());
-								}
-								
+//									hasWriterRiskMethodPath.add(record.getRiskMthd());
+//								}
+//								}
 							}
 					}
 					}

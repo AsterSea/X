@@ -11,6 +11,7 @@ import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.Node4path;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
+import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.MethodCall;
 import soot.Scene;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -21,8 +22,12 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 	public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk) {
 		super(depJarJRisk);
 	}
+	
 	public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk, Set<String> entryMethods) {
-		super(depJarJRisk, entryMethods);
+			super(depJarJRisk, entryMethods);
+	}
+	public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk, boolean filterusedDepJarParent, Set<String> entryMethods) {
+			super(depJarJRisk, depJarJRisk.getUsedDepJar().getAllParentDepJar(), entryMethods);
 	}
 	@Override
 	protected void formGraph() {
@@ -51,9 +56,9 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 				String tgtClsName = edge.tgt().getDeclaringClass().getName();
 				if (edge.src().isJavaLibraryMethod() || edge.tgt().isJavaLibraryMethod()) {
 					// filter relation contains javaLibClass
-//				} else if (conflictJarClses.contains(SootUtil.mthdSig2cls(srcMthdName))
-//						&& conflictJarClses.contains(SootUtil.mthdSig2cls(tgtMthdName))) {
-					// filter relation inside conflictJar
+//				} else if (usedJarClses.contains(SootUtil.mthdSig2cls(srcMthdName))
+//						&& usedJarClses.contains(SootUtil.mthdSig2cls(tgtMthdName))) {
+//					 filter relation inside conflictJar
 				} else {
 					if (edge.src().isConcrete() || edge.tgt().isConcrete()) {
 //						if (riskMthds.contains(srcMthdName)) {
