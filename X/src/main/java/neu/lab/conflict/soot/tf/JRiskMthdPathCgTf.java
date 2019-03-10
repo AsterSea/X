@@ -11,7 +11,6 @@ import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.Node4path;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
-import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.MethodCall;
 import soot.Scene;
 import soot.jimple.toolkits.callgraph.CallGraph;

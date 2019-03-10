@@ -25,7 +25,6 @@ import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.MySortedMap;
 import neu.lab.conflict.util.SootUtil;
-import neu.lab.conflict.util.UserConf;
 import neu.lab.conflict.vo.Conflict;
 import neu.lab.conflict.vo.DepJar;
 
@@ -86,7 +85,7 @@ public class TestCaseGenerator {
 				return false;
 			}
 			// TODO debug distance graph.
-			GraphPrinter.printGraph(distanceGraph, UserConf.getOutDir4Mac() + "graph.txt", distanceGraph.getHostNds());
+			GraphPrinter.printGraph(distanceGraph, Conf.outDir + "graph.txt", distanceGraph.getHostNds());
 			Map<String, IBook> distanceBooks = new Dog(distanceGraph).findRlt(distanceGraph.getHostNds(),
 					Conf.DOG_DEP_FOR_DIS, Strategy.NOT_RESET_BOOK);
 			Set<String> nds2remain = new HashSet<String>();
@@ -107,7 +106,7 @@ public class TestCaseGenerator {
 			}
 
 			// Graph4path pathGraph = jarRisk.getGraph4mthdPath();
-			Set<String> hostNds = pathGraph.getHostNds();
+			Set<String> hostNds = pathGraph.getHostNodes();
 			// TODO debug path graph.
 //			GraphPrinter.printGraph(pathGraph, UserConf.getOutDir4Mac() + "graph_mthdPath.txt", hostNds);
 

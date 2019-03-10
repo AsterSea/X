@@ -23,7 +23,6 @@ import neu.lab.conflict.container.NodeAdapters;
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
-import neu.lab.conflict.util.UserConf;
 import neu.lab.conflict.vo.DepJar;
 
 public abstract class ConflictMojo extends AbstractMojo {
@@ -108,23 +107,22 @@ public abstract class ConflictMojo extends AbstractMojo {
 		Conf.DOG_DEP_FOR_PATH = pathDepth;
 		Conf.callConflict = callConflict;
 		Conf.findAllpath = findAllPath;
-		UserConf.setOutDir(resultPath);
+		Conf.outDir = resultPath;
 		GlobalVar.useAllJar = useAllJar;
 
 		//初始化NodeAdapters
 		NodeAdapters.init(root);
 		//初始化DepJars
 		DepJars.init(NodeAdapters.i());// occur jar in tree
-
-		validateSysSize();
-
+		//验证系统大小
+		validateSystemSize();
 		//初始化所有的类集合
 		AllCls.init(DepJars.i());
-		
+		//初始化树中的版本冲突
 		Conflicts.init(NodeAdapters.i());// version conflict in tree	初始化树中的版本冲突
 	}
 
-	private void validateSysSize() throws Exception {
+	private void validateSystemSize() throws Exception {
 
 		for (DepJar depJar : DepJars.i().getAllDepJar()) {
 			if (depJar.isSelected()) {
@@ -138,9 +136,6 @@ public abstract class ConflictMojo extends AbstractMojo {
 		MavenUtil.i().getLog().info("tree size:" + DepJars.i().getAllDepJar().size() + ", used size:" + systemSize
 				+ ", usedFile size:" + systemFileSize / 1000);
 
-		//		if (DepJars.i().getAllDepJar().size() <= 50||systemFileSize / 1000>20000) {
-		//			throw new Exception("project size error.");
-		//		}
 	}
 
 	@Override

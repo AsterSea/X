@@ -291,11 +291,12 @@ public class Conflict {
 	public Set<String> getConflictLevel() {
 		Set<String> usedRiskMethods = new HashSet<String>(); // 被使用的usedDepJar风险方法集合
 		for (DepJarJRisk depJarJRisk : getJarRisks()) {
-			 Graph4path pathGraph = depJarJRisk.getMethodPathGraphForSemanteme();
-			Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(pathGraph.getHostNds(),
-					Conf.DOG_DEP_FOR_DIS, Strategy.NOT_RESET_BOOK);
-			Set<String> bottomMethods = depJarJRisk.getMethodBottomForPath(pathBooks);
-			usedRiskMethods.addAll(bottomMethods);
+			usedRiskMethods.addAll(depJarJRisk.getThrownMthds());
+//			 Graph4path pathGraph = depJarJRisk.getMethodPathGraphForSemanteme();
+//			Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(pathGraph.getHostNodes(),
+//					Conf.DOG_DEP_FOR_DIS, Strategy.NOT_RESET_BOOK);
+//			Set<String> bottomMethods = depJarJRisk.getMethodBottomForPath(pathBooks);
+//			usedRiskMethods.addAll(bottomMethods);
 		}
 		return usedRiskMethods;
 	}

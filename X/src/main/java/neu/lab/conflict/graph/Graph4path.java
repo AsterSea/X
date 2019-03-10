@@ -27,7 +27,7 @@ public class Graph4path implements IGraph{
 //		name2node.get(call.getTgt()).addInNd(call.getSrc());
 	}
 
-	public Set<String> getHostNds() {
+	public Set<String> getHostNodes() {
 		Set<String> hostNds = new HashSet<String>();
 		for (Node4path node : name2node.values()) {
 			if (node.isHostNode())

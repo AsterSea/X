@@ -1,62 +1,67 @@
 package neu.lab.conflict.vo;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import soot.Unit;
+import soot.UnitBox;
+import soot.Value;
+import soot.ValueBox;
+
 public class SemantemeMethod {
 
-	String methodName;	//方法名
-	int intersection;	//两个版本同名方法的call graph的out路径的交集
-	int difference;		//两个版本同名方法的call graph的out路径的差集
-//	String depJarVersion;	//父类版本
-//	boolean referenceChange;	//是否引用被改变，如果因为版本屏蔽而指向了新版本中的本方法则为true
-	boolean thrownMethod;	//是不是thrown方法，会抛出
-	
-	
-	
-	public SemantemeMethod(String methodName, int intersection, int difference, boolean thrownMethod) {
-		super();
-		this.methodName = methodName;
-		this.intersection = intersection;
-		this.difference = difference;
-		this.thrownMethod = thrownMethod;
-	}
+	String methodName; // 方法名
+	private Set<Unit> units = new HashSet<Unit>(); // 这个方法单元所包含的单元数量
+	private Set<Value> values = new HashSet<Value>(); // 这个方法单元所定义和使用的Value数量
+	private int branchForUnit = 0;
+
 	public SemantemeMethod(String methodName) {
 		super();
 		this.methodName = methodName;
 	}
-	public boolean isThrownMethod() {
-		return thrownMethod;
-	}
-	public void setThrownMethod(boolean thrownMethod) {
-		this.thrownMethod = thrownMethod;
-	}
+
 	public String getMethodName() {
 		return methodName;
 	}
+
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
-	public int getIntersection() {
-		return intersection;
+
+
+	public Set<Unit> getUnits() {
+		return units;
 	}
-	public void setIntersection(int intersection) {
-		this.intersection = intersection;
+
+
+	public Set<Value> getValues() {
+		return values;
 	}
-	public int getDifference() {
-		return difference;
+
+
+	public void setUnits(List<UnitBox> unitBoxs) {
+		for (UnitBox unitBox : unitBoxs) {
+			this.units.add(unitBox.getUnit());
+			if (unitBox.isBranchTarget()) {
+				this.setBranchForUnit(this.getBranchForUnit() + 1);
+			}
+		}
 	}
-	public void setDifference(int difference) {
-		this.difference = difference;
+
+
+	public void setValues(List<ValueBox> valueBoxs) {
+		for (ValueBox valueBox : valueBoxs) {
+			this.values.add(valueBox.getValue());
+		}
 	}
-//	public String getDepJarVersion() {
-//		return depJarVersion;
-//	}
-//	public void setDepJarVersion(String depJarVersion) {
-//		this.depJarVersion = depJarVersion;
-//	}
-//	public boolean isReferenceChange() {
-//		return referenceChange;
-//	}
-//	public void setReferenceChange(boolean referenceChange) {
-//		this.referenceChange = referenceChange;
-//	}
-	
+
+	public int getBranchForUnit() {
+		return branchForUnit;
+	}
+
+	public void setBranchForUnit(int branchForUnit) {
+		this.branchForUnit = branchForUnit;
+	}
+
 }

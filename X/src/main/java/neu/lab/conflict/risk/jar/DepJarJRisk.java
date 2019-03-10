@@ -10,6 +10,7 @@ import java.util.Set;
 
 import neu.lab.conflict.GlobalVar;
 import neu.lab.conflict.container.DepJars;
+import neu.lab.conflict.container.SemantemeMethods;
 import neu.lab.conflict.graph.Graph4distance;
 import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.GraphForMethodOutPath;
@@ -29,7 +30,6 @@ import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.DepJar;
 import neu.lab.conflict.vo.MethodCall;
-import neu.lab.conflict.vo.SemantemeMethod;
 
 /**
  * 依赖风险jar
@@ -41,7 +41,7 @@ public class DepJarJRisk {
 	private DepJar depJar; // 依赖jar
 	private DepJar usedDepJar; // 依赖jar
 	private Set<String> thrownMthds; // 抛弃的方法
-	private Set<String> semantemeRiskMethods;	//语义风险方法集合
+	private Set<String> semantemeRiskMethods; // 语义风险方法集合
 	// private Set<String> rchedMthds;
 	private Graph4distance graph4distance; // 图
 //	private Map<String, IBook> books; // book记录用
@@ -99,35 +99,24 @@ public class DepJarJRisk {
 		thrownMthds = usedDepJar.getRiskMthds(depJar.getallMethods());
 		MavenUtil.i().getLog().info("riskMethod size before filter: " + thrownMthds.size());
 		if (thrownMthds.size() > 0)
-				new SootRiskMthdFilter().filterRiskMthds(thrownMthds, enterDepJar);
+			new SootRiskMthdFilter().filterRiskMthds(thrownMthds, enterDepJar);
 		MavenUtil.i().getLog().info("riskMethod size after filter1: " + thrownMthds.size());
 		if (thrownMthds.size() > 0)
-				new SootRiskMthdFilter2().filterRiskMthds(this, thrownMthds);
+			new SootRiskMthdFilter2().filterRiskMthds(this, thrownMthds);
 		MavenUtil.i().getLog().info("riskMethod size after filter2: " + thrownMthds.size());
 		return thrownMthds;
 	}
-	
-/**
- * 语义冲突得到相关方法
- * @return
- */
-public Set<String> getSemantemeRiskMethods(){
-	semantemeRiskMethods = usedDepJar.getCommonMethods(depJar.getallMethods());
-	MavenUtil.i().getLog().info("semantemeRiskMethods size for common methods: " + semantemeRiskMethods.size());
-	semantemeRiskMethods.addAll(getThrownMthds());
-	MavenUtil.i().getLog().info("semantemeRiskMethods size for thrown methods before filter: " + semantemeRiskMethods.size());
-	if (semantemeRiskMethods.size() > 0) {
-		Set<String> deleteMethods = new HashSet<String>();
-		for (String method : semantemeRiskMethods) {
-			if (method.contains("init>") || method.contains("cinit>")) {
-				deleteMethods.add(method);
-			}
-		}
-		semantemeRiskMethods.removeAll(deleteMethods);
-		MavenUtil.i().getLog().info("semantemeRiskMethods size after filterInit: " + semantemeRiskMethods.size());
+
+	/**
+	 * 语义冲突得到相关方法
+	 * 
+	 * @return
+	 */
+	public Set<String> getSemantemeRiskMethods() {
+		semantemeRiskMethods = usedDepJar.getCommonMethods(depJar.getallMethods());
+		MavenUtil.i().getLog().info("semantemeRiskMethods size for common methods: " + semantemeRiskMethods.size());
+		return semantemeRiskMethods;
 	}
-	return semantemeRiskMethods;
-}
 
 	public Set<String> getMethodBottom(Map<String, IBook> books) {
 		Set<String> bottomMethods = new HashSet<String>();
@@ -139,6 +128,7 @@ public Set<String> getSemantemeRiskMethods(){
 		}
 		return bottomMethods;
 	}
+
 	public Set<String> getMethodBottomForPath(Map<String, IBook> books) {
 		Set<String> bottomMethods = new HashSet<String>();
 		for (IBook book : books.values()) {
@@ -149,9 +139,10 @@ public Set<String> getSemantemeRiskMethods(){
 		}
 		return bottomMethods;
 	}
+
 	public Collection<String> getPrcDirPaths() throws Exception {
 		List<String> classpaths;
-		if (GlobalVar.useAllJar) {	//default:true
+		if (GlobalVar.useAllJar) { // default:true
 			classpaths = depJar.getRepalceClassPath();
 		} else {
 			MavenUtil.i().getLog().info("not add all jar to process");
@@ -180,17 +171,18 @@ public Set<String> getSemantemeRiskMethods(){
 	 */
 	public Graph4distance getGraph4distance() {
 		if (graph4distance == null) {
-		Set<String> thrownmethods = getThrownMthds();
-		if (thrownmethods.size() > 0) {
-			IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskDistanceCgTf(this, thrownmethods));
-			if (iGraph != null) {
-				graph4distance = (Graph4distance) iGraph;
+			Set<String> thrownmethods = getThrownMthds();
+			if (thrownmethods.size() > 0) {
+				IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskDistanceCgTf(this, thrownmethods));
+				if (iGraph != null) {
+					graph4distance = (Graph4distance) iGraph;
+				} else {
+					graph4distance = new Graph4distance(new HashMap<String, Node4distance>(),
+							new ArrayList<MethodCall>());
+				}
 			} else {
 				graph4distance = new Graph4distance(new HashMap<String, Node4distance>(), new ArrayList<MethodCall>());
 			}
-		} else {
-			graph4distance = new Graph4distance(new HashMap<String, Node4distance>(), new ArrayList<MethodCall>());
-		}
 		}
 		return graph4distance;
 	}
@@ -233,52 +225,47 @@ public Set<String> getSemantemeRiskMethods(){
 //		}
 //		return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
 	}
-	
-	//语义冲突 封装类集合
-	Map<String, SemantemeMethod> semantemeMethods;
-	
-	
-	public Map<String, SemantemeMethod> getSemantemeMethods() {
-		return semantemeMethods;
+
+	Map<String, Integer> semantemeMethodForDifferences;	//语义方法的差异集合
+
+	public Map<String, Integer> getSemantemeMethodForDifferences() {
+		return semantemeMethodForDifferences;
 	}
 
+	// 得到语义冲突的路径图
 	public Graph4path getMethodPathGraphForSemanteme() {
-		
+
 		Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
-		
-		Set<String> thrownMethods = getThrownMthds();
-		
+
 		if (semantemeRiskMethods.size() > 0) {
-			GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar, new JRiskMethodOutPathCgTf(depJar.getAllParentDepJar(), semantemeRiskMethods), true);
+			GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
+					new JRiskMethodOutPathCgTf(semantemeRiskMethods), false);
+
+			GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
+					.getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods), false);
+
+			SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
+					usedDepJarGraphForMethodOutPath.getSemantemeMethods());
 			
-			GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods), false);
+			semantemeMethods.CalculationDifference();	//计算差异
 			
-			Set<String> riskMethods = usedDepJarGraphForMethodOutPath.comparedMethodOutPath(depJarGraphForMethodOutPath.getMethodOutPath(), thrownMethods);
-			
-			/*Map<String, SemantemeMethod>*/ 
-			semantemeMethods = usedDepJarGraphForMethodOutPath.getSemantemeMethods();
-			
-//			for (String riskMethod : riskMethods) {
-//				if (semantemeMethodsForMap.containsKey(riskMethod)) {
-//					semantemeMethods.put(riskMethod, semantemeMethodsForMap.get(riskMethod));
-//				}
-//			}
-			
+			semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForDifferences();
+			Set<String> riskMethods = semantemeMethods.sortMap(100);
+
 			depJarGraphForMethodOutPath = null;
 			usedDepJarGraphForMethodOutPath = null;
-			
+
 			if (riskMethods.size() > 0) {
-				IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, true, riskMethods));
-			if (iGraph != null) {
-				return (Graph4path) iGraph;
+				IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, riskMethods));
+				if (iGraph != null) {
+					return (Graph4path) iGraph;
+				} else {
+					return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
+				}
 			} else {
 				return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
 			}
 		} else {
-			return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
-		}
-			}
-		else {
 			return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
 		}
 	}

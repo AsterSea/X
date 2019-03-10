@@ -87,6 +87,7 @@ public abstract class JRiskCgTf extends SceneTransformer {
 
 		MavenUtil.i().getLog().info("JRiskCgTf start..");
 		Map<String, String> cgMap = new HashMap<String, String>();
+		
 		cgMap.put("enabled", "true");
 		cgMap.put("apponly", "true");
 		cgMap.put("all-reachable", "true");

@@ -18,8 +18,8 @@ public class Conf {
 //	public static final int MAX_PATH_DEP = 8;
 	
 	//TODO path depth
-	public static int DOG_DEP_FOR_DIS ;//final path may be larger than PATH_DEP when child book is existed.
-	public static int DOG_DEP_FOR_PATH ;//final path may be larger than PATH_DEP when child book is existed.
+	public static int DOG_DEP_FOR_DIS;//final path may be larger than PATH_DEP when child book is existed.
+	public static int DOG_DEP_FOR_PATH;//final path may be larger than PATH_DEP when child book is existed.
 	public static String callConflict;
 	public static boolean findAllpath;
 	
@@ -36,7 +36,7 @@ public class Conf {
 	
 	public static boolean CNT_RISK_CLASS_METHOD = true;//if methods that are in risk-class is risk-method.
 	
-//	public static final String outSir = "D:\\ws\\sta\\";
+	public static String outDir = "D:\\";
 }
 
 //public class Conf {

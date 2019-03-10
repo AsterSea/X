@@ -93,20 +93,20 @@ public class DepJar {
 
 	}
 
-//	/**
-//	 * @return the import path of depJar.
-//	 */
-//	public String getValidDepPath() {
-//		StringBuilder sb = new StringBuilder(toString() + ":");
-//		for (NodeAdapter node : getNodeAdapters()) {
-//			if (node.isNodeSelected()) {
-//				sb.append("  [");
-//				sb.append(node.getWholePath());
-//				sb.append("]");
-//			}
-//		}
-//		return sb.toString();
-//	}
+	/**
+	 * @return the import path of depJar.
+	 */
+	public String getValidDepPath() {
+		StringBuilder sb = new StringBuilder(toString() + ":");
+		for (NodeAdapter node : getNodeAdapters()) {
+			if (node.isNodeSelected()) {
+				sb.append("  [");
+				sb.append(node.getWholePath());
+				sb.append("]");
+			}
+		}
+		return sb.toString();
+	}
 
 //	public NodeAdapter getSelectedNode() {
 //		for (NodeAdapter node : getNodeAdapters()) {

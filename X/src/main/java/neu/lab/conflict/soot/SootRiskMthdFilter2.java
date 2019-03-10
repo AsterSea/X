@@ -85,7 +85,7 @@ class RiskMthdFilter2Tf extends SceneTransformer {
 				if (!Scene.v().containsClass(className)) {// weird class
 					MavenUtil.i().getLog().info("remove weird method:" + testMthd);
 					ite.remove();
-				} else if (!hasSuperDefine(className, mthdSuffix)) {
+				} else if (hasSuperDefine(className, mthdSuffix)) {
 //				MavenUtil.i().getLog().info("remove father-implement-method:" + testMthd);
 					ite.remove();
 				}
