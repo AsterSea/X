@@ -12,8 +12,7 @@ public class SemanticsRiskMojo extends ConflictMojo {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		SemanticsRiskWriter semanticsRiskWriter = new SemanticsRiskWriter();
-		semanticsRiskWriter.writeSemanticsRiskToFile(Conf.outDir);
+		new SemanticsRiskWriter().writeSemanticsRiskToFile(Conf.outDir);
 	}
 
 }
