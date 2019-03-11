@@ -12,7 +12,7 @@ public class CountProjectMojo extends ConflictMojo {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		new CountProjectWriter().writeToFileForCountInfo(Conf.outDir);
+		new CountProjectWriter().writeForRiskMethodInProject(Conf.outDir);
 	}
 
 }
