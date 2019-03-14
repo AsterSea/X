@@ -26,7 +26,6 @@ public class ClassDupRiskWriter {
 		classDups = new ClassDups(DepJars.i());
 	}
 
-
 	public void writeByClass() {
 		try {
 			PrintWriter printer = new PrintWriter(
@@ -46,11 +45,17 @@ public class ClassDupRiskWriter {
 
 	public void writeByJar(String outPath) {
 		try {
-			PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(new File(outPath), true)));
+			String fileName = MavenUtil.i().getProjectGroupId() + ":" + MavenUtil.i().getProjectArtifactId() + ":"
+					+ MavenUtil.i().getProjectVersion();
+			PrintWriter printer = new PrintWriter(
+					new BufferedWriter(new FileWriter(new File(outPath + fileName + "DupByJar.txt"), true)));
 			printer.println("===============projectPath->" + MavenUtil.i().getProjectInfo());
 
 			for (DupClsJarPair jarPair : getJarPairs().getAllJarPair()) {
 				printer.println(jarPair.getRiskString());
+				
+				
+				
 			}
 			printer.println("\n\n\n\n");
 			printer.close();

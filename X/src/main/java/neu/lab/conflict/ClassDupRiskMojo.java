@@ -12,7 +12,7 @@ public class ClassDupRiskMojo extends ConflictMojo {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		new ClassDupRiskWriter().writeByJar(Conf.outDir + "classDupByJar.txt");
+		new ClassDupRiskWriter().writeByJar(Conf.outDir);
 	}
 
 }
