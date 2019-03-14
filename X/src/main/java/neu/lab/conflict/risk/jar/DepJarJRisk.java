@@ -226,9 +226,9 @@ public class DepJarJRisk {
 //		return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
 	}
 
-	Map<String, Integer> semantemeMethodForDifferences;	//语义方法的差异集合
+	Map<String, List<Integer>> semantemeMethodForDifferences; // 语义方法的差异集合
 
-	public Map<String, Integer> getSemantemeMethodForDifferences() {
+	public Map<String, List<Integer>> getSemantemeMethodForDifferences() {
 		return semantemeMethodForDifferences;
 	}
 
@@ -236,7 +236,7 @@ public class DepJarJRisk {
 	public Graph4path getMethodPathGraphForSemanteme() {
 
 		Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
-
+		Set<String> riskMethods = new HashSet<String>();
 		if (semantemeRiskMethods.size() > 0) {
 			GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
 					new JRiskMethodOutPathCgTf(semantemeRiskMethods), false);
@@ -246,11 +246,12 @@ public class DepJarJRisk {
 
 			SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
 					usedDepJarGraphForMethodOutPath.getSemantemeMethods());
+
+			semantemeMethods.CalculationDifference(); // 计算差异
+
+			semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
 			
-			semantemeMethods.CalculationDifference();	//计算差异
-			
-			semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForDifferences();
-			Set<String> riskMethods = semantemeMethods.sortMap(100);
+			riskMethods = semantemeMethods.sortMap(100);
 
 			depJarGraphForMethodOutPath = null;
 			usedDepJarGraphForMethodOutPath = null;

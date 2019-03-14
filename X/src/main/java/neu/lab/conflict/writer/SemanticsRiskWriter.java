@@ -3,6 +3,7 @@ package neu.lab.conflict.writer;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,7 +56,7 @@ public class SemanticsRiskWriter {
 							}
 						}
 					}
-					 Map<String, Integer> semantemeMethodForDifferences = depJarRisk.getSemantemeMethodForDifferences();
+					Map<String, List<Integer>> semantemeMethodForDifferences = depJarRisk.getSemantemeMethodForDifferences();
 					if (dis2records.size() > 0) {
 //							Set<String> hasWriterRiskMethodPath = new HashSet<String>();
 						printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
@@ -63,11 +64,12 @@ public class SemanticsRiskWriter {
 						for (Record4path record : dis2records.flat()) {
 //								if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
 //								if(addJarPath(record.getPathStr()).contains(conflictDepJarVersion)) {
-							int difference = semantemeMethodForDifferences.get(record.getRiskMthd());
+							 List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMthd());
 							printer.println("\n" + "conflict:" + conflict.toString());
 							printer.println("risk method name:" + record.getRiskMthd());
 							printer.println("来自冲突版本:" + depJarRisk.getConflictDepJar().toString());
-							printer.println("差异:" + difference);
+							printer.println("差异:" + differenceAndSame.get(0));
+							printer.println("相同:" + differenceAndSame.get(1));
 							printer.println("pathLen:" + record.getPathlen() + "\n" + addJarPath(record.getPathStr()));
 //									hasWriterRiskMethodPath.add(record.getRiskMthd());
 //								}

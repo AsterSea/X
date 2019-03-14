@@ -1,6 +1,7 @@
 package neu.lab.conflict.container;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,6 +17,15 @@ public class SemantemeMethods {
 	private Map<String, SemantemeMethod> coveredDepJarSemantemeMethods; // 被覆盖JAR包的语义方法集合
 	private Map<String, SemantemeMethod> usedDepJarSemantemeMethods; // 使用JAR包的语义方法集合
 	private Map<String, Integer> semantemeMethodForDifferences = new HashMap<String, Integer>(); // 语义方法的差异集合
+	private Map<String, List<Integer>> semantemeMethodForReturn = new HashMap<String, List<Integer>>();
+
+	public Map<String, List<Integer>> getSemantemeMethodForReturn() {
+		return semantemeMethodForReturn;
+	}
+
+	public void setSemantemeMethodForReturn(Map<String, List<Integer>> semantemeMethodForReturn) {
+		this.semantemeMethodForReturn = semantemeMethodForReturn;
+	}
 
 	public Map<String, Integer> getSemantemeMethodForDifferences() {
 		return semantemeMethodForDifferences;
@@ -31,8 +41,12 @@ public class SemantemeMethods {
 	public void CalculationDifference() {
 		for (String methodName : coveredDepJarSemantemeMethods.keySet()) {
 			int difference = 0;
+			int same = 0;
 			int differenceForUnit = 0;
+			int sameForUnit = 0;
+//			double differenceForUnitOnlyBranch = 0;
 			int differenceForValue = 0;
+			int sameForValue = 0;
 //			boolean existence;
 			if (usedDepJarSemantemeMethods.containsKey(methodName)) {
 				SemantemeMethod coveredsemantemeMethod = coveredDepJarSemantemeMethods.get(methodName);
@@ -59,6 +73,16 @@ public class SemantemeMethods {
 							.abs(coveredsemantemeMethod.getUnits().size() - usedsemantemeMethod.getUnits().size())
 							+ Math.abs(
 									coveredsemantemeMethod.getBranchForUnit() - usedsemantemeMethod.getBranchForUnit());
+					if (coveredsemantemeMethod.getUnits().size() > usedsemantemeMethod.getUnits().size()) {
+						sameForUnit = sameForUnit + usedsemantemeMethod.getUnits().size();
+					} else {
+						sameForUnit = sameForUnit + coveredsemantemeMethod.getUnits().size();
+					}
+					if (coveredsemantemeMethod.getBranchForUnit() > usedsemantemeMethod.getBranchForUnit()) {
+						sameForUnit = sameForUnit + usedsemantemeMethod.getBranchForUnit();
+					} else {
+						sameForUnit = sameForUnit + coveredsemantemeMethod.getBranchForUnit();
+					}
 				}
 				if (coveredsemantemeMethod.getValues().size() == usedsemantemeMethod.getValues().size()) {
 //					for (Value value : coveredsemantemeMethod.getValues()) {
@@ -76,10 +100,17 @@ public class SemantemeMethods {
 				} else {
 					differenceForValue = Math
 							.abs(coveredsemantemeMethod.getValues().size() - usedsemantemeMethod.getValues().size());
+					if (coveredsemantemeMethod.getValues().size() > usedsemantemeMethod.getValues().size()) {
+						sameForValue = sameForValue + usedsemantemeMethod.getValues().size();
+					} else {
+						sameForValue = sameForValue + coveredsemantemeMethod.getValues().size();
+					}
 				}
 			}
+			same = sameForUnit + sameForValue;
 			difference = differenceForUnit + differenceForValue;
 			if (difference > 0) {
+				semantemeMethodForReturn.put(methodName, new ArrayList<Integer>(Arrays.asList(difference, same)));
 				semantemeMethodForDifferences.put(methodName, difference);
 			}
 		}

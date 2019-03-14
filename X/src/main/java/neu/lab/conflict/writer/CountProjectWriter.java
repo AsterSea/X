@@ -71,9 +71,9 @@ public class CountProjectWriter {
 //						}
 //					}
 //				}
-				Map<String, Integer> semantemeMethodForDifferences = depJarRisk.getSemantemeMethodForDifferences();
-				for (String method : semantemeMethodForDifferences.keySet()) {
-					printer.println("riskMethod=" + method + " " + "difference>>" + semantemeMethodForDifferences.get(method));
+				Map<String, List<Integer>> semantemeMethodForReturn = depJarRisk.getSemantemeMethodForDifferences();
+				for (String method : semantemeMethodForReturn.keySet()) {
+					printer.println("riskMethod=" + method + " " + "difference>>" + semantemeMethodForReturn.get(method).get(0));
 				}
 				
 //				if (dis2records.size() > 0) {
