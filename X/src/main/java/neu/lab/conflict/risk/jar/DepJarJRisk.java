@@ -73,8 +73,8 @@ public class DepJarJRisk {
 
 	/**
 	 * 得到抛弃的方法
-	 * 
 	 * @return
+	 * 
 	 */
 	public Set<String> getThrownMthds() {
 		// e.g.:"<neu.lab.plug.testcase.homemade.host.prob.ProbBottom: void m()>"
