@@ -46,7 +46,31 @@ public class SootJRiskCg extends SootAna {
 		GlobalVar.time2cg += runtime;
 		return graph;
 	}
-	public IGraph getGraph(DepJar entryDepJar,JRiskCgTf transformer, boolean needParentDepJar) {
+	
+	public IGraph getGraph(String[] jarFilePaths,JRiskCgTf transformer) {
+//		MavenUtil.i().getLog().info("use soot to compute reach methods for " + depJarJRisk.toString());
+		IGraph graph = null;
+		long start = System.currentTimeMillis();
+		try {
+
+			SootUtil.modifyLogOut();
+
+			PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", transformer));
+
+			soot.Main.main(getArgs(jarFilePaths).toArray(new String[0]));
+
+			graph = transformer.getGraph();
+
+		} catch (Exception e) {
+			MavenUtil.i().getLog().warn("cg error: ", e);
+		}
+		soot.G.reset();
+		long runtime = (System.currentTimeMillis() - start) / 1000;
+		GlobalVar.time2cg += runtime;
+		return graph;
+	}
+	
+	public IGraph getGraph(DepJar entryDepJar,JRiskCgTf transformer) {
 		MavenUtil.i().getLog().info("use soot to form methods graph for " + entryDepJar.toString());
 		IGraph graph = null;
 		long start = System.currentTimeMillis();
@@ -56,11 +80,11 @@ public class SootJRiskCg extends SootAna {
 
 			PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", transformer));
 
-			if(needParentDepJar) {
-				soot.Main.main(getArgs(entryDepJar.getAllParentJarClassPaths(true).toArray(new String[0])).toArray(new String[0]));
-			}else {
+//			if(needParentDepJar) {
+//				soot.Main.main(getArgs(entryDepJar.getAllParentJarClassPaths(true).toArray(new String[0])).toArray(new String[0]));
+//			}else {
 				soot.Main.main(getArgs(entryDepJar.getJarFilePaths(true).toArray(new String[0])).toArray(new String[0]));
-			}
+//			}
 
 			graph = transformer.getGraph();
 

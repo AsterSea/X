@@ -66,7 +66,14 @@ public class DepJar {
 //		}
 //		return nodeEle;
 //	}
-
+	public DepJar getUsedDepJar() {
+		for (DepJar depJar : DepJars.i().getAllDepJar()) {
+			if (isSameLib(depJar) && depJar.isSelected()) {
+				return depJar;
+			}
+		}
+		return this;
+	}
 //	public Element getClsConflictEle(int num) {
 //		Element nodeEle = new DefaultElement("jar-" + num);
 //		nodeEle.addAttribute("id", toString());
@@ -312,8 +319,7 @@ public class DepJar {
 	 * note:from the view of usedJar. e.g.
 	 * getReplaceJar().getRiskMthds(getRchedMthds());
 	 * 
-	 * @param entryMethods
-	 * 			-depJar.getallMethods()
+	 * @param entryMethods -depJar.getallMethods()
 	 * @return
 	 */
 	public Set<String> getRiskMthds(Collection<String> entryMethods) {
@@ -334,9 +340,20 @@ public class DepJar {
 		// if (diffMthd.contains("<init>") || diffMthd.contains("<clinit>")) {
 		return riskMthds;
 	}
-	
-	
-	public Set<String> getCommonMethods(Collection<String> entryMethods){
+
+	public Set<String> getRiskMthdsNoAllClass(Collection<String> entryMethods) {
+		Set<String> riskMthds = new HashSet<String>();
+		for (String testMethod : entryMethods) {
+			if (!this.containMethod(testMethod) && AllRefedCls.i().contains(SootUtil.mthdSig2cls(testMethod))) {
+				// don't have method,and class is used. 使用这个类，但是没有方法
+				riskMthds.add(testMethod);
+			}
+		}
+		// if (diffMthd.contains("<init>") || diffMthd.contains("<clinit>")) {
+		return riskMthds;
+	}
+
+	public Set<String> getCommonMethods(Collection<String> entryMethods) {
 		Set<String> commonMethods = new HashSet<String>();
 		for (String testMethod : entryMethods) {
 			if (this.containMethod(testMethod)) {
@@ -405,6 +422,7 @@ public class DepJar {
 	 *        before maven-package disadvantage:class can't deconstruct by soot;miss
 	 *        class that generated.
 	 *        主机类名称可以从源目录(False)或目标目录(True)获得.使用源目录。优点：获取类之前maven包的缺点：类不能被soot解构，错过类生成。
+	 *        true:[C:\Users\Flipped\.m2\repository\neu\lab\testcase\TA\1.0\TA-1.0.jar]
 	 * @return
 	 */
 	public List<String> getJarFilePaths(boolean useTarget) {
@@ -467,9 +485,10 @@ public class DepJar {
 		}
 		return fatherJarCps;
 	}
-	
+
 	/**
 	 * 得到所有这个jar包节点的一层父节点的jar class path
+	 * 
 	 * @param includeSelf
 	 * @return
 	 */
@@ -480,12 +499,12 @@ public class DepJar {
 		}
 		return parentJarClassPaths;
 	}
-	
-	public Set<DepJar> getAllParentDepJar(){
+
+	public Set<DepJar> getAllParentDepJar() {
 		Set<DepJar> parentDepJar = new HashSet<DepJar>();
 		for (NodeAdapter node : this.nodeAdapters) {
 			parentDepJar.add(node.getParent().getDepJar());
 		}
 		return parentDepJar;
- 	}
+	}
 }

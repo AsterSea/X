@@ -78,7 +78,7 @@ public class DepJarJRisk {
 	 */
 	public Set<String> getThrownMthds() {
 		// e.g.:"<neu.lab.plug.testcase.homemade.host.prob.ProbBottom: void m()>"
-		thrownMthds = usedDepJar.getRiskMthds(depJar.getallMethods());
+		thrownMthds = usedDepJar.getRiskMthdsNoAllClass(depJar.getallMethods());
 		MavenUtil.i().getLog().info("riskMethod size before filter: " + thrownMthds.size());
 		if (thrownMthds.size() > 0)
 			new SootRiskMthdFilter().filterRiskMthds(thrownMthds);
@@ -239,10 +239,10 @@ public class DepJarJRisk {
 		Set<String> riskMethods = new HashSet<String>();
 		if (semantemeRiskMethods.size() > 0) {
 			GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
-					new JRiskMethodOutPathCgTf(semantemeRiskMethods), false);
+					new JRiskMethodOutPathCgTf(semantemeRiskMethods));
 
 			GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
-					.getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods), false);
+					.getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
 
 			SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
 					usedDepJarGraphForMethodOutPath.getSemantemeMethods());
@@ -250,7 +250,7 @@ public class DepJarJRisk {
 			semantemeMethods.CalculationDifference(); // 计算差异
 
 			semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
-			
+
 			riskMethods = semantemeMethods.sortMap(100);
 
 			depJarGraphForMethodOutPath = null;

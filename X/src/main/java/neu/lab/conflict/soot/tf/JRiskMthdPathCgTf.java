@@ -16,18 +16,24 @@ import soot.Scene;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 
-public class JRiskMthdPathCgTf extends JRiskCgTf{
+public class JRiskMthdPathCgTf extends JRiskCgTf {
 
 	public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk) {
 		super(depJarJRisk);
 	}
-	
+
+	public JRiskMthdPathCgTf(Set<String> entryMethods) {
+		super(entryMethods);
+	}
+
 	public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk, Set<String> entryMethods) {
-			super(depJarJRisk, entryMethods);
+		super(depJarJRisk, entryMethods);
 	}
+
 	public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk, boolean filterusedDepJarParent, Set<String> entryMethods) {
-			super(depJarJRisk, depJarJRisk.getUsedDepJar().getAllParentDepJar(), entryMethods);
+		super(depJarJRisk, depJarJRisk.getUsedDepJar().getAllParentDepJar(), entryMethods);
 	}
+
 	@Override
 	protected void formGraph() {
 		if (graph == null) {
@@ -35,15 +41,13 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 			// get call-graph.
 			Map<String, Node4path> name2node = new HashMap<String, Node4path>();
 			List<MethodCall> mthdRlts = new ArrayList<MethodCall>();
-			
+
 			CallGraph cg = Scene.v().getCallGraph();
-			
+
 			Iterator<Edge> ite = cg.iterator();
 			while (ite.hasNext()) {
 				Edge edge = ite.next();
 
-				
-				
 				String srcMthdName = edge.src().getSignature();
 				String tgtMthdName = edge.tgt().getSignature();
 				// //TODO1
@@ -64,16 +68,19 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 //							System.out.println(edge.src().getSignature());
 //							System.out.println(edge.src().getActiveBody().getAllUnitBoxes());
 //						}
-					if (!name2node.containsKey(srcMthdName)) {
-						name2node.put(srcMthdName, new Node4path(srcMthdName, isHostClass(srcClsName)&&!edge.src().isPrivate(),
-								riskMthds.contains(srcMthdName)));
+						if (!name2node.containsKey(srcMthdName)) {
+							name2node.put(srcMthdName,
+									new Node4path(srcMthdName, isHostClass(srcClsName) && !edge.src().isPrivate(),
+											riskMthds.contains(srcMthdName)));
+						}
+						if (!name2node.containsKey(tgtMthdName)) {
+							name2node.put(tgtMthdName,
+									new Node4path(tgtMthdName, isHostClass(tgtClsName) && !edge.tgt().isPrivate(),
+											riskMthds.contains(tgtMthdName)));
+						}
+						mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
 					}
-					if (!name2node.containsKey(tgtMthdName)) {
-						name2node.put(tgtMthdName, new Node4path(tgtMthdName, isHostClass(tgtClsName)&&!edge.tgt().isPrivate(),
-								riskMthds.contains(tgtMthdName)));
-					}
-					mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
-				}}
+				}
 			}
 			graph = new Graph4path(name2node, mthdRlts);
 			MavenUtil.i().getLog().info("end form graph.");
@@ -82,7 +89,7 @@ public class JRiskMthdPathCgTf extends JRiskCgTf{
 
 	@Override
 	protected void initMthd2branch() {
-		
+
 	}
 
 }

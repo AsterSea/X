@@ -37,6 +37,8 @@ public class Conf {
 	public static boolean CNT_RISK_CLASS_METHOD = true;//if methods that are in risk-class is risk-method.
 	
 	public static String outDir = "D:\\";
+	
+	public static boolean CLASS_MISSING = false;
 }
 
 //public class Conf {
