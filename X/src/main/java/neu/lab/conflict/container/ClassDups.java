@@ -28,19 +28,19 @@ public class ClassDups {
 			ClassDup conflict = ite.next();
 			if (!conflict.isDup()) {// delete conflict if there is only one version
 				ite.remove();
+
 			}
 		}
 	}
 
 	public ClassDups(DepJars depJars, DepJarJRisk depJarJRisk) {
 		container = new ArrayList<ClassDup>();
-		Set<String> thrownMethods = depJarJRisk.getThrownMthds();
-		for (String method : thrownMethods) {
-			String cls = SootUtil.mthdSig2cls(method);
+		Set<String> thrownClasses = depJarJRisk.getThrownClasses();
+		for (String cls : thrownClasses) {
 			addCls(cls, depJarJRisk.getConflictDepJar());
 		}
 		for (DepJar depJar : depJars.getAllDepJar()) {
-			if (depJar.isSelected()) {
+			if (depJar.isSelected() && !depJar.isSameLib(depJarJRisk.getUsedDepJar())) {
 				for (String cls : depJar.getAllCls(false)) {
 					addCls(cls, depJar);
 				}

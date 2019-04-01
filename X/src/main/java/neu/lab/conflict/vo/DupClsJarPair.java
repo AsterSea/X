@@ -32,6 +32,14 @@ public class DupClsJarPair {
 	private DepJar jar1;
 	private DepJar jar2;
 	private Set<String> clsSigs;
+	private Set<String> thrownMethods;
+
+	public void addThrownMethods(String method) {
+		if (thrownMethods == null) {
+			thrownMethods = new HashSet<String>();
+		}
+		this.thrownMethods.add(method);
+	}
 
 	public DupClsJarPair(DepJar jarA, DepJar jarB) {
 		jar1 = jarA;
@@ -107,13 +115,16 @@ public class DupClsJarPair {
 			depJar = jar2.getUsedDepJar();
 			sb.append("<" + jar1.toString() + ">  used:" + jar1.isSelected() + "\n");
 			sb.append("<" + jar2.toString() + ">  used:" + jar2.isSelected() + "\n");
-			sb.append("<" + depJar.toString() + ">  used:" + depJar.isSelected() + "\n");
-		}
-		if (jar2.isSelected()) {
+			if (!depJar.isSelf(jar2)) {
+				sb.append("<" + depJar.toString() + ">  used:" + depJar.isSelected() + "\n");
+			}
+		} else if (jar2.isSelected()) {
 			depJar = jar1.getUsedDepJar();
 			sb.append("<" + jar1.toString() + ">  used:" + jar1.isSelected() + "\n");
 			sb.append("<" + jar2.toString() + ">  used:" + jar2.isSelected() + "\n");
-			sb.append("<" + depJar.toString() + ">  used:" + depJar.isSelected() + "\n");
+			if (!depJar.isSelf(jar1)) {
+				sb.append("<" + depJar.toString() + ">  used:" + depJar.isSelected() + "\n");
+			}
 		}
 		return sb.toString();
 	}

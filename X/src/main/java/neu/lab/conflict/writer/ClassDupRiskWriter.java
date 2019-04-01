@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import neu.lab.conflict.container.ClassDups;
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.container.DepJars;
@@ -63,13 +62,12 @@ public class ClassDupRiskWriter {
 					+ MavenUtil.i().getProjectVersion();
 			PrintWriter printer = new PrintWriter(new BufferedWriter(
 					new FileWriter(new File(outPath + fileName.replace('.', '_') + "DupByJar.txt"), true)));
-			printer.println("projectPath->" + MavenUtil.i().getProjectInfo());
 
 			for (DupClsJarPair jarPair : getJarPairs().getAllJarPair()) {
+				printer.println("projectPath->" + MavenUtil.i().getProjectInfo());
 				write(jarPair, printer);
 //				printer.println(jarPair.getJar1().getJarFilePaths(false));
 			}
-			printer.println("\n\n\n\n");
 			printer.close();
 		} catch (Exception e) {
 			MavenUtil.i().getLog().error("can't write classDupByJar:", e);
@@ -122,8 +120,9 @@ public class ClassDupRiskWriter {
 					+ MavenUtil.i().getProjectVersion();
 			PrintWriter printer = new PrintWriter(new BufferedWriter(
 					new FileWriter(new File(outPath + fileName.replace('.', '_') + "DupByJar.txt"), true)));
-			printer.println("projectPath->" + MavenUtil.i().getProjectInfo());
+
 			for (Conflict conflict : Conflicts.i().getConflicts()) {
+				printer.println("projectPath->" + MavenUtil.i().getProjectInfo());
 				for (DepJarJRisk depJarJRisk : conflict.getJarRisks()) {
 					ClassDups newClassDups = new ClassDups(DepJars.i(), depJarJRisk);
 //					System.out.println(newClassDups.getAllClsDup().size());
@@ -135,7 +134,6 @@ public class ClassDupRiskWriter {
 					}
 				}
 			}
-			printer.println("\n\n\n\n");
 			printer.close();
 		} catch (Exception e) {
 			MavenUtil.i().getLog().error("can't write classDupByJar:", e);

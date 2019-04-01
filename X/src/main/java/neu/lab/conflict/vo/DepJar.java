@@ -353,6 +353,16 @@ public class DepJar {
 		return riskMthds;
 	}
 
+	public Set<String> getRiskClasses(Collection<String> entryClasses) {
+		Set<String> riskClasses = new HashSet<String>();
+		for (String cls : entryClasses) {
+			if (!this.containClass(cls)) {
+				riskClasses.add(cls);
+			}
+		}
+		return riskClasses;
+	}
+
 	public Set<String> getCommonMethods(Collection<String> entryMethods) {
 		Set<String> commonMethods = new HashSet<String>();
 		for (String testMethod : entryMethods) {

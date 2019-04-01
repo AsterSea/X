@@ -70,7 +70,10 @@ public class DepJarJRisk {
 	public void setUsedDepJar(DepJar usedDepJar) {
 		this.usedDepJar = usedDepJar;
 	}
-
+public Set<String> getThrownClasses(){
+	Set<String> thrownClasses = usedDepJar.getRiskClasses(depJar.getAllCls(false));
+	return thrownClasses;
+}
 	/**
 	 * 得到抛弃的方法
 	 * @return
@@ -78,7 +81,7 @@ public class DepJarJRisk {
 	 */
 	public Set<String> getThrownMthds() {
 		// e.g.:"<neu.lab.plug.testcase.homemade.host.prob.ProbBottom: void m()>"
-		thrownMthds = usedDepJar.getRiskMthdsNoAllClass(depJar.getallMethods());
+		thrownMthds = usedDepJar.getRiskMthds(depJar.getallMethods());
 		MavenUtil.i().getLog().info("riskMethod size before filter: " + thrownMthds.size());
 		if (thrownMthds.size() > 0)
 			new SootRiskMthdFilter().filterRiskMthds(thrownMthds);

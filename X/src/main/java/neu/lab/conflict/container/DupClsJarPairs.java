@@ -2,6 +2,7 @@ package neu.lab.conflict.container;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import neu.lab.conflict.vo.ClassDup;
 import neu.lab.conflict.vo.DepJar;
@@ -36,5 +37,15 @@ public class DupClsJarPairs {
 		DupClsJarPair jarCmp = new DupClsJarPair(jarA, jarB);
 		container.add(jarCmp);
 		return jarCmp;
+	}
+	
+	public void setThrownMethods(Set<String> thrownMethods) {
+		for (DupClsJarPair jarCmp : container) {
+			for (String method : thrownMethods) {
+				if(jarCmp.isInDupCls(method)) {
+					jarCmp.addThrownMethods(method);
+				}
+			}
+		}
 	}
 }
