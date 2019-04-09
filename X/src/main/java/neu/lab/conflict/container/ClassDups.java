@@ -28,7 +28,8 @@ public class ClassDups {
 			ClassDup conflict = ite.next();
 			if (!conflict.isDup()) {// delete conflict if there is only one version
 				ite.remove();
-
+			} else if (conflict.hasTestScope()) {
+				ite.remove();
 			}
 		}
 	}
@@ -44,23 +45,16 @@ public class ClassDups {
 				for (String cls : depJar.getAllCls(false)) {
 					addCls(cls, depJar);
 				}
-//					System.out.println("sf" + SootUtil.mthdSig2cls(cls));
-//					for (String clssss : depJar.getAllCls(false)) {
-//						if (SootUtil.mthdSig2cls(cls).equals(clssss)) {
-//							System.out.println("true");
-//						}
-//					}
-//				}
-//				System.out.println("===========");
-//				for (String cls : depJar.getAllCls(false)) {
-//					System.out.println(cls);
-//				}
 			}
 		}
 		Iterator<ClassDup> ite = container.iterator();
 		while (ite.hasNext()) {
 			ClassDup conflict = ite.next();
 			if (!conflict.isDup()) {// delete conflict if there is only one version
+				ite.remove();
+			} else if (!conflict.getDepJars().contains(depJarJRisk.getConflictDepJar())) {
+				ite.remove();
+			} else if (conflict.hasTestScope()) {
 				ite.remove();
 			}
 		}

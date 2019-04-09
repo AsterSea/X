@@ -89,6 +89,17 @@ public class DepJar {
 		return nodeAdapters;
 	}
 
+	public String getScope() {
+		String scope = null;
+		for (NodeAdapter node : nodeAdapters) {
+			scope = node.getScope();
+			if (scope != null) {
+				break;
+			}
+		}
+		return scope;
+	}
+
 	public String getAllDepPath() {
 		StringBuilder sb = new StringBuilder(toString() + ":");
 		for (NodeAdapter node : getNodeAdapters()) {

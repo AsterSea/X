@@ -17,6 +17,15 @@ public class ClassDup {
 		return depJars;
 	}
 
+	public boolean hasTestScope() {
+		for (DepJar depJar : depJars) {
+			if (depJar.getScope().equals("test")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public ClassDup(String clsSig) {
 		this.clsSig = clsSig;
 		depJars = new ArrayList<DepJar>();
@@ -61,7 +70,7 @@ public class ClassDup {
 		List<DepJar> noJars = new ArrayList<DepJar>();
 		for (DepJar depJar : depJars) {
 			ClassVO clsVO = depJar.getClassVO(clsSig);
-			if(clsVO != null) {
+			if (clsVO != null) {
 				if (clsVO.hasMethod(mthdSig))
 					yesJars.add(depJar);
 				else

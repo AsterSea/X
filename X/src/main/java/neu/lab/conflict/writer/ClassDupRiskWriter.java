@@ -96,12 +96,12 @@ public class ClassDupRiskWriter {
 //			Set<String> hasWriterRiskMethodPath = new HashSet<String>();
 			printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
 			printer.println("pomPath:" + MavenUtil.i().getBaseDir());
-			printer.println("\n" + "conflict:" + jarPair.getCommonMethodsString());
+			
 			for (Record4path record : dis2records.flat()) {
 //				if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
 //				if(addJarPath(record.getPathStr()).contains(conflictDepJarVersion)) {
 				List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMthd());
-
+				printer.println("\n" + "conflict:" + jarPair.getCommonMethodsString());
 				printer.println("risk method name:" + record.getRiskMthd());
 				printer.println("差异:" + differenceAndSame.get(0));
 				printer.println("相同:" + differenceAndSame.get(1));
@@ -124,6 +124,7 @@ public class ClassDupRiskWriter {
 			for (Conflict conflict : Conflicts.i().getConflicts()) {
 				printer.println("projectPath->" + MavenUtil.i().getProjectInfo());
 				for (DepJarJRisk depJarJRisk : conflict.getJarRisks()) {
+//					System.out.println(depJarJRisk.toString());
 					ClassDups newClassDups = new ClassDups(DepJars.i(), depJarJRisk);
 //					System.out.println(newClassDups.getAllClsDup().size());
 					DupClsJarPairs newJarPairs = new DupClsJarPairs(newClassDups);

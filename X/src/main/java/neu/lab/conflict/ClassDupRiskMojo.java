@@ -13,8 +13,10 @@ public class ClassDupRiskMojo extends ConflictMojo {
 	public void run() {
 		// TODO Auto-generated method stub
 		if (Conf.CLASS_MISSING) {
+//			System.out.println("has class missing");
 			new ClassDupRiskWriter().writeByJarHasClassMissing(Conf.outDir);
 		}else {
+//			System.out.println("no class missing");
 			new ClassDupRiskWriter().writeByJarNoClassMissing(Conf.outDir);
 		}
 	}

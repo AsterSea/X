@@ -113,17 +113,19 @@ public class DupClsJarPair {
 		DepJar depJar;
 		if (jar1.isSelected()) {
 			depJar = jar2.getUsedDepJar();
-			sb.append("<" + jar1.toString() + ">  used:" + jar1.isSelected() + "\n");
-			sb.append("<" + jar2.toString() + ">  used:" + jar2.isSelected() + "\n");
+			sb.append("<" + jar1.toString() + ">  used:" + jar1.isSelected() + " scope:" + jar1.getScope() + "\n");
+			sb.append("<" + jar2.toString() + ">  used:" + jar2.isSelected() + " scope:" + jar2.getScope() + "\n");
 			if (!depJar.isSelf(jar2)) {
-				sb.append("<" + depJar.toString() + ">  used:" + depJar.isSelected() + "\n");
+				sb.append("<" + depJar.toString() + ">  used:" + depJar.isSelected() + " scope:" + jar2.getScope()
+						+ "\n");
 			}
 		} else if (jar2.isSelected()) {
 			depJar = jar1.getUsedDepJar();
-			sb.append("<" + jar1.toString() + ">  used:" + jar1.isSelected() + "\n");
-			sb.append("<" + jar2.toString() + ">  used:" + jar2.isSelected() + "\n");
+			sb.append("<" + jar1.toString() + ">  used:" + jar1.isSelected() + " scope:" + jar1.getScope() + "\n");
+			sb.append("<" + jar2.toString() + ">  used:" + jar2.isSelected() + " scope:" + jar2.getScope() + "\n");
 			if (!depJar.isSelf(jar1)) {
-				sb.append("<" + depJar.toString() + ">  used:" + depJar.isSelected() + "\n");
+				sb.append("<" + depJar.toString() + ">  used:" + depJar.isSelected() + " scope:" + jar1.getScope()
+						+ "\n");
 			}
 		}
 		return sb.toString();

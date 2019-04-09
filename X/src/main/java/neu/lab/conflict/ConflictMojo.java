@@ -91,8 +91,8 @@ public abstract class ConflictMojo extends AbstractMojo {
 	@Parameter(property = "subdivisionLevel", defaultValue = "false")
 	public boolean subdivisionLevel;
 
-	@Parameter(property = "classMissing", defaultValue = "flase")
-	public boolean classMissing;
+	@Parameter(property = "classMissing")
+	public boolean classMissing = false;
 
 	@Parameter(property = "findAllPath")
 	public boolean findAllPath = false;
@@ -105,7 +105,6 @@ public abstract class ConflictMojo extends AbstractMojo {
 	protected void initGlobalVar() throws Exception {
 
 		MavenUtil.i().setMojo(this);
-
 		Conf.CLASS_MISSING = classMissing;
 		Conf.DOG_DEP_FOR_DIS = disDepth;
 		Conf.DOG_DEP_FOR_PATH = pathDepth;
