@@ -235,6 +235,24 @@ public Set<String> getThrownClasses(){
 		return semantemeMethodForDifferences;
 	}
 
+	public void getAllSemantemeMethodForDifferences() {
+		Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
+//		Set<String> riskMethods = new HashSet<String>();
+		if (semantemeRiskMethods.size() > 0) {
+			GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
+					new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+
+			GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
+					.getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+
+			SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
+					usedDepJarGraphForMethodOutPath.getSemantemeMethods());
+
+			semantemeMethods.CalculationDifference(); // 计算差异
+
+			semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
+		}
+	}
 	// 得到语义冲突的路径图
 	public Graph4path getMethodPathGraphForSemanteme() {
 

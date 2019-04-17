@@ -57,7 +57,7 @@ public class CountProjectWriter {
 			for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
 				printer.println("conflictVersion=" + depJarRisk.toString());
 //				Graph4path pathGraph = 
-						depJarRisk.getMethodPathGraphForSemanteme();
+				depJarRisk.getAllSemantemeMethodForDifferences();
 //				Set<String> hostNodes = pathGraph.getHostNodes();
 //				Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH,
 //						Strategy.NOT_RESET_BOOK);
@@ -73,9 +73,10 @@ public class CountProjectWriter {
 //				}
 				Map<String, List<Integer>> semantemeMethodForReturn = depJarRisk.getSemantemeMethodForDifferences();
 				for (String method : semantemeMethodForReturn.keySet()) {
-					printer.println("riskMethod=" + method + " " + "difference>>" + semantemeMethodForReturn.get(method).get(0));
+					printer.println("riskMethod=" + method);
+					printer.println("difference=" + semantemeMethodForReturn.get(method).get(0));
 				}
-				
+
 //				if (dis2records.size() > 0) {
 //					Set<String> hasWriterRiskMethodPath = new HashSet<String>();
 //					for (Record4path record : dis2records.flat()) {
@@ -89,5 +90,12 @@ public class CountProjectWriter {
 			}
 		}
 		printer.println();
+	}
+
+	/**
+	 * 得到Source文件的对象多样化信息
+	 */
+	public void getSourceInfo() {
+
 	}
 }

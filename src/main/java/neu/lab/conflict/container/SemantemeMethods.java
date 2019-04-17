@@ -109,10 +109,10 @@ public class SemantemeMethods {
 			}
 			same = sameForUnit + sameForValue;
 			difference = differenceForUnit + differenceForValue;
-			if (difference > 0) {
+//			if (difference > 0) {
 				semantemeMethodForReturn.put(methodName, new ArrayList<Integer>(Arrays.asList(difference, same)));
 				semantemeMethodForDifferences.put(methodName, difference);
-			}
+//			}
 		}
 	}
 
