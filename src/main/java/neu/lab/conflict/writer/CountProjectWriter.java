@@ -4,13 +4,23 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import neu.lab.conflict.container.Conflicts;
+import neu.lab.conflict.container.DepJars;
+import neu.lab.conflict.graph.GraphForMethodName;
+import neu.lab.conflict.graph.IGraph;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
+import neu.lab.conflict.soot.SootJRiskCg;
+import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
+import neu.lab.conflict.soot.tf.JRiskObjectCgTf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.Conflict;
+import neu.lab.conflict.vo.DepJar;
 
 public class CountProjectWriter {
 
@@ -18,6 +28,18 @@ public class CountProjectWriter {
 
 	public CountProjectWriter() {
 		conflicts = Conflicts.i().getConflicts();
+	}
+
+	public void writeTofileForSourceObjectCount(String outPath) {
+		PrintWriter printer = null;
+		try {
+			printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "ObjectCount.txt", true)));
+			writeSourceInfo(printer);
+			printer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void writeToFileForCountInfo(String outPath) {
@@ -95,7 +117,22 @@ public class CountProjectWriter {
 	/**
 	 * 得到Source文件的对象多样化信息
 	 */
-	public void getSourceInfo() {
-
+	private void writeSourceInfo(PrintWriter printer) {
+		printer.println("projectInfo=" + MavenUtil.i().getProjectCor());
+		DepJar hostDepJar = DepJars.i().getHostDepJar();
+		int sum = 0;
+		GraphForMethodName graphForMethodName = (GraphForMethodName) SootJRiskCg.i()
+				.getGraph(hostDepJar.getJarFilePaths(true).toArray(new String[0]), new JRiskObjectCgTf());
+		HashMap<String, ArrayList<String>> accessibleMethods = graphForMethodName.getAccessibleMethod();
+		for (String accessibleMethod : accessibleMethods.keySet()) {
+			printer.println("可访问的类方法：" + accessibleMethod);
+			int size = accessibleMethods.get(accessibleMethod).size();
+			sum += size;
+			printer.println("\\+数目：" + size);
+			for (String method : accessibleMethods.get(accessibleMethod)) {
+				printer.println("\\+返回值为对象的方法：" + method);
+			}
+		}
+		printer.println("总数目：" + sum);
 	}
 }

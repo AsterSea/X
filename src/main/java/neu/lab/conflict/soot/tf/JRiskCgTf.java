@@ -32,6 +32,11 @@ public abstract class JRiskCgTf extends SceneTransformer {
 	protected Map<String, Integer> mthd2branch;
 	protected Set<String> parentDepJarClasses;
 
+	public JRiskCgTf() {
+		super();
+		entryClses = DepJars.i().getHostDepJar().getAllCls(true);
+	}
+
 	public JRiskCgTf(DepJarJRisk depJarJRisk) {
 		super();
 		// this.depJarJRisk = depJarJRisk;
