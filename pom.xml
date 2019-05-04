@@ -8,20 +8,35 @@
 	<packaging>maven-plugin</packaging>
 
 	<name>conflict Maven Plugin</name>
-	<!-- 测试mac -->
 	<!-- FIXME change it to the project's website -->
 	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- <mavenVersion>3.5.4</mavenVersion> -->
+		<evosuite.version>1.0.6</evosuite.version>
 	</properties>
 
 	<dependencies>
-	<dependency>
+		<dependency>
 			<groupId>org.evosuite</groupId>
 			<artifactId>evosuite-master</artifactId>
-			<version>1.0.7-SNAPSHOT</version>
+			<version>${evosuite.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.evosuite</groupId>
+			<artifactId>evosuite-client</artifactId>
+			<version>${evosuite.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.evosuite</groupId>
+			<artifactId>evosuite-runtime</artifactId>
+			<version>${evosuite.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.evosuite</groupId>
+			<artifactId>evosuite-shaded</artifactId>
+			<version>${evosuite.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -69,11 +84,12 @@
 			<artifactId>javassist</artifactId>
 			<version>3.18.2-GA</version>
 		</dependency>
-
+		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId> 
+			<version>1.7.22</version> </dependency> -->
 		<!-- <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm</artifactId> 
 			<version>6.0</version> </dependency> <dependency> <groupId>org.ow2.asm</groupId> 
 			<artifactId>asm-util</artifactId> <version>6.0</version> </dependency> -->
-		
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-exec</artifactId>
@@ -92,7 +108,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
+				<version>3.6.0</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
@@ -101,7 +117,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.3</version>
+				<version>3.6.0</version>
 				<configuration>
 					<goalPrefix>X</goalPrefix>
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
@@ -114,7 +130,7 @@
 						</goals>
 					</execution>
 					<execution>
-						<id>help-goal</id>
+						<id>generated-helpmojo</id>
 						<goals>
 							<goal>helpmojo</goal>
 						</goals>
