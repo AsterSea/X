@@ -70,12 +70,15 @@ public class DepJarJRisk {
 	public void setUsedDepJar(DepJar usedDepJar) {
 		this.usedDepJar = usedDepJar;
 	}
-public Set<String> getThrownClasses(){
-	Set<String> thrownClasses = usedDepJar.getRiskClasses(depJar.getAllCls(false));
-	return thrownClasses;
-}
+
+	public Set<String> getThrownClasses() {
+		Set<String> thrownClasses = usedDepJar.getRiskClasses(depJar.getAllCls(false));
+		return thrownClasses;
+	}
+
 	/**
 	 * 得到抛弃的方法
+	 * 
 	 * @return
 	 * 
 	 */
@@ -253,6 +256,7 @@ public Set<String> getThrownClasses(){
 			semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
 		}
 	}
+
 	// 得到语义冲突的路径图
 	public Graph4path getMethodPathGraphForSemanteme() {
 

@@ -47,6 +47,17 @@ public class SootUtil {
 	}
 
 	/**
+	 * 获取方法名，切分String 只留 返回值类型 方法名
+	 * 
+	 * @param methodSig e.g.:<org.slf4j.event.SubstituteLoggingEvent:
+	 *                  org.slf4j.event.Level getLevel()>
+	 * @return e.g.: getLevel;
+	 */
+	public static String mthdSig2methodName(String methodSig) {
+		return methodSig.split(" ")[2].replaceAll("\\(.*>", ""); // 返回值
+	}
+
+	/**
 	 * 获取类名，切分String 只留 类名
 	 * 
 	 * @param methodSig e.g.:<org.slf4j.event.SubstituteLoggingEvent:

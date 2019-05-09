@@ -56,7 +56,8 @@ public class SemanticsRiskWriter {
 							}
 						}
 					}
-					Map<String, List<Integer>> semantemeMethodForDifferences = depJarRisk.getSemantemeMethodForDifferences();
+					Map<String, List<Integer>> semantemeMethodForDifferences = depJarRisk
+							.getSemantemeMethodForDifferences();
 					if (dis2records.size() > 0) {
 //							Set<String> hasWriterRiskMethodPath = new HashSet<String>();
 						printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
@@ -64,7 +65,7 @@ public class SemanticsRiskWriter {
 						for (Record4path record : dis2records.flat()) {
 //								if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
 //								if(addJarPath(record.getPathStr()).contains(conflictDepJarVersion)) {
-							 List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMthd());
+							List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMthd());
 							printer.println("\n" + "conflict:" + conflict.toString());
 							printer.println("risk method name:" + record.getRiskMthd());
 							printer.println("来自冲突版本:" + depJarRisk.getConflictDepJar().toString());

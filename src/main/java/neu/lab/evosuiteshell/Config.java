@@ -7,6 +7,7 @@ import neu.lab.conflict.util.MavenUtil;
 public class Config {
 	private static String MAVEN_PATH = "";
 	public static String SENSOR_DIR = "sensor_testcase";
+	public static String EVOSUITE_NAME = "evosuite-runtime-1.0.6.jar";
 
 	/**
 	 * get mvn.bat or mvn.cmd path
