@@ -1,7 +1,9 @@
 package neu.lab.evosuiteshell;
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,17 +33,50 @@ public class ExecuteCommand {
 		executor.execute(cmdLine);
 	}
 
+	public static ArrayList<String> exeCmdAndGetResult(String commandStr) {
+		System.out.println(System.getProperty("user.dir"));
+		BufferedReader br = null;
+//		StringBuilder stringBuilder = new StringBuilder();
+		ArrayList<String> lines = new ArrayList<String>();
+		try {
+			Process p = Runtime.getRuntime().exec(commandStr);
+			br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String line = null;
+			while ((line = br.readLine()) != null) {
+//				stringBuilder.append(line + "\n");
+				lines.add(line);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return lines;
+	}
+
 	public static void main(String[] args) throws ExecuteException, IOException {
-		String sensor_dir = "C:\\Users\\Flipped\\eclipse-workspace\\Host\\" + Config.SENSOR_DIR + "\\";
-		String targetFile = ReadXML.copyPom(sensor_dir);
-		List<DependencyInfo> DependencyInfos = new ArrayList<DependencyInfo>();
-		DependencyInfo dependencyInfo = new DependencyInfo();
-		dependencyInfo.setArtifactId("B");
-		dependencyInfo.setGroupId("neu.lab");
-		dependencyInfo.setVersion("1.0");
-		DependencyInfos.add(dependencyInfo);
-		ReadXML.setCopyDependency(DependencyInfos, targetFile);
-		String mvnCmd = Config.getMaven() + Command.MVN_POM + targetFile + Command.MVN_COPY + sensor_dir + "jar\\";
-		exeCmd(mvnCmd);
+		String commandStr = Config.getMaven() + " -version";
+		ArrayList<String> results = ExecuteCommand.exeCmdAndGetResult(commandStr);
+		for (String line : results) {
+			if (line.contains("3.6.0"))
+				System.out.println(line);
+		}
+//		String sensor_dir = "C:\\Users\\Flipped\\eclipse-workspace\\Host\\" + Config.SENSOR_DIR + "\\";
+//		String targetFile = ReadXML.copyPom(sensor_dir);
+//		List<DependencyInfo> DependencyInfos = new ArrayList<DependencyInfo>();
+//		DependencyInfo dependencyInfo = new DependencyInfo();
+//		dependencyInfo.setArtifactId("B");
+//		dependencyInfo.setGroupId("neu.lab");
+//		dependencyInfo.setVersion("1.0");
+//		DependencyInfos.add(dependencyInfo);
+//		ReadXML.setCopyDependency(DependencyInfos, targetFile);
+//		String mvnCmd = Config.getMaven() + Command.MVN_POM + targetFile + Command.MVN_COPY + sensor_dir + "jar\\";
+//		exeCmd(mvnCmd);
 	}
 }
