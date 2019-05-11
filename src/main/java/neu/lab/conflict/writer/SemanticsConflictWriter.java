@@ -94,7 +94,6 @@ public class SemanticsConflictWriter {
 
 	public void runEvosuite(PrintWriter printer) {
 		for (Conflict conflict : Conflicts.i().getConflicts()) {
-			System.out.println(conflict.toString());
 			riskMethodPair(conflict);
 			System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
 			for (String method : methodToHost.keySet()) {
@@ -177,35 +176,9 @@ public class SemanticsConflictWriter {
 //		String fileName = testClassName.substring(testClassName.lastIndexOf(".") + 1);
 //		String packageName = testClassName.replace(fileName, "").replace(".", "\\");
 //		System.out.println(packageName);
-		String result = "(3 tests)";
-		String lines = result.substring(result.indexOf("(") + 1, result.indexOf(")"));
-		System.out.println(lines.split(" ")[0]);
-	}
-
-	public void run() {
-		String properties = System.getProperty("java.library.path");
-		String[] paths = properties.split(";");
-		String mvn = "";
-		for (String path : paths) {
-			if (path.contains("maven")) {
-				System.out.println(path);
-				mvn = path + "\\mvn.cmd ";
-			}
-		}
-		System.out.println(properties);
-//	SemanticsConflictWriter sSemanticsConflictWriter = new SemanticsConflictWriter();
-//	sSemanticsConflictWriter.write();
-		CommandLine command = CommandLine.parse(mvn + "-version");
-		DefaultExecutor executor = new DefaultExecutor();
-		try {
-			executor.execute(command);
-		} catch (ExecuteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		String result = "(3 tests)";
+//		String lines = result.substring(result.indexOf("(") + 1, result.indexOf(")"));
+//		System.out.println(lines.split(" ")[0]);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -264,12 +237,6 @@ public class SemanticsConflictWriter {
 		File dir = new File(workPath);
 		if (!dir.exists())
 			dir.mkdirs();
-		try {
-			new File(workPath + riskMethod + ".txt").createNewFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return workPath;
 	}
 
@@ -288,15 +255,37 @@ public class SemanticsConflictWriter {
 		String mvnCmd = Config.getMaven() + Command.MVN_POM + targetPom + Command.MVN_COPY + dependencyJarDir;
 		try {
 			ExecuteCommand.exeCmd(mvnCmd);
-		} catch (ExecuteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		File file = new File(dependencyJarDir);
+		boolean existJunit = false;
+		for (String dependency : file.list()) {
+			if (dependency.contains("junit")) {
+				existJunit = true;
+				break;
+			}
+		}
+		if (!existJunit) {
+			copyJunit(dependencyJarDir);
+		}
 		dependencyJarsPath = file.list();
+	}
+
+	/**
+	 * 依赖中没有junit包，则手动导入Junit4-12的包依赖
+	 */
+	public void copyJunit(String dir) {
+		String fileName = this.getClass().getClassLoader().getResource("copyJunit.xml").getPath();
+		System.out.println(fileName);
+		String mvnCmd = Config.getMaven() + Command.MVN_POM + fileName + Command.MVN_COPY + dir;
+		try {
+			ExecuteCommand.exeCmd(mvnCmd);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private String[] dependencyConflictJarsPath;
