@@ -59,7 +59,7 @@ public abstract class ConflictMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project.compileSourceRoots}", readonly = true, required = true)
 	public List<String> compileSourceRoots;
 
-	@Parameter(property = "ignoreTestScope", defaultValue = "false")
+	@Parameter(property = "ignoreTestScope", defaultValue = "true")
 	public boolean ignoreTestScope;
 
 	@Parameter(property = "ignoreProvidedScope", defaultValue = "false")

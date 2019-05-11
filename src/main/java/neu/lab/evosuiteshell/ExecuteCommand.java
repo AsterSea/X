@@ -34,7 +34,6 @@ public class ExecuteCommand {
 	}
 
 	public static ArrayList<String> exeCmdAndGetResult(String commandStr) {
-		System.out.println(System.getProperty("user.dir"));
 		BufferedReader br = null;
 //		StringBuilder stringBuilder = new StringBuilder();
 		ArrayList<String> lines = new ArrayList<String>();
