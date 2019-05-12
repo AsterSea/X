@@ -2,9 +2,13 @@ package neu.lab.conflict.writer;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -172,6 +176,8 @@ public class SemanticsConflictWriter {
 	}
 
 	public static void main(String[] args) {
+//		File file = new File("./copyJunit.xml");
+//		System.out.println(file.exists());
 //		String testClassName = "B.B.ServicesConfig_ESTest";
 //		String fileName = testClassName.substring(testClassName.lastIndexOf(".") + 1);
 //		String packageName = testClassName.replace(fileName, "").replace(".", "\\");
@@ -277,9 +283,25 @@ public class SemanticsConflictWriter {
 	 * 依赖中没有junit包，则手动导入Junit4-12的包依赖
 	 */
 	public void copyJunit(String dir) {
-		String fileName = this.getClass().getClassLoader().getResource("copyJunit.xml").getPath();
-		System.out.println(fileName);
-		String mvnCmd = Config.getMaven() + Command.MVN_POM + fileName + Command.MVN_COPY + dir;
+		InputStream fileInputStream = this.getClass().getResourceAsStream("/copyJunit.xml");
+		try {
+			System.out.println(fileInputStream.available());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String copyFileName = System.getProperty("user.dir") + "\\" + Config.SENSOR_DIR + "\\copyJunit.xml";
+		byte[] buffer;
+		try {
+			buffer = new byte[fileInputStream.available()];
+			fileInputStream.read(buffer);
+			File targetFile = new File(copyFileName);
+			Files.write(buffer, targetFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String mvnCmd = Config.getMaven() + Command.MVN_POM + copyFileName + Command.MVN_COPY + dir;
 		try {
 			ExecuteCommand.exeCmd(mvnCmd);
 		} catch (IOException e) {
