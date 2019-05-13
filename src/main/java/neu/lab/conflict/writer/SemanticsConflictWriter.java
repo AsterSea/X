@@ -46,9 +46,11 @@ import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.MySortedMap;
 import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.Conflict;
+import neu.lab.conflict.vo.DependencyInfo;
 import neu.lab.evosuiteshell.Command;
 import neu.lab.evosuiteshell.Config;
 import neu.lab.evosuiteshell.ExecuteCommand;
+import neu.lab.evosuiteshell.ReadXML;
 import neu.lab.evosuiteshell.junit.ExecuteJunit;
 
 public class SemanticsConflictWriter {
@@ -56,10 +58,7 @@ public class SemanticsConflictWriter {
 		PrintWriter printer = null;
 		try {
 			printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "SemeanticsConflict.txt", true)));
-//			write(printer);
-//			write();
 			runEvosuite(printer);
-//			createMethodDir();
 			printer.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -101,11 +100,11 @@ public class SemanticsConflictWriter {
 			riskMethodPair(conflict);
 			System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
 			for (String method : methodToHost.keySet()) {
-				HashSet<String> riskMethodHosts = methodToHost.get(method);
-				for (String riskMethodHost : riskMethodHosts) {
+				HashSet<String> riskMethodClassHosts = methodToHost.get(method);
+				for (String riskMethodClassHost : riskMethodClassHosts) {
 					printer.println(conflict.toString());
-					printer.println(riskMethodHost + "====>" + method);
-					String testClassName = SootUtil.mthdSig2cls(riskMethodHost) + "_ESTest";
+					printer.println(riskMethodClassHost + "====>" + method);
+					String testClassName = riskMethodClassHost + "_ESTest";
 					String testDir = createMethodDir(method);
 					TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
 					String CP = getDependencyCP(null);
@@ -113,8 +112,9 @@ public class SemanticsConflictWriter {
 					Properties.getInstance();
 					Properties.TEST_DIR = testDir;
 					Properties.CP = CP + ";" + System.getProperty("user.dir") + "\\" + Config.EVOSUITE_NAME;
-					Properties.TARGET_CLASS = SootUtil.mthdSig2cls(riskMethodHost);
-					Properties.TARGET_METHOD = SootUtil.mthdSig2methodName(riskMethodHost);
+					Properties.TARGET_CLASS = riskMethodClassHost;
+//					Properties.TARGET_CLASS = SootUtil.mthdSig2cls(riskMethodClassHost);
+//					Properties.TARGET_METHOD = SootUtil.mthdSig2methodName(riskMethodHost);
 					testSuiteGenerator.generateTestSuite();
 					compileJunit(testDir, testClassName, CP);
 					ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
@@ -135,13 +135,13 @@ public class SemanticsConflictWriter {
 				run = Double.parseDouble(lines[0].split(": ")[1]);
 				failures = Double.parseDouble(lines[1].split(": ")[1]);
 				percent = failures / run;
-				handle = "test case nums : " + run + " failures nums : " + failures + "\nFailures accounted for "
+				handle = "test case nums : " + run + " failures nums : " + failures + " failures accounted for "
 						+ percent * 100 + "%";
 				break;
 			}
 			if (result.contains("OK")) {
 				String line = result.substring(result.indexOf("(") + 1, result.indexOf(")"));
-				handle = "test case nums : " + line.split(" ")[0] + "\nFailures accounted for 0%";
+				handle = "test case nums : " + line.split(" ")[0] + " failures accounted for 0%";
 				break;
 			}
 		}
@@ -225,11 +225,11 @@ public class SemanticsConflictWriter {
 							host = new HashSet<String>();
 							methodToHost.put(record.getRiskMthd(), host);
 						}
-						host.add(topMthd);
+						// 修改后 存的是host节点的class名
+						host.add(SootUtil.mthdSig2cls(topMthd));
 					}
 				}
 			}
-			System.out.println(methodToHost);
 		}
 	}
 
@@ -274,7 +274,7 @@ public class SemanticsConflictWriter {
 			}
 		}
 		if (!existJunit) {
-			copyJunit(dependencyJarDir);
+			copyJunitFormMaven(dependencyJarDir);
 		}
 		dependencyJarsPath = file.list();
 	}
@@ -282,32 +282,9 @@ public class SemanticsConflictWriter {
 	/**
 	 * 依赖中没有junit包，则手动导入Junit4-12的包依赖
 	 */
-	public void copyJunit(String dir) {
-		InputStream fileInputStream = this.getClass().getResourceAsStream("/copyJunit.xml");
-		try {
-			System.out.println(fileInputStream.available());
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		String copyFileName = System.getProperty("user.dir") + "\\" + Config.SENSOR_DIR + "\\copyJunit.xml";
-		byte[] buffer;
-		try {
-			buffer = new byte[fileInputStream.available()];
-			fileInputStream.read(buffer);
-			File targetFile = new File(copyFileName);
-			Files.write(buffer, targetFile);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		String mvnCmd = Config.getMaven() + Command.MVN_POM + copyFileName + Command.MVN_COPY + dir;
-		try {
-			ExecuteCommand.exeCmd(mvnCmd);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void copyJunitFormMaven(String dir) {
+		String xmlFileName = ReadXML.copyPom(ReadXML.COPY_JUNIT);
+		ReadXML.executeMavenCopy(xmlFileName, dir);
 	}
 
 	private String[] dependencyConflictJarsPath;
@@ -327,15 +304,27 @@ public class SemanticsConflictWriter {
 				conflictDependencyJar += conflict.getGroupId().replace(".", "\\") + "\\"
 						+ conflict.getArtifactId().replace(".", "\\") + "\\" + depJarJRisk.getVersion() + "\\"
 						+ conflict.getArtifactId() + "-" + depJarJRisk.getVersion() + ".jar";
-				try {
-					Files.copy(new File(conflictDependencyJar), new File(dependencyConflictJarDir + "\\"
-							+ conflict.getArtifactId() + "-" + depJarJRisk.getVersion() + ".jar"));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if (new File(conflictDependencyJar).exists()) {
+					try {
+						Files.copy(new File(conflictDependencyJar), new File(dependencyConflictJarDir + "\\"
+								+ conflict.getArtifactId() + "-" + depJarJRisk.getVersion() + ".jar"));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} else {
+					DependencyInfo dependencyInfo = new DependencyInfo(conflict.getGroupId(), conflict.getArtifactId(),
+							depJarJRisk.getVersion());
+					copyConflictFromMaven(dependencyInfo, dependencyConflictJarDir);
 				}
 			}
 		}
 		dependencyConflictJarsPath = new File(dependencyConflictJarDir).list();
+	}
+
+	public void copyConflictFromMaven(DependencyInfo dependencyInfo, String dir) {
+		String xmlFileName = ReadXML.copyPom(ReadXML.COPY_CONFLICT);
+		ReadXML.setCopyDependency(dependencyInfo, xmlFileName);
+		ReadXML.executeMavenCopy(xmlFileName, dir);
 	}
 }
