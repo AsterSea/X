@@ -1,6 +1,7 @@
 package neu.lab.evosuiteshell;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,12 +34,12 @@ public class ExecuteCommand {
 		executor.execute(cmdLine);
 	}
 
-	public static ArrayList<String> exeCmdAndGetResult(String commandStr) {
+	public static ArrayList<String> exeBatAndGetResult(String batFilePath) {
 		BufferedReader br = null;
 //		StringBuilder stringBuilder = new StringBuilder();
 		ArrayList<String> lines = new ArrayList<String>();
 		try {
-			Process p = Runtime.getRuntime().exec(commandStr);
+			Process p = Runtime.getRuntime().exec(batFilePath);
 			br = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			String line = null;
 			while ((line = br.readLine()) != null) {
@@ -55,17 +56,18 @@ public class ExecuteCommand {
 					e.printStackTrace();
 				}
 			}
+			new File(batFilePath).delete();
 		}
 		return lines;
 	}
 
 	public static void main(String[] args) throws ExecuteException, IOException {
-		String commandStr = Config.getMaven() + " -version";
-		ArrayList<String> results = ExecuteCommand.exeCmdAndGetResult(commandStr);
-		for (String line : results) {
-			if (line.contains("3.6.0"))
-				System.out.println(line);
-		}
+//		String commandStr = Config.getMaven() + " -version";
+//		ArrayList<String> results = ExecuteCommand.exeCmdAndGetResult(commandStr);
+//		for (String line : results) {
+//			if (line.contains("3.6.0"))
+//				System.out.println(line);
+//		}
 //		String sensor_dir = "C:\\Users\\Flipped\\eclipse-workspace\\Host\\" + Config.SENSOR_DIR + "\\";
 //		String targetFile = ReadXML.copyPom(sensor_dir);
 //		List<DependencyInfo> DependencyInfos = new ArrayList<DependencyInfo>();

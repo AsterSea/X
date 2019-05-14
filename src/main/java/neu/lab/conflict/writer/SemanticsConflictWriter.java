@@ -51,15 +51,18 @@ import neu.lab.evosuiteshell.Command;
 import neu.lab.evosuiteshell.Config;
 import neu.lab.evosuiteshell.ExecuteCommand;
 import neu.lab.evosuiteshell.ReadXML;
+import neu.lab.evosuiteshell.TestCaseUtil;
 import neu.lab.evosuiteshell.junit.ExecuteJunit;
 
 public class SemanticsConflictWriter {
 	public void writeSemanticsConflict(String outPath) {
 		PrintWriter printer = null;
 		try {
-			printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "SemeanticsConflict.txt", true)));
+			printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "SemeanticsConflict.txt", false)));
 			runEvosuite(printer);
 			printer.close();
+			System.out.println(TestCaseUtil
+					.removeFileDir(new File(System.getProperty("user.dir") + "\\" + Config.SENSOR_DIR + "\\")));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -100,28 +103,40 @@ public class SemanticsConflictWriter {
 			riskMethodPair(conflict);
 			System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
 			for (String method : methodToHost.keySet()) {
+				String testDir = createMethodDir(method);
+				String CP = getDependencyCP(null);
+				String ConflictCP = getDependencyCP(conflict);
+				String testClassName = "";
 				HashSet<String> riskMethodClassHosts = methodToHost.get(method);
 				for (String riskMethodClassHost : riskMethodClassHosts) {
 					printer.println(conflict.toString());
 					printer.println(riskMethodClassHost + "====>" + method);
-					String testClassName = riskMethodClassHost + "_ESTest";
-					String testDir = createMethodDir(method);
-					TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
-					String CP = getDependencyCP(null);
-					String ConflictCP = getDependencyCP(conflict);
-					Properties.getInstance();
-					Properties.TEST_DIR = testDir;
-					Properties.CP = CP + ";" + System.getProperty("user.dir") + "\\" + Config.EVOSUITE_NAME;
-					Properties.TARGET_CLASS = riskMethodClassHost;
-//					Properties.TARGET_CLASS = SootUtil.mthdSig2cls(riskMethodClassHost);
-//					Properties.TARGET_METHOD = SootUtil.mthdSig2methodName(riskMethodHost);
-					testSuiteGenerator.generateTestSuite();
+					testClassName = riskMethodClassHost + "_ESTest";
+					startEvolution(CP, testDir, riskMethodClassHost);
 					compileJunit(testDir, testClassName, CP);
 					ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
 					printer.println(handleResult(results));
 				}
+				printer.println("target class = conflict class");
+				testClassName = SootUtil.mthdSig2cls(method);
+				startEvolution(CP, testDir, testClassName);
+				compileJunit(testDir, testClassName, CP);
+				ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
+				printer.println(handleResult(results));
 			}
 		}
+	}
+
+	public void startEvolution(String CP, String testDir, String targetClass) {
+		TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
+		Properties.getInstance();
+		Properties.TEST_DIR = testDir;
+		Properties.JUNIT_CHECK = false;
+		Properties.CP = CP + ";" + System.getProperty("user.dir") + "\\" + Config.EVOSUITE_NAME;
+		Properties.TARGET_CLASS = targetClass;
+//	Properties.TARGET_CLASS = SootUtil.mthdSig2cls(riskMethodClassHost);
+//	Properties.TARGET_METHOD = SootUtil.mthdSig2methodName(riskMethodHost);
+		testSuiteGenerator.generateTestSuite();
 	}
 
 	public String handleResult(ArrayList<String> results) {
@@ -135,13 +150,13 @@ public class SemanticsConflictWriter {
 				run = Double.parseDouble(lines[0].split(": ")[1]);
 				failures = Double.parseDouble(lines[1].split(": ")[1]);
 				percent = failures / run;
-				handle = "test case nums : " + run + " failures nums : " + failures + " failures accounted for "
+				handle = "test case nums : " + run + " * failures nums : " + failures + " * failures accounted for "
 						+ percent * 100 + "%";
 				break;
 			}
 			if (result.contains("OK")) {
 				String line = result.substring(result.indexOf("(") + 1, result.indexOf(")"));
-				handle = "test case nums : " + line.split(" ")[0] + " failures accounted for 0%";
+				handle = "test case nums : " + line.split(" ")[0] + " * failures accounted for 0%";
 				break;
 			}
 		}
@@ -157,8 +172,8 @@ public class SemanticsConflictWriter {
 		cmd.append(Command.CLASSPATH);
 		cmd.append(CP + " ");
 		cmd.append("*.java");
-		System.out.println(cmd + "\n" + fileDir);
-		ExecuteCommand.exeCmdAndGetResult(ExecuteJunit.creatBat(cmd.toString(), fileDir));
+//		System.out.println(cmd + "\n" + fileDir);
+		ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatBat(cmd.toString(), fileDir));
 	}
 
 	public ArrayList<String> executeJunit(String testDir, String testClassName, String CP) {
@@ -171,8 +186,8 @@ public class SemanticsConflictWriter {
 		cmd.append(CP + ";" + testDir);
 		cmd.append(Command.JUNIT_CORE);
 		cmd.append(testClassName);
-		System.out.println(cmd + "\n" + fileDir);
-		return ExecuteCommand.exeCmdAndGetResult(ExecuteJunit.creatBat(cmd.toString(), fileDir));
+//		System.out.println(cmd + "\n" + fileDir);
+		return ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatBat(cmd.toString(), fileDir));
 	}
 
 	public static void main(String[] args) {
