@@ -61,8 +61,8 @@ public class SemanticsConflictWriter {
 			printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "SemeanticsConflict.txt", false)));
 			runEvosuite(printer);
 			printer.close();
-			System.out.println(TestCaseUtil
-					.removeFileDir(new File(System.getProperty("user.dir") + "\\" + Config.SENSOR_DIR + "\\")));
+//			System.out.println(TestCaseUtil
+//					.removeFileDir(new File(System.getProperty("user.dir") + "\\" + Config.SENSOR_DIR + "\\")));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -110,15 +110,15 @@ public class SemanticsConflictWriter {
 				HashSet<String> riskMethodClassHosts = methodToHost.get(method);
 				for (String riskMethodClassHost : riskMethodClassHosts) {
 					printer.println(conflict.toString());
-					printer.println(riskMethodClassHost + "====>" + method);
+					printer.println(riskMethodClassHost + "===>" + method);
 					testClassName = riskMethodClassHost + "_ESTest";
 					startEvolution(CP, testDir, riskMethodClassHost);
 					compileJunit(testDir, testClassName, CP);
 					ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
 					printer.println(handleResult(results));
 				}
-				printer.println("target class = conflict class");
 				testClassName = SootUtil.mthdSig2cls(method);
+				printer.println("target class ===> conflict class " + testClassName);
 				startEvolution(CP, testDir, testClassName);
 				compileJunit(testDir, testClassName, CP);
 				ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
