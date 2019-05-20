@@ -21,12 +21,25 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.evosuite.Properties;
 import org.evosuite.TestSuiteGenerator;
+import org.evosuite.Properties.Criterion;
+import org.evosuite.Properties.SecondaryObjective;
 import org.evosuite.classpath.ClassPathHandler;
 import org.evosuite.coverage.mutation.MutationPool;
 import org.evosuite.ga.Chromosome;
+import org.evosuite.ga.ChromosomeFactory;
+import org.evosuite.ga.archive.Archive;
 import org.evosuite.ga.metaheuristics.GeneticAlgorithm;
 import org.evosuite.result.TestGenerationResult;
+import org.evosuite.seeding.ConstantPoolManager;
+import org.evosuite.seeding.ObjectPool;
+import org.evosuite.seeding.ObjectPoolManager;
+import org.evosuite.testcase.DefaultTestCase;
+import org.evosuite.testcase.TestCase;
+import org.evosuite.testcase.TestChromosome;
+import org.evosuite.testcase.factories.RandomLengthTestFactory;
+import org.evosuite.testcase.statements.StringPrimitiveStatement;
 import org.evosuite.testsuite.TestSuiteChromosome;
+import org.evosuite.testsuite.TestSuiteSerialization;
 import org.evosuite.utils.LoggingUtils;
 
 import com.google.common.io.Files;
@@ -101,7 +114,7 @@ public class SemanticsConflictWriter {
 	public void runEvosuite(PrintWriter printer) {
 		for (Conflict conflict : Conflicts.i().getConflicts()) {
 			riskMethodPair(conflict);
-			System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
+			System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "debug");
 			for (String method : methodToHost.keySet()) {
 				String testDir = createMethodDir(method);
 				String CP = getDependencyCP(null);
@@ -128,15 +141,50 @@ public class SemanticsConflictWriter {
 	}
 
 	public void startEvolution(String CP, String testDir, String targetClass) {
+
+		Properties.getInstance().resetToDefaults();
 		TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
-		Properties.getInstance();
+//		TestSuiteChromosome seed = new TestSuiteChromosome();
+//		ChromosomeFactory<TestChromosome> defaultFactory = new RandomLengthTestFactory();
+//		TestChromosome testChromosome = defaultFactory.getChromosome();
+//		TestCase test = testChromosome.getTestCase();
+//		StringPrimitiveStatement primitiveStmt = new StringPrimitiveStatement(test, "AWS-size");
+//		test.addStatement(primitiveStmt,0);
+//		testChromosome.setTestCase(test);
+//		seed.addTest(testChromosome);
+//		ObjectPool pool = ObjectPool.getPoolFromTestSuite(seed);
+//		pool.writePool(testDir + "test.txt");
+//		Properties.OBJECT_POOLS = testDir + "test.txt";
+//		ObjectPoolManager.getInstance().initialisePool();
+//		Properties.CTG_SEEDS_FILE_IN = testDir + "test.seed";
+//		TestSuiteSerialization.saveTests(seed, new File(Properties.CTG_SEEDS_FILE_IN));
+//		Properties.getInstance();
+		ConstantPoolManager.getInstance().addSUTConstant("AWS-size");
+		ConstantPoolManager.getInstance().addSUTConstant("Service-size");
+		ConstantPoolManager.getInstance().addSUTConstant("Federated-size");
+		ConstantPoolManager.getInstance().addDynamicConstant("AWS-size");
+		ConstantPoolManager.getInstance().addDynamicConstant("Service-size");
+		ConstantPoolManager.getInstance().addDynamicConstant("Federated-size");
+		ConstantPoolManager.getInstance().addNonSUTConstant("AWS-size");
+		ConstantPoolManager.getInstance().addNonSUTConstant("Service-size");
+		ConstantPoolManager.getInstance().addNonSUTConstant("Federated-size");
+//		ConstantPoolManager.getInstance().addDynamicConstant("AWS-size");
+//		ConstantPoolManager.getInstance().addNonSUTConstant("AWS-size");
+//		Properties.SECONDARY_OBJECTIVE = new SecondaryObjective[] { SecondaryObjective.SIZE };
+//		Properties.MINIMIZE = false;
+		Properties.MIN_INITIAL_TESTS = 10;
+		Properties.NUM_TESTS = 10;
 		Properties.TEST_DIR = testDir;
 		Properties.JUNIT_CHECK = false;
 		Properties.CP = CP + ";" + System.getProperty("user.dir") + "\\" + Config.EVOSUITE_NAME;
 		Properties.TARGET_CLASS = targetClass;
-//	Properties.TARGET_CLASS = SootUtil.mthdSig2cls(riskMethodClassHost);
-//	Properties.TARGET_METHOD = SootUtil.mthdSig2methodName(riskMethodHost);
+//		Properties.TARGET_CLASS = SootUtil.mthdSig2cls(targetClass);
+		Properties.TARGET_METHOD = "onStart";
+//		Properties.CRITERION = new Criterion[] { Criterion.LINE };
 		testSuiteGenerator.generateTestSuite();
+		System.out.println(Properties.MIN_INITIAL_TESTS);
+		System.out.println(Properties.NUM_TESTS);
+		System.out.println(Properties.MINIMIZE);
 	}
 
 	public String handleResult(ArrayList<String> results) {
