@@ -66,6 +66,8 @@ import neu.lab.evosuiteshell.ExecuteCommand;
 import neu.lab.evosuiteshell.ReadXML;
 import neu.lab.evosuiteshell.TestCaseUtil;
 import neu.lab.evosuiteshell.junit.ExecuteJunit;
+import neu.lab.evosuiteshell.search.SearchConstantPool;
+import neu.lab.evosuiteshell.search.SearchPrimitiveManager;
 
 public class SemanticsConflictWriter {
 	public void writeSemanticsConflict(String outPath) {
@@ -140,37 +142,23 @@ public class SemanticsConflictWriter {
 		}
 	}
 
-	public void startEvolution(String CP, String testDir, String targetClass) {
+	public void seedingConstant(String targetClass) {
+		SearchPrimitiveManager.getInstance();
+		int num = targetClass.lastIndexOf(".");
+		String name = targetClass.substring(num + 1, targetClass.length());
+		HashSet<String> constants = SearchConstantPool.getInstance().getPoolValues(name);
+		if (constants != null) {
+			for (String constant : constants) {
+				ConstantPoolManager.getInstance().addSUTConstant(constant);
+				ConstantPoolManager.getInstance().addDynamicConstant(constant);
+				ConstantPoolManager.getInstance().addNonSUTConstant(constant);
+			}
+		}
+	}
 
-		Properties.getInstance().resetToDefaults();
+	public void startEvolution(String CP, String testDir, String targetClass) {
 		TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
-//		TestSuiteChromosome seed = new TestSuiteChromosome();
-//		ChromosomeFactory<TestChromosome> defaultFactory = new RandomLengthTestFactory();
-//		TestChromosome testChromosome = defaultFactory.getChromosome();
-//		TestCase test = testChromosome.getTestCase();
-//		StringPrimitiveStatement primitiveStmt = new StringPrimitiveStatement(test, "AWS-size");
-//		test.addStatement(primitiveStmt,0);
-//		testChromosome.setTestCase(test);
-//		seed.addTest(testChromosome);
-//		ObjectPool pool = ObjectPool.getPoolFromTestSuite(seed);
-//		pool.writePool(testDir + "test.txt");
-//		Properties.OBJECT_POOLS = testDir + "test.txt";
-//		ObjectPoolManager.getInstance().initialisePool();
-//		Properties.CTG_SEEDS_FILE_IN = testDir + "test.seed";
-//		TestSuiteSerialization.saveTests(seed, new File(Properties.CTG_SEEDS_FILE_IN));
-//		Properties.getInstance();
-		ConstantPoolManager.getInstance().addSUTConstant("AWS-size");
-		ConstantPoolManager.getInstance().addSUTConstant("Service-size");
-		ConstantPoolManager.getInstance().addSUTConstant("Federated-size");
-		ConstantPoolManager.getInstance().addDynamicConstant("AWS-size");
-		ConstantPoolManager.getInstance().addDynamicConstant("Service-size");
-		ConstantPoolManager.getInstance().addDynamicConstant("Federated-size");
-		ConstantPoolManager.getInstance().addNonSUTConstant("AWS-size");
-		ConstantPoolManager.getInstance().addNonSUTConstant("Service-size");
-		ConstantPoolManager.getInstance().addNonSUTConstant("Federated-size");
-//		ConstantPoolManager.getInstance().addDynamicConstant("AWS-size");
-//		ConstantPoolManager.getInstance().addNonSUTConstant("AWS-size");
-//		Properties.SECONDARY_OBJECTIVE = new SecondaryObjective[] { SecondaryObjective.SIZE };
+		seedingConstant(targetClass);
 //		Properties.MINIMIZE = false;
 		Properties.MIN_INITIAL_TESTS = 10;
 		Properties.NUM_TESTS = 10;
@@ -180,11 +168,7 @@ public class SemanticsConflictWriter {
 		Properties.TARGET_CLASS = targetClass;
 //		Properties.TARGET_CLASS = SootUtil.mthdSig2cls(targetClass);
 		Properties.TARGET_METHOD = "onStart";
-//		Properties.CRITERION = new Criterion[] { Criterion.LINE };
 		testSuiteGenerator.generateTestSuite();
-		System.out.println(Properties.MIN_INITIAL_TESTS);
-		System.out.println(Properties.NUM_TESTS);
-		System.out.println(Properties.MINIMIZE);
 	}
 
 	public String handleResult(ArrayList<String> results) {
@@ -236,25 +220,6 @@ public class SemanticsConflictWriter {
 		cmd.append(testClassName);
 //		System.out.println(cmd + "\n" + fileDir);
 		return ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatBat(cmd.toString(), fileDir));
-	}
-
-	public static void main(String[] args) {
-//		File file = new File("./copyJunit.xml");
-//		System.out.println(file.exists());
-//		String testClassName = "B.B.ServicesConfig_ESTest";
-//		String fileName = testClassName.substring(testClassName.lastIndexOf(".") + 1);
-//		String packageName = testClassName.replace(fileName, "").replace(".", "\\");
-//		System.out.println(packageName);
-//		String result = "(3 tests)";
-//		String lines = result.substring(result.indexOf("(") + 1, result.indexOf(")"));
-//		System.out.println(lines.split(" ")[0]);
-	}
-
-	@SuppressWarnings("unchecked")
-	private TestGenerationResult getGAFromResult(Object result) {
-		List<List<TestGenerationResult>> results = (List<List<TestGenerationResult>>) result;
-		System.out.println(results);
-		return results.get(0).get(0);
 	}
 
 	public Set<String> readFiles(String path) {
