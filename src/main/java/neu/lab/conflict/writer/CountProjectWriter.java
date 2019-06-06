@@ -8,15 +8,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.graph.GraphForMethodName;
-import neu.lab.conflict.graph.IGraph;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.soot.SootJRiskCg;
-import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
 import neu.lab.conflict.soot.tf.JRiskObjectCgTf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.Conflict;

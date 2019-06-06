@@ -11,11 +11,11 @@ import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.graph.Book4path;
 import neu.lab.conflict.graph.Dog;
-import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.IBook;
 import neu.lab.conflict.graph.IRecord;
 import neu.lab.conflict.graph.Record4path;
 import neu.lab.conflict.graph.Dog.Strategy;
+import neu.lab.conflict.graph.Graph4distance;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
@@ -42,7 +42,7 @@ public class SemanticsRiskWriter {
 
 			for (Conflict conflict : Conflicts.i().getConflicts()) {
 				for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
-					Graph4path pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
+					Graph4distance pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
 					Set<String> hostNodes = pathGraph.getHostNodes();
 					Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH,
 							Strategy.NOT_RESET_BOOK);

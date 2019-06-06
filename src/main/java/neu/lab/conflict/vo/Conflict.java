@@ -13,7 +13,6 @@ import neu.lab.conflict.container.AllRefedCls;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.graph.Dog;
 import neu.lab.conflict.graph.Graph4distance;
-import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.IBook;
 import neu.lab.conflict.graph.Dog.Strategy;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
@@ -200,7 +199,7 @@ public class Conflict {
 						break;
 					}
 
-					Map<String, IBook> distanceBooks = new Dog(distanceGraph).findRlt(distanceGraph.getHostNds(),
+					Map<String, IBook> distanceBooks = new Dog(distanceGraph).findRlt(distanceGraph.getHostNodes(),
 							Conf.DOG_DEP_FOR_DIS, Strategy.NOT_RESET_BOOK);
 					bottomMethods = depJarJRisk.getMethodBottom(distanceBooks);
 					if (isUsedDepJar) {

@@ -13,7 +13,6 @@ import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.GraphForMethodOutPath;
 import neu.lab.conflict.graph.IGraph;
 import neu.lab.conflict.graph.Node4path;
-import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.soot.SootJRiskCg;
 import neu.lab.conflict.soot.tf.JRiskMethodOutPathCgTf;
 import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 import org.dom4j.*;
 import org.dom4j.io.OutputFormat;
@@ -13,7 +12,6 @@ import org.dom4j.io.XMLWriter;
 
 import com.google.common.io.Files;
 
-import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.vo.DependencyInfo;
 
 public class ReadXML {

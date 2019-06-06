@@ -7,7 +7,6 @@ import java.util.Set;
 
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
-import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.ClassDup;
 import neu.lab.conflict.vo.DepJar;
 

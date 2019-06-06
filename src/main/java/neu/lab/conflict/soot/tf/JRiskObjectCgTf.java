@@ -3,19 +3,14 @@ package neu.lab.conflict.soot.tf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import neu.lab.conflict.graph.GraphForMethodName;
-import neu.lab.conflict.graph.GraphForMethodOutPath;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.SootUtil;
-import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.jimple.toolkits.callgraph.CallGraph;
-import soot.jimple.toolkits.callgraph.Edge;
 import soot.util.Chain;
 
 public class JRiskObjectCgTf extends JRiskCgTf {
@@ -100,7 +95,7 @@ public class JRiskObjectCgTf extends JRiskCgTf {
 		}
 	}
 
-	private boolean isAccessible(SootMethod srcMethod) {
+	public boolean isAccessible(SootMethod srcMethod) {
 		return srcMethod.isPublic() || srcMethod.isStatic();
 	}
 }

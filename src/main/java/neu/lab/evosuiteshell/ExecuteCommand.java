@@ -1,20 +1,16 @@
 package neu.lab.evosuiteshell;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
-
-import neu.lab.conflict.vo.DependencyInfo;
 
 public class ExecuteCommand {
 	public static void exeCmd(String mvnCmd) throws ExecuteException, IOException {
@@ -56,7 +52,7 @@ public class ExecuteCommand {
 					e.printStackTrace();
 				}
 			}
-			new File(batFilePath).delete();
+//			new File(batFilePath).delete();
 		}
 		return lines;
 	}

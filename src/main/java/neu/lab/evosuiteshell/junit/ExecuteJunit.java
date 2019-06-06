@@ -2,11 +2,6 @@ package neu.lab.evosuiteshell.junit;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-
-import neu.lab.evosuiteshell.ExecuteCommand;
 
 public class ExecuteJunit {
 
