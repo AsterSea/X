@@ -33,7 +33,7 @@ public class JarAna extends SootAna {
 	 * @return
 	 */
 	public Map<String, ClassVO> deconstruct(List<String> jarFilePath) {
-		MavenUtil.i().getLog().info("use soot to deconstruct " + jarFilePath);
+//		MavenUtil.i().getLog().info("use soot to deconstruct " + jarFilePath);
 
 		long startTime = System.currentTimeMillis();
 
@@ -43,8 +43,8 @@ public class JarAna extends SootAna {
 		} else {
 			DsTransformer transformer = new DsTransformer(jarFilePath);
 			PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", transformer));
-			
-			SootUtil.modifyLogOut();
+
+//			SootUtil.modifyLogOut();
 			
 			soot.Main.main(args.toArray(new String[0]));
 			Map<String, ClassVO> clses = transformer.getClsTb();

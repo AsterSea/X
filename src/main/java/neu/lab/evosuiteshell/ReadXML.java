@@ -49,7 +49,7 @@ public class ReadXML {
 	 */
 	public static String copyPom(String XMLName) {
 		InputStream fileInputStream = ReadXML.class.getResourceAsStream("/" + XMLName);
-		String xmlFileName = System.getProperty("user.dir") + "\\" + Config.SENSOR_DIR + "\\" + XMLName;
+        String xmlFileName = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + XMLName;
 		byte[] buffer;
 		try {
 			buffer = new byte[fileInputStream.available()];

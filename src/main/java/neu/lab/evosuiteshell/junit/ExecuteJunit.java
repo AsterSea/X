@@ -5,28 +5,41 @@ import java.io.IOException;
 
 public class ExecuteJunit {
 
-	/**
-	 * 创建bat文件去执行cmd命令
-	 * 
-	 * @param cmd
-	 * @param url 目录
-	 * @return fileName 带绝对路径
-	 *         C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-tests\\B\\B\\executeCMD.bat
-	 */
-	public static String creatBat(String cmd, String dir) {
-		String fileName = dir + "executeCMD.bat";
-		try {
-			FileWriter fileWriter = new FileWriter(fileName);
-			fileWriter.write(cmd);
-			fileWriter.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return fileName;
-	}
+    /**
+     * 创建bat文件去执行cmd命令
+     *
+     * @param cmd
+     * @param url 目录
+     * @return fileName 带绝对路径
+     * C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-tests\\B\\B\\executeCMD.bat
+     */
+    public static String creatBat(String cmd, String dir) {
+        String fileName = dir + "executeCMD.bat";
+        try {
+            FileWriter fileWriter = new FileWriter(fileName);
+            fileWriter.write(cmd);
+            fileWriter.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return fileName;
+    }
 
-	public static void main(String[] args) throws IOException {
+    public static String creatShellScript(String cmd, String dir) {
+        String fileName = dir + "execute.sh";
+        try {
+            FileWriter fileWriter = new FileWriter(fileName);
+            fileWriter.write("#!bin/sh\n" + cmd);
+            fileWriter.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return fileName;
+    }
+
+    public static void main(String[] args) throws IOException {
 //		String cmd = "cd C:\\Users\\Flipped\\eclipse-workspace\\Host\\sensor_testcase\\test_method\\getSize\\neu\\lab\\Host\njavac -classpath C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\classes;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\junit-4.12.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\A-1.0.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-runtime-1.0.6.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-tests;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\hamcrest-core-1.3.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\B-1.0.jar Host_ESTest.java";
 //		String url = "C:\\Users\\Flipped\\eclipse-workspace\\Host\\sensor_testcase\\test_method\\getSize\\neu\\lab\\Host\\";
 //		ArrayList<String> result = ExecuteCommand.exeCmdAndGetResult(creatBat(cmd, url));
@@ -44,5 +57,5 @@ public class ExecuteJunit {
 //				"C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\classes;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\junit-4.12.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\A-1.0.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-runtime-1.0.6.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-tests;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\hamcrest-core-1.3.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\B-1.0.jar",
 //				" ServicesConfig_ESTest.java");
 //		System.out.println(result);
-	}
+    }
 }

@@ -58,6 +58,8 @@ public class ExecuteCommand {
 	}
 
 	public static void main(String[] args) throws ExecuteException, IOException {
+//		exeCmd("sh /Users/wangchao/eclipse-workspace/Host/sensor_testcase/test_method/getSize/neu/lab/Host/execute.sh");
+        System.out.println(exeBatAndGetResult("sh /Users/wangchao/eclipse-workspace/Host/sensor_testcase/test_method/getSize/neu/lab/Host/execute.sh"));
 //		String commandStr = Config.getMaven() + " -version";
 //		ArrayList<String> results = ExecuteCommand.exeCmdAndGetResult(commandStr);
 //		for (String line : results) {

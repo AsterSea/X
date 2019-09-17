@@ -5,19 +5,19 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
+import neu.lab.conflict.soot.JarAna;
+import neu.lab.conflict.vo.ClassVO;
+import neu.lab.evosuiteshell.generate.GenericObjectSet;
 import soot.PackManager;
 import soot.Transform;
 
 public class SootExe {
-	public void initClassInheritInfo(String[] jarFilePath) {
-
+    public void initProjectInfo(String[] jarFilePath) {
+//		System.out.println("jarFilePath size"+ jarFilePath);
 		List<String> args = getArgs(jarFilePath);
+//		System.out.println("args size"+ args);
 		if (args.size() != 0) {
 
 			ClassTransformer transformer = new ClassTransformer();
@@ -94,12 +94,16 @@ public class SootExe {
 	}
 
 	public static void main(String[] args) throws IOException {
-		new SootExe().initClassInheritInfo(
-				new String[] { "C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\Host-1.0.jar" });
-		HashMap<String, HashSet<ClassInfo>> classSig = ClassInherit.getInstance().getClassSig();
-		PrintWriter printer = new PrintWriter(new BufferedWriter(
-				new FileWriter("C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\1.txt", false)));
-		printer.println(classSig);
-		printer.close();
-	}
+        new SootExe().initProjectInfo(
+                new String[]{"/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar"});
+        ProjectInfo.i().setEntryCls("neu.lab.Host.Host");
+        MyClassLoader.jarLoader(new File("/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar"));
+//		System.out.println(ProjectInfo.i().getClassInfo("neu.lab.A.Principal"));
+        GenericObjectSet.getInstance().generateGenericObject("neu.lab.Host.Host");
+//		PrintWriter printer = new PrintWriter(new BufferedWriter(
+//				new FileWriter("/Users/wangchao/个人文件/东北大学/实验室/实验室台式/eclipse/Host/target/1.txt", false)));
+//		printer.println(ProjectInfo.i().getAllClassInfo());
+//		printer.close();
+    }
+
 }
