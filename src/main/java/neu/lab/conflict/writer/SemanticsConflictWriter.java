@@ -49,6 +49,7 @@ public class SemanticsConflictWriter {
     public void writeSemanticsConflict(String outPath) {
         PrintWriter printer = null;
         try {
+//            System.out.println(outPath + "SemeanticsConflict.txt");
             printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "SemeanticsConflict.txt", false)));
             runEvosuite(printer);
             printer.close();
@@ -63,25 +64,25 @@ public class SemanticsConflictWriter {
      */
     public String getDependencyCP(Conflict conflict) {
         copyDependency();
-        StringBuffer CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes;"
+        StringBuffer CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR
                 + System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.EVOSUITE_NAME);
         String dependencyConflictJarDir = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR
                 + "dependencyConflictJar" + Config.FILE_SEPARATOR;
         String dependencyJar = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "dependencyJar" + Config.FILE_SEPARATOR;
         if (conflict == null) {
             for (String dependency : dependencyJarsPath) {
-                CP.append(";" + dependencyJar + dependency);
+                CP.append(Config.CLASSPATH_SEPARATOR + dependencyJar + dependency);
             }
         } else {
             copyConflictDependency();
             for (String dependency : dependencyJarsPath) {
                 if (dependency.contains(conflict.getArtifactId()))
                     continue;
-                CP.append(";" + dependencyJar + dependency);
+                CP.append(Config.CLASSPATH_SEPARATOR + dependencyJar + dependency);
             }
             for (String dependency : dependencyConflictJarsPath) {
                 if (dependency.contains(conflict.getArtifactId()))
-                    CP.append(";" + dependencyConflictJarDir + dependency);
+                    CP.append(Config.CLASSPATH_SEPARATOR + dependencyConflictJarDir + dependency);
             }
         }
         return CP.toString();
@@ -89,8 +90,9 @@ public class SemanticsConflictWriter {
 
     public void runEvosuite(PrintWriter printer) {
         for (Conflict conflict : Conflicts.i().getConflicts()) {
+//            System.out.println(conflict);
             riskMethodPair(conflict);
-            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "debug");
+            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
             for (String method : methodToHost.keySet()) {
 //                initObjectPool(SootUtil.mthdSig2cls(method));
                 String testDir = createMethodDir(method);
@@ -162,7 +164,7 @@ public class SemanticsConflictWriter {
         Properties.NUM_TESTS = 10;
         Properties.TEST_DIR = testDir;
         Properties.JUNIT_CHECK = false;
-        CP = CP.replace(";", ":");// + ":" + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "evosuite-shaded-1.0.6.jar";
+//        CP = CP.replace(";", ":");// + ":" + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "evosuite-shaded-1.0.6.jar";
 //        CP = CP.replaceAll("/Users/wangchao/eclipse-workspace/Host/", "");
         Properties.CP = CP;
 //        CP.replaceAll(";",":");
@@ -245,7 +247,7 @@ public class SemanticsConflictWriter {
         StringBuffer cmd = new StringBuffer("cd " + fileDir + "\n");
         cmd.append(Command.JAVA);
         cmd.append(Command.CLASSPATH);
-        cmd.append(CP + ";" + testDir);
+        cmd.append(CP + Config.CLASSPATH_SEPARATOR + testDir);
         cmd.append(Command.JUNIT_CORE);
         cmd.append(testClassName);
 //		System.out.println(cmd + "\n" + fileDir);
@@ -255,7 +257,7 @@ public class SemanticsConflictWriter {
     public String addJunitDependency() {
         StringBuffer stringBuffer = new StringBuffer("");
         for (String jarPath : junitJarsPath) {
-            stringBuffer.append(";");
+            stringBuffer.append(Config.CLASSPATH_SEPARATOR);
             stringBuffer.append(jarPath);
         }
         return stringBuffer.toString();
@@ -279,11 +281,14 @@ public class SemanticsConflictWriter {
     public void riskMethodPair(Conflict conflict) {
         for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
             Graph4distance pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
+            System.out.println(pathGraph.getHostNodes());
             Set<String> hostNodes = pathGraph.getHostNodes();
+            System.out.println(hostNodes);
             pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH, Strategy.NOT_RESET_BOOK);
 //			MethodProbDistances methodProbabilityDistances = getMethodProDistances(pathBooks);
 //			setNodeProbDistance(methodProbabilityDistances);
 //			System.out.println(getMethodProDistances(pathBooks));
+            System.out.println(pathBooks.keySet());
             for (String topMthd : pathBooks.keySet()) {
                 if (hostNodes.contains(topMthd)) {
                     Book4distance book = (Book4distance) (pathBooks.get(topMthd));

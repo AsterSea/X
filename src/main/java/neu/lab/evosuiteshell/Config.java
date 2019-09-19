@@ -9,6 +9,13 @@ public class Config {
     public static String SENSOR_DIR = "sensor_testcase";
     public static String EVOSUITE_NAME = "evosuite-runtime-1.0.6.jar";
     public static String FILE_SEPARATOR = File.separator;
+    public static String CLASSPATH_SEPARATOR = ";";
+
+    static {
+        if (System.getProperty("os.name").equals("Mac OS X")) {
+            CLASSPATH_SEPARATOR = ":";
+        }
+    }
 
     /**
      * get mvn.bat or mvn.cmd path
@@ -46,5 +53,6 @@ public class Config {
     public static void main(String[] args) {
         System.out.println(System.getProperty("os.name"));
         System.out.println(getMaven());
+        System.out.println(CLASSPATH_SEPARATOR);
     }
 }

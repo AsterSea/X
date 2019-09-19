@@ -97,8 +97,8 @@ public class DepJarJRisk {
 
 	/**
 	 * 用传入的depJar去得到抛弃的方法
-	 * 
-	 * @param depJar
+	 *
+	 * @param enterDepJar
 	 * @return
 	 */
 	public Set<String> getThrownMthds(DepJar enterDepJar) {

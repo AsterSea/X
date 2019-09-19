@@ -119,7 +119,6 @@ public class SemantemeMethods {
 	/**
 	 * 对Map排序后，输出前N个Intger最大的method 降序
 	 * 
-	 * @param map
 	 * @param entrySize 大小限制，输出多少个排序后数组
 	 * @return
 	 */

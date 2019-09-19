@@ -66,7 +66,7 @@ public class GenericObjectSet {
                 neededParams.add(new NeededObj(paramType, 0));
             }
             EvosuiteNeedObject evosuiteNeedParamObject = structureParamTypes(classInfo, neededParams);
-            System.out.println(evosuiteNeedParamObject.toString());
+//            System.out.println(evosuiteNeedParamObject.toString());
         }
 //        VariableReference variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams);
 //        ObjectPool objectPool = new ObjectPool();

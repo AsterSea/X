@@ -20,8 +20,8 @@ public class ReadXML {
 
 	/**
 	 * add dependency to new empty
-	 * 
-	 * @param DependencyInfo
+	 *
+	 * @param dependencyInfo
 	 */
 	public static void setCopyDependency(DependencyInfo dependencyInfo, String xmlFilePath) {
 		SAXReader reader = new SAXReader();

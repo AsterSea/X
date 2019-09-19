@@ -280,8 +280,8 @@ public class DepJar {
 
 	/**
 	 * 是否为同一个
-	 * 
-	 * @param dep
+	 *
+     * @param depJar
 	 * @return
 	 */
 	public boolean isSelf(DepJar depJar) {

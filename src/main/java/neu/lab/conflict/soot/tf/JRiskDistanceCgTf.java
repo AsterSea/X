@@ -57,7 +57,7 @@ public class JRiskDistanceCgTf extends JRiskCgTf {
 			List<MethodCall> mthdRlts = new ArrayList<MethodCall>();
 			
 			CallGraph cg = Scene.v().getCallGraph();//得到图 优化效率从这里开始
-			
+
 			Iterator<Edge> ite = cg.iterator();
 			
 			while (ite.hasNext()) {
@@ -85,6 +85,7 @@ public class JRiskDistanceCgTf extends JRiskCgTf {
 					mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
 				}
 			}
+			System.out.println(mthdRlts.size());
 			graph = new Graph4distance(name2node, mthdRlts);
 			MavenUtil.i().getLog().info("end form graph.");
 		}

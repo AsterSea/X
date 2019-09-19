@@ -9,7 +9,7 @@ public class ExecuteJunit {
      * 创建bat文件去执行cmd命令
      *
      * @param cmd
-     * @param url 目录
+     * @param dir 目录
      * @return fileName 带绝对路径
      * C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-tests\\B\\B\\executeCMD.bat
      */
@@ -36,7 +36,7 @@ public class ExecuteJunit {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return fileName;
+        return "sh " + fileName;
     }
 
     public static void main(String[] args) throws IOException {
