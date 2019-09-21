@@ -12,7 +12,7 @@ public class JDCorePrinter implements Printer {
 
     @Override
     public String toString() {
-        return sb.toString();
+        return sb.toString().replace("package", "");
     }
 
     @Override

@@ -1,14 +1,10 @@
 package neu.lab.conflict.risk.jar;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import gumtree.spoon.AstComparator;
+import gumtree.spoon.diff.Diff;
 import neu.lab.conflict.GlobalVar;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.container.SemantemeMethods;
@@ -35,6 +31,8 @@ import neu.lab.evosuiteshell.Config;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtParameter;
 
 /**
  * 依赖风险jar
@@ -276,24 +274,24 @@ public class DepJarJRisk {
 
             decompile();
 
-            calculationDifference(semantemeRiskMethods);
+            riskMethods = calculationDifference(semantemeRiskMethods);
 
-            GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
-                    new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+//            GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
+//                    new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+//
+//            GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
+//                    .getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+//
+//            SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
+//                    usedDepJarGraphForMethodOutPath.getSemantemeMethods());
+//
+//            semantemeMethods.CalculationDifference(); // 计算差异
+//
+//            semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
 
-            GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
-                    .getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
-
-            SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
-                    usedDepJarGraphForMethodOutPath.getSemantemeMethods());
-
-            semantemeMethods.CalculationDifference(); // 计算差异
-
-            semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
-
-            riskMethods = semantemeMethods.sortMap(100);
-            depJarGraphForMethodOutPath = null;
-            usedDepJarGraphForMethodOutPath = null;
+//            riskMethods = semantemeMethods.sortMap(100);
+//            depJarGraphForMethodOutPath = null;
+//            usedDepJarGraphForMethodOutPath = null;
 
             if (riskMethods.size() > 0) {
                 IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskDistanceCgTf(this, riskMethods));
@@ -345,12 +343,18 @@ public class DepJarJRisk {
      * @param semantemeRiskMethods 两个jar包共有的方法集合，即有可能存在语义冲突的方法集合
      */
     private Set<String> calculationDifference(Set<String> semantemeRiskMethods) {
+
+        Map<String, Integer> semantemeMethodForDifferences = new HashMap<String, Integer>(); // 语义方法的差异集合
+
         Loader loaderDepJar = new JDCoreLoader(new File(depJarDecompressionPath));
         Loader loaderUsedDepJar = new JDCoreLoader(new File(usedDepJarDecompressionPath));
         Printer printerDepJar = new JDCorePrinter();
         Printer printerUsedDepJar = new JDCorePrinter();
 
         ClassFileToJavaSourceDecompiler decompiler = new ClassFileToJavaSourceDecompiler();
+
+        AstComparator astComparator = new AstComparator();
+
         // key class
         // value methods
         Map<String, Set<String>> methodsFromClass = new HashMap<String, Set<String>>();
@@ -372,12 +376,43 @@ public class DepJarJRisk {
 
                 for (String method : methodsFromClass.get(methodClassSig)) {
 
-                    System.out.println("method +  " + method);
+//                    System.out.println("method   " + method);
+//                    System.out.println("method name   " + SootUtil.mthdSig2methodName(method));
+//                    System.out.println("params   " + SootUtil.mthdSig2param(method));
+
+                    String depJarContent = printerDepJar.toString();
+//                    System.out.println(depJarContent);
+                    String usedDepJarContent = printerUsedDepJar.toString();
+
+//                    Set<CtMethod<?>> allmethod = astComparator.getCtType(depJarContent).getAllMethods();
+//                    for (CtMethod ctMethod : allmethod) {
+//                        System.out.println(ctMethod.getSimpleName());
+//                    }
+                    try {
+                        List<CtMethod<?>> depJarCtMethods = astComparator.getCtType(depJarContent).getMethodsByName(SootUtil.mthdSig2methodName(method));
+
+                        List<CtMethod<?>> usedDepJarCtMethods = astComparator.getCtType(usedDepJarContent).getMethodsByName(SootUtil.mthdSig2methodName(method));
+
+                        CtMethod ctMethodFromDepJar = getCtMethod(depJarCtMethods, SootUtil.mthdSig2param(method));
+
+                        CtMethod ctMethodFromUsedDepJar = getCtMethod(usedDepJarCtMethods, SootUtil.mthdSig2param(method));
+
+                        if (ctMethodFromDepJar == null || ctMethodFromUsedDepJar == null) {
+                            continue;
+                        }
+                        Diff diff = astComparator.compare(ctMethodFromDepJar, ctMethodFromUsedDepJar);
+
+                        int differentSize = diff.getRootOperations().size();
+
+                        semantemeMethodForDifferences.put(method, differentSize);
+
+                        System.out.println(diff.toString());
+                        System.out.println(diff.getRootOperations().size());
 
 
-                    System.out.println(printerDepJar.toString());
-
-                    System.out.println(printerUsedDepJar.toString());
+                    } catch (Exception e) {
+                        MavenUtil.i().getLog().error(e.toString() + " method : " + method);
+                    }
                 }
             }
 
@@ -386,8 +421,78 @@ public class DepJarJRisk {
             e.printStackTrace();
         }
 
+        return sortMap(semantemeMethodForDifferences, 100);
+    }
 
+
+    private CtMethod<?> getCtMethod(List<CtMethod<?>> ctMethods, String sootMethodParams) {
+
+        if (sootMethodParams.length() == 0) {
+            for (CtMethod<?> ctMethod : ctMethods) {
+                if (ctMethod.getParameters().size() == 0) {
+//                    System.out.println("没有参数");
+//                    System.out.println(ctMethod.getSimpleName());
+                    return ctMethod;
+                }
+            }
+        } else if (!sootMethodParams.contains(",")) {
+            for (CtMethod<?> ctMethod : ctMethods) {
+                if (ctMethod.getParameters().size() == 1 && (ctMethod.getParameters().get(0)).getType().getQualifiedName().equals(sootMethodParams)) {
+//                    System.out.println("一个参数");
+//                    System.out.println(ctMethod.getSimpleName());
+                    return ctMethod;
+                }
+            }
+        } else {
+//            System.out.println("多个参数");
+            String[] params = sootMethodParams.split(",");
+            for (CtMethod<?> ctMethod : ctMethods) {
+                int flag = 0;
+                if (ctMethod.getParameters().size() == params.length) {
+                    for (int i = 0; i < params.length; i++) {
+                        if (ctMethod.getParameters().get(i).getType().getQualifiedName().equals(params[i])) {
+                            flag++;
+                        } else {
+                            break;
+                        }
+                    }
+                    if (flag == params.length) {
+                        return ctMethod;
+                    }
+                }
+            }
+        }
         return null;
+    }
+
+    /**
+     * 对Map排序后，输出前N个Intger最大的method 降序
+     *
+     * @param entrySize 大小限制，输出多少个排序后数组
+     * @return
+     */
+    public Set<String> sortMap(Map<String, Integer> semantemeMethodForDifferences, int entrySize) {
+        if (semantemeMethodForDifferences.size() == 0) {
+            return null;
+        }
+        Set<String> afterSortMethods = new HashSet<String>();
+        List<Map.Entry<String, Integer>> entries = new ArrayList<Map.Entry<String, Integer>>(
+                semantemeMethodForDifferences.entrySet());
+        Collections.sort(entries, new Comparator<Map.Entry<String, Integer>>() {
+            public int compare(Map.Entry<String, Integer> obj1, Map.Entry<String, Integer> obj2) {
+                return obj2.getValue() - obj1.getValue();
+            }
+        });
+        int size = 0;
+        if (semantemeMethodForDifferences.size() > entrySize) {
+            size = entrySize;
+        } else {
+            size = semantemeMethodForDifferences.size();
+        }
+        for (int i = 0; i < size; i++) {
+            afterSortMethods.add(entries.get(i).getKey());
+        }
+        return afterSortMethods;
     }
 
     @Override
