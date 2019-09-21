@@ -85,7 +85,7 @@ public class JRiskDistanceCgTf extends JRiskCgTf {
 					mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
 				}
 			}
-			System.out.println(mthdRlts.size());
+//			System.out.println(mthdRlts.size());
 			graph = new Graph4distance(name2node, mthdRlts);
 			MavenUtil.i().getLog().info("end form graph.");
 		}
