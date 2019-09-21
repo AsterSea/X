@@ -92,31 +92,31 @@ public class SemanticsConflictWriter {
         for (Conflict conflict : Conflicts.i().getConflicts()) {
 //            System.out.println(conflict);
             riskMethodPair(conflict);
-//            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
-//            for (String method : methodToHost.keySet()) {
-////                initObjectPool(SootUtil.mthdSig2cls(method));
-//                String testDir = createMethodDir(method);
-//                String CP = getDependencyCP(null);
-//                String ConflictCP = getDependencyCP(conflict);
-//                String testClassName = "";
-//                HashSet<String> riskMethodHosts = methodToHost.get(method);
-//                for (String riskMethodHost : riskMethodHosts) {
-//                    String riskMethodClassHost = SootUtil.mthdSig2cls(riskMethodHost);
-//                    printer.println(conflict.toString());
-//                    printer.println(riskMethodClassHost + "===>" + method);
-//                    testClassName = riskMethodClassHost + "_ESTest";
-//                    startEvolution(CP, testDir, riskMethodClassHost, method);
-//                    compileJunit(testDir, testClassName, CP);
-//                    ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
-//                    printer.println(handleResult(results));
-//                }
-//                testClassName = SootUtil.mthdSig2cls(method);
-//                printer.println("target class ===> conflict class " + testClassName);
-//                startEvolution(CP, testDir, testClassName, method);
-//                compileJunit(testDir, testClassName + "_ESTest", CP);
-//                ArrayList<String> results = executeJunit(testDir, testClassName + "_ESTest", ConflictCP);
-//                printer.println(handleResult(results));
-//            }
+            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
+            for (String method : methodToHost.keySet()) {
+//                initObjectPool(SootUtil.mthdSig2cls(method));
+                String testDir = createMethodDir(method);
+                String CP = getDependencyCP(null);
+                String ConflictCP = getDependencyCP(conflict);
+                String testClassName = "";
+                HashSet<String> riskMethodHosts = methodToHost.get(method);
+                for (String riskMethodHost : riskMethodHosts) {
+                    String riskMethodClassHost = SootUtil.mthdSig2cls(riskMethodHost);
+                    printer.println(conflict.toString());
+                    printer.println(riskMethodClassHost + "===>" + method);
+                    testClassName = riskMethodClassHost + "_ESTest";
+                    startEvolution(CP, testDir, riskMethodClassHost, method);
+                    compileJunit(testDir, testClassName, CP);
+                    ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
+                    printer.println(handleResult(results));
+                }
+                testClassName = SootUtil.mthdSig2cls(method);
+                printer.println("target class ===> conflict class " + testClassName);
+                startEvolution(CP, testDir, testClassName, method);
+                compileJunit(testDir, testClassName + "_ESTest", CP);
+                ArrayList<String> results = executeJunit(testDir, testClassName + "_ESTest", ConflictCP);
+                printer.println(handleResult(results));
+            }
         }
     }
 
@@ -283,27 +283,27 @@ public class SemanticsConflictWriter {
             Graph4distance pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
             Set<String> hostNodes = pathGraph.getHostNodes();
 //            System.out.println(hostNodes);
-            for (String node : hostNodes) {
-                String params = SootUtil.mthdSig2param(node);
-                System.out.println(node);
-                System.out.println(params);
-                if (params.length() == 0) {
-                    System.out.println("没有参数");
-                } else if (!params.contains(",")) {
-                    System.out.println("一个参数");
-                    System.out.println(params);
-                } else {
-                    System.out.println("多个参数");
-                    for (String param : params.split(",")) {
-                        System.out.println(param);
-                    }
-                }
+//            for (String node : hostNodes) {
+//                String params = SootUtil.mthdSig2param(node);
+//                System.out.println(node);
+//                System.out.println(params);
+//                if (params.length() == 0) {
+//                    System.out.println("没有参数");
+//                } else if (!params.contains(",")) {
+//                    System.out.println("一个参数");
+//                    System.out.println(params);
+//                } else {
+//                    System.out.println("多个参数");
+//                    for (String param : params.split(",")) {
+//                        System.out.println(param);
+//                    }
+//                }
 //                if(params.length>0){
 //                    for (String param : params){
 //                        System.out.println(param);
 //                    }
 //                }
-            }
+//            }
             pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH, Strategy.NOT_RESET_BOOK);
 //			MethodProbDistances methodProbabilityDistances = getMethodProDistances(pathBooks);
 //			setNodeProbDistance(methodProbabilityDistances);

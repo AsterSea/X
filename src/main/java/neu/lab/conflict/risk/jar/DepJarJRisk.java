@@ -269,7 +269,7 @@ public class DepJarJRisk {
 
         Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
         Set<String> riskMethods = new HashSet<String>();
-        System.out.println(usedDepJar.toString() + "  used");
+//        System.out.println(usedDepJar.toString() + "  used");
         if (semantemeRiskMethods.size() > 0) {
 
             decompile();
@@ -331,8 +331,8 @@ public class DepJarJRisk {
         depJarDecompressionPath = JARDecompressionTool.decompressionPath + depJar.getDepJarName() + Config.FILE_SEPARATOR;
         usedDepJarDecompressionPath = JARDecompressionTool.decompressionPath + usedDepJar.getDepJarName() + Config.FILE_SEPARATOR;
 
-        System.out.println(depJarDecompressionPath);
-        System.out.println(usedDepJarDecompressionPath);
+//        System.out.println(depJarDecompressionPath);
+//        System.out.println(usedDepJarDecompressionPath);
 
         JARDecompressionTool.decompress(depJar.getJarFilePaths(true).get(0), depJarDecompressionPath);
 
@@ -406,8 +406,8 @@ public class DepJarJRisk {
 
                         semantemeMethodForDifferences.put(method, differentSize);
 
-                        System.out.println(diff.toString());
-                        System.out.println(diff.getRootOperations().size());
+//                        System.out.println(diff.toString());
+//                        System.out.println(diff.getRootOperations().size());
 
 
                     } catch (Exception e) {
