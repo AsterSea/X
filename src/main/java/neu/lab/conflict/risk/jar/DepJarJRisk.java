@@ -269,29 +269,12 @@ public class DepJarJRisk {
 
         Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
         Set<String> riskMethods = new HashSet<String>();
-//        System.out.println(usedDepJar.toString() + "  used");
+
         if (semantemeRiskMethods.size() > 0) {
 
             decompile();
 
             riskMethods = calculationDifference(semantemeRiskMethods);
-
-//            GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
-//                    new JRiskMethodOutPathCgTf(semantemeRiskMethods));
-//
-//            GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
-//                    .getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
-//
-//            SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
-//                    usedDepJarGraphForMethodOutPath.getSemantemeMethods());
-//
-//            semantemeMethods.CalculationDifference(); // 计算差异
-//
-//            semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
-
-//            riskMethods = semantemeMethods.sortMap(100);
-//            depJarGraphForMethodOutPath = null;
-//            usedDepJarGraphForMethodOutPath = null;
 
             if (riskMethods.size() > 0) {
                 IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskDistanceCgTf(this, riskMethods));
@@ -307,32 +290,14 @@ public class DepJarJRisk {
             return new Graph4distance(new HashMap<String, Node4distance>(), new ArrayList<MethodCall>());
         }
     }
-//	private Map<String, IBook> getBooks4distance() {
-//		if (this.books == null) {
-//			if (getThrownMthds().size() > 0) {
-//				// calculate distance
-//
-//				books = new Dog(getGraph4distance()).findRlt(getGraph4distance().getHostNds(), Conf.DOG_DEP_FOR_DIS,
-//						Dog.Strategy.NOT_RESET_BOOK);
-//
-////				GraphPrinter.printGraph(graph4branch, "d:\\graph_distance.txt",getGraph4branch().getHostNds());
-//			} else {
-//				books = new HashMap<String, IBook>();
-//			}
-//		}
-//		return books;
-//	}
 
     /**
-     *
+     * 解压冲突jar包
      */
     public void decompile() {
 
         depJarDecompressionPath = JARDecompressionTool.decompressionPath + depJar.getDepJarName() + Config.FILE_SEPARATOR;
         usedDepJarDecompressionPath = JARDecompressionTool.decompressionPath + usedDepJar.getDepJarName() + Config.FILE_SEPARATOR;
-
-//        System.out.println(depJarDecompressionPath);
-//        System.out.println(usedDepJarDecompressionPath);
 
         JARDecompressionTool.decompress(depJar.getJarFilePaths(true).get(0), depJarDecompressionPath);
 
@@ -340,7 +305,10 @@ public class DepJarJRisk {
     }
 
     /**
+     * 计算共有方法对的ast tree的差异集合
+     *
      * @param semantemeRiskMethods 两个jar包共有的方法集合，即有可能存在语义冲突的方法集合
+     * @return 返回有差异的方法对，默认返回排序后的前100个
      */
     private Set<String> calculationDifference(Set<String> semantemeRiskMethods) {
 
@@ -376,18 +344,9 @@ public class DepJarJRisk {
 
                 for (String method : methodsFromClass.get(methodClassSig)) {
 
-//                    System.out.println("method   " + method);
-//                    System.out.println("method name   " + SootUtil.mthdSig2methodName(method));
-//                    System.out.println("params   " + SootUtil.mthdSig2param(method));
-
                     String depJarContent = printerDepJar.toString();
-//                    System.out.println(depJarContent);
                     String usedDepJarContent = printerUsedDepJar.toString();
 
-//                    Set<CtMethod<?>> allmethod = astComparator.getCtType(depJarContent).getAllMethods();
-//                    for (CtMethod ctMethod : allmethod) {
-//                        System.out.println(ctMethod.getSimpleName());
-//                    }
                     try {
                         List<CtMethod<?>> depJarCtMethods = astComparator.getCtType(depJarContent).getMethodsByName(SootUtil.mthdSig2methodName(method));
 
@@ -406,10 +365,6 @@ public class DepJarJRisk {
 
                         semantemeMethodForDifferences.put(method, differentSize);
 
-//                        System.out.println(diff.toString());
-//                        System.out.println(diff.getRootOperations().size());
-
-
                     } catch (Exception e) {
                         MavenUtil.i().getLog().error(e.toString() + " method : " + method);
                     }
@@ -424,27 +379,28 @@ public class DepJarJRisk {
         return sortMap(semantemeMethodForDifferences, 100);
     }
 
-
+    /**
+     * 通过输入的参数列表找到特定的方法
+     *
+     * @param ctMethods
+     * @param sootMethodParams
+     * @return
+     */
     private CtMethod<?> getCtMethod(List<CtMethod<?>> ctMethods, String sootMethodParams) {
 
         if (sootMethodParams.length() == 0) {
             for (CtMethod<?> ctMethod : ctMethods) {
                 if (ctMethod.getParameters().size() == 0) {
-//                    System.out.println("没有参数");
-//                    System.out.println(ctMethod.getSimpleName());
                     return ctMethod;
                 }
             }
         } else if (!sootMethodParams.contains(",")) {
             for (CtMethod<?> ctMethod : ctMethods) {
                 if (ctMethod.getParameters().size() == 1 && (ctMethod.getParameters().get(0)).getType().getQualifiedName().equals(sootMethodParams)) {
-//                    System.out.println("一个参数");
-//                    System.out.println(ctMethod.getSimpleName());
                     return ctMethod;
                 }
             }
         } else {
-//            System.out.println("多个参数");
             String[] params = sootMethodParams.split(",");
             for (CtMethod<?> ctMethod : ctMethods) {
                 int flag = 0;
@@ -471,7 +427,7 @@ public class DepJarJRisk {
      * @param entrySize 大小限制，输出多少个排序后数组
      * @return
      */
-    public Set<String> sortMap(Map<String, Integer> semantemeMethodForDifferences, int entrySize) {
+    private Set<String> sortMap(Map<String, Integer> semantemeMethodForDifferences, int entrySize) {
         if (semantemeMethodForDifferences.size() == 0) {
             return null;
         }
