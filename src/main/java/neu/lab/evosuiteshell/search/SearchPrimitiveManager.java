@@ -70,7 +70,7 @@ public class SearchPrimitiveManager {
     }
 
     public static void main(String[] args) {
-        SearchPrimitiveManager.getInstance().search("C:\\Users\\Flipped\\eclipse-workspace\\Host\\src");
+        SearchPrimitiveManager.getInstance().search("/Users/wangchao/eclipse-workspace/Host/src");
         System.out.println(SearchConstantPool.getInstance().getPoolValues("Host1"));
     }
 }

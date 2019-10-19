@@ -278,7 +278,7 @@ public class ClassInfo {
     /**
      * return constructor that has minimum parameter.
      *
-     * @param cons
+     * @param conses
      * @return
      */
     private MethodInfo getMinParamCons(List<MethodInfo> conses) {
