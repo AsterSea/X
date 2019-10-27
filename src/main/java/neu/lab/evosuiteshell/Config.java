@@ -17,6 +17,9 @@ public class Config {
         }
     }
 
+    //项目junit测试用例目录
+    public static String PROJECT_TESTCASE_DIR = System.getProperty("user.dir") + "/src/test/java/";
+
     /**
      * get mvn.bat or mvn.cmd path
      *

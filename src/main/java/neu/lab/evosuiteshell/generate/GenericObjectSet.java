@@ -3,6 +3,7 @@ package neu.lab.evosuiteshell.generate;
 import fj.Hash;
 import neu.lab.conflict.vo.ClassVO;
 import neu.lab.evosuiteshell.search.*;
+import org.evosuite.Properties;
 import org.evosuite.classpath.ClassPathHandler;
 import org.evosuite.coverage.method.designation.EvosuiteNeedObject;
 import org.evosuite.instrumentation.InstrumentingClassLoader;
@@ -51,23 +52,24 @@ public class GenericObjectSet {
     }
 
     public void generateGenericObject(String classSig) {
-        TestCaseBuilder testCaseBuilder = new TestCaseBuilder();
-        ClassInfo classInfo = ProjectInfo.i().getClassInfo(classSig);
-        if (classInfo == null) {
-            return;
-        }
-//        System.out.println(classSig + "asdf");
-        List<MethodInfo> methodInfoList = classInfo.getAllConstructor(false);
-//        System.out.println(methodInfo.getSig());
-//        List<String> paramTypes = methodInfo.getParamTypes();
-        List<NeededObj> neededParams = new ArrayList<NeededObj>();
-        for (MethodInfo methodInfo : methodInfoList) {
-            for (String paramType : methodInfo.getParamTypes()) {
-                neededParams.add(new NeededObj(paramType, 0));
-            }
-            EvosuiteNeedObject evosuiteNeedParamObject = structureParamTypes(classInfo, neededParams);
-//            System.out.println(evosuiteNeedParamObject.toString());
-        }
+        System.out.println(classSig);
+//        TestCaseBuilder testCaseBuilder = new TestCaseBuilder();
+//        ClassInfo classInfo = ProjectInfo.i().getClassInfo(classSig);
+//        if (classInfo == null) {
+//            return;
+//        }
+////        System.out.println(classSig + "asdf");
+//        List<MethodInfo> methodInfoList = classInfo.getAllConstructor(false);
+////        System.out.println(methodInfo.getSig());
+////        List<String> paramTypes = methodInfo.getParamTypes();
+//        List<NeededObj> neededParams = new ArrayList<NeededObj>();
+//        for (MethodInfo methodInfo : methodInfoList) {
+//            for (String paramType : methodInfo.getParamTypes()) {
+//                neededParams.add(new NeededObj(paramType, 0));
+//            }
+//            EvosuiteNeedObject evosuiteNeedParamObject = structureParamTypes(classInfo, neededParams);
+////            System.out.println(evosuiteNeedParamObject.toString());
+//        }
 //        VariableReference variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams);
 //        ObjectPool objectPool = new ObjectPool();
 
@@ -172,11 +174,24 @@ public class GenericObjectSet {
     }
 
     public static void main(String[] args) throws ClassNotFoundException {
-        String cp = System.getProperty("user.dir") + "/target/classes";
-        ClassPathHandler.getInstance().addElementToTargetProjectClassPath(cp);
+//        String cp = System.getProperty("user.dir") + "/target/classes";
+//        String cp = "/Users/wangchao/eclipse-workspace/Host/target/classes/";
+//        ClassPathHandler.getInstance().addElementToTargetProjectClassPath(cp);
+//        ClassPathHandler.getInstance().addElementToTargetProjectClassPath(System.getProperty("user.dir") + "/target/test-classes");
+        Properties.TARGET_CLASS = "neu.lab.Host.Host";
+        Properties.CP = "/Users/wangchao/eclipse-workspace/Host/target/classes/:/Users/wangchao/.m2/repository/neu/lab/A/1.0/A-1.0.jar:/Users/wangchao/.m2/repository/neu/lab/B/2.0/B-2.0.jar:/Users/wangchao/eclipse-workspace/Host/target/test-classes/";
+        Properties.SELECTED_JUNIT = "neu.lab.Host.HostTest";
         InstrumentingClassLoader instrumentingClassLoader = new InstrumentingClassLoader();
-//        Class<?> clazz=instrumentingClassLoader.loadClassFromFile("neu.lab.Host.Host","/Users/wangchao/eclipse-workspace/Host/target/classes/neu/lab/Host/Host.class");
-        Class<?> clazz = instrumentingClassLoader.loadClass(neu.lab.evosuiteshell.Config.class.getCanonicalName());
-        System.out.println(clazz);
+        final org.evosuite.testcarver.extraction.CarvingClassLoader classLoader = new org.evosuite.testcarver.extraction.CarvingClassLoader();
+        Class<?> Host = classLoader.loadClass("neu.lab.Host.Host");
+        Class<?> Hosttest = classLoader.loadClass("neu.lab.Host.HostTest");
+
+        ObjectPool.getPoolFromJUnit(new GenericClass(Host), Hosttest);
+        //        Class<?> clazz = instrumentingClassLoader.loadClass(neu.lab.evosuiteshell.Config.class.getCanonicalName());
+//        System.out.println(clazz);
+//        final org.evosuite.testcarver.extraction.CarvingClassLoader classLoader = new org.evosuite.testcarver.extraction.CarvingClassLoader();
+//        Class host = neu.lab.evosuiteshell.junit.ExecuteJunit.class;//classLoader.loadClass("neu.lab.evosuiteshell.junit.ExecuteJunit");
+//        Class hostTest = neu.lab.evosuiteshell.junit.ExecuteJunit;
+//            ObjectPool.getPoolFromJUnit(new GenericClass(host),hostTest);
     }
 }

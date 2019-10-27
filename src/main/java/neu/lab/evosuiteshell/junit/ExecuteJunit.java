@@ -39,7 +39,7 @@ public class ExecuteJunit {
         return "sh " + fileName;
     }
 
-    public static void main(String[] args) throws IOException {
+//    public static void main(String[] args) throws IOException {
 //		String cmd = "cd C:\\Users\\Flipped\\eclipse-workspace\\Host\\sensor_testcase\\test_method\\getSize\\neu\\lab\\Host\njavac -classpath C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\classes;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\junit-4.12.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\A-1.0.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-runtime-1.0.6.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-tests;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\hamcrest-core-1.3.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\B-1.0.jar Host_ESTest.java";
 //		String url = "C:\\Users\\Flipped\\eclipse-workspace\\Host\\sensor_testcase\\test_method\\getSize\\neu\\lab\\Host\\";
 //		ArrayList<String> result = ExecuteCommand.exeCmdAndGetResult(creatBat(cmd, url));
@@ -57,5 +57,5 @@ public class ExecuteJunit {
 //				"C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\classes;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\junit-4.12.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\A-1.0.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-runtime-1.0.6.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-tests;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\hamcrest-core-1.3.jar;C:\\Users\\Flipped\\eclipse-workspace\\Host\\target\\dependency\\B-1.0.jar",
 //				" ServicesConfig_ESTest.java");
 //		System.out.println(result);
-    }
+//    }
 }

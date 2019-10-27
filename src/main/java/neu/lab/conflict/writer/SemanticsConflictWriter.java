@@ -13,12 +13,14 @@ import java.util.Set;
 
 import neu.lab.conflict.container.DepJars;
 import neu.lab.evosuiteshell.generate.GenericObjectSet;
+import neu.lab.evosuiteshell.generate.GenericPoolFromTestCase;
 import neu.lab.evosuiteshell.search.*;
 import org.evosuite.Properties;
 import org.evosuite.TestSuiteGenerator;
 import org.evosuite.Properties.Criterion;
 import org.evosuite.coverage.method.designation.GlobalVar;
 import org.evosuite.coverage.method.designation.NodeProbDistance;
+import org.evosuite.instrumentation.InstrumentingClassLoader;
 import org.evosuite.seeding.ConstantPoolManager;
 import com.google.common.io.Files;
 
@@ -42,6 +44,8 @@ import neu.lab.evosuiteshell.Config;
 import neu.lab.evosuiteshell.ExecuteCommand;
 import neu.lab.evosuiteshell.ReadXML;
 import neu.lab.evosuiteshell.junit.ExecuteJunit;
+import org.evosuite.seeding.ObjectPool;
+import org.evosuite.utils.generic.GenericClass;
 
 public class SemanticsConflictWriter {
     private Map<String, IBook> pathBooks;
@@ -62,9 +66,9 @@ public class SemanticsConflictWriter {
     /**
      * 得到依赖jar包的路径
      */
-    public String getDependencyCP(Conflict conflict) {
+    private String getDependencyCP(Conflict conflict) {
         copyDependency();
-        StringBuffer CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR
+        StringBuffer CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "test-classes" + Config.CLASSPATH_SEPARATOR
                 + System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.EVOSUITE_NAME);
         String dependencyConflictJarDir = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR
                 + "dependencyConflictJar" + Config.FILE_SEPARATOR;
@@ -88,7 +92,7 @@ public class SemanticsConflictWriter {
         return CP.toString();
     }
 
-    public void runEvosuite(PrintWriter printer) {
+    private void runEvosuite(PrintWriter printer) {
         for (Conflict conflict : Conflicts.i().getConflicts()) {
 //            System.out.println(conflict);
             riskMethodPair(conflict);
@@ -121,6 +125,22 @@ public class SemanticsConflictWriter {
     }
 
     public void initObjectPool(String className) {
+        /*
+        测试 getPoolFromJUnit
+         */
+//        final org.evosuite.testcarver.extraction.CarvingClassLoader classLoader = new org.evosuite.testcarver.extraction.CarvingClassLoader();
+//        InstrumentingClassLoader instrumentingClassLoader = new InstrumentingClassLoader();
+//        try {
+//            System.out.println(1111);
+//            Class<?> Host = instrumentingClassLoader.loadClass(className);
+////            Class<?> Host = instrumentingClassLoader.loadClassFromFile("neu.lab.Host.Host", "/Users/wangchao/eclipse-workspace/Host/target/classes/neu/lab/Host/Host.class");
+//            Class<?> Hosttest = instrumentingClassLoader.loadClassFromFile("neu.lab.Host.HostTest", "/Users/wangchao/eclipse-workspace/Host/target/test-classes/neu/lab/Host/HostTest.class");
+//            ObjectPool.getPoolFromJUnit(new GenericClass(Host), Hosttest);
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//Properties.WRITE_POOL="aaa.txt";
+
         String hostJarPath = DepJars.i().getHostDepJar().getJarFilePaths(true).toArray(new String[]{})[0];
         if (!(hostJarPath.endsWith(".jar"))) {
             for (File file : new File(hostJarPath).getParentFile().listFiles()) {
@@ -137,7 +157,7 @@ public class SemanticsConflictWriter {
         GenericObjectSet.getInstance().generateGenericObject(className);
     }
 
-    public void seedingConstant(String targetClass) {
+    private void seedingConstant(String targetClass) {
         SearchPrimitiveManager.getInstance();
         int num = targetClass.lastIndexOf(".");
         String name = targetClass.substring(num + 1, targetClass.length());
@@ -151,11 +171,14 @@ public class SemanticsConflictWriter {
         }
     }
 
-    public void startEvolution(String CP, String testDir, String targetClass, String riskMethod) {
+    private void startEvolution(String CP, String testDir, String targetClass, String riskMethod) {
+        Properties.CP = CP;
         TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
         setNodeProbDistance(pathBooks, riskMethod);
 //        Properties.SEED_TYPES = false;
         seedingConstant(targetClass);// String 参数种植
+//        System.out.println(targetClass);
+        GenericPoolFromTestCase.receiveTargetClass(targetClass);
 //		Properties.MINIMIZE = false;
         Properties.P_OBJECT_POOL = 1;
         Properties.RISK_METHOD = riskMethod;
@@ -166,23 +189,23 @@ public class SemanticsConflictWriter {
         Properties.JUNIT_CHECK = false;
 //        CP = CP.replace(";", ":");// + ":" + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "evosuite-shaded-1.0.6.jar";
 //        CP = CP.replaceAll("/Users/wangchao/eclipse-workspace/Host/", "");
-        Properties.CP = CP;
+
 //        CP.replaceAll(";",":");
 //        System.out.println(CP);
         Properties.TARGET_CLASS = targetClass;
-        initObjectPool(targetClass);
+//        initObjectPool(targetClass);
 //		Properties.TARGET_CLASS = SootUtil.mthdSig2cls(targetClass);
 //		Properties.TARGET_METHOD = "onStart";
         testSuiteGenerator.generateTestSuite();
     }
 
-    public void setNodeProbDistance(Map<String, IBook> pathGraph, String riskMethod) {
+    private void setNodeProbDistance(Map<String, IBook> pathGraph, String riskMethod) {
         MethodProbDistances methodProbabilityDistances = getMethodProDistances(pathGraph);
         NodeProbDistance nodeProbDistance = methodProbabilityDistances.getEvosuiteProbability(riskMethod);
         GlobalVar.i().setNodeProbDistance(nodeProbDistance);
     }
 
-    public MethodProbDistances getMethodProDistances(Map<String, IBook> books) {
+    private MethodProbDistances getMethodProDistances(Map<String, IBook> books) {
         MethodProbDistances distances = new MethodProbDistances();
         for (IBook book : books.values()) {
             // MavenUtil.i().getLog().info("book:"+book.getNodeName());
@@ -197,7 +220,7 @@ public class SemanticsConflictWriter {
         return distances;
     }
 
-    public String handleResult(ArrayList<String> results) {
+    private String handleResult(ArrayList<String> results) {
         double run = 0;
         double failures = 0;
         String handle = "";
@@ -221,7 +244,7 @@ public class SemanticsConflictWriter {
         return handle;
     }
 
-    public void compileJunit(String testDir, String testClassName, String CP) {
+    private void compileJunit(String testDir, String testClassName, String CP) {
         if (!CP.contains("junit")) {
             CP += addJunitDependency();
         }
@@ -237,7 +260,7 @@ public class SemanticsConflictWriter {
         ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatShellScript(cmd.toString(), fileDir));
     }
 
-    public ArrayList<String> executeJunit(String testDir, String testClassName, String CP) {
+    private ArrayList<String> executeJunit(String testDir, String testClassName, String CP) {
         if (!CP.contains("junit")) {
             CP += addJunitDependency();
         }
@@ -254,7 +277,7 @@ public class SemanticsConflictWriter {
         return ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatShellScript(cmd.toString(), fileDir));
     }
 
-    public String addJunitDependency() {
+    private String addJunitDependency() {
         StringBuffer stringBuffer = new StringBuffer("");
         for (String jarPath : junitJarsPath) {
             stringBuffer.append(Config.CLASSPATH_SEPARATOR);
@@ -278,7 +301,7 @@ public class SemanticsConflictWriter {
     /**
      * get Risk method pair to methodToHost
      */
-    public void riskMethodPair(Conflict conflict) {
+    private void riskMethodPair(Conflict conflict) {
         for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
             Graph4distance pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
             Set<String> hostNodes = pathGraph.getHostNodes();
@@ -304,6 +327,9 @@ public class SemanticsConflictWriter {
 //                    }
 //                }
 //            }
+            /**
+             * 可以在这里修改寻找深度，改成10层
+             */
             pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH, Strategy.NOT_RESET_BOOK);
 //			MethodProbDistances methodProbabilityDistances = getMethodProDistances(pathBooks);
 //			setNodeProbDistance(methodProbabilityDistances);
@@ -331,7 +357,7 @@ public class SemanticsConflictWriter {
     /**
      * 创建测试方法目录
      */
-    public String createMethodDir(String riskMethod) {
+    private String createMethodDir(String riskMethod) {
         String workPath = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "test_method" + Config.FILE_SEPARATOR;
         riskMethod = SootUtil.mthdSig2methodName(riskMethod);
         workPath = workPath + riskMethod + Config.FILE_SEPARATOR;
@@ -347,7 +373,7 @@ public class SemanticsConflictWriter {
     /**
      * 复制项目自身的依赖到指定文件夹中
      */
-    public void copyDependency() {
+    private void copyDependency() {
         String workPath = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR;
         String dependencyJarDir = workPath + "dependencyJar" + Config.FILE_SEPARATOR;
         String targetPom = MavenUtil.i().getProjectPom();
@@ -378,7 +404,7 @@ public class SemanticsConflictWriter {
     /**
      * 依赖中没有junit包，则手动导入Junit4-12的包依赖
      */
-    public void copyJunitFormMaven() {
+    private void copyJunitFormMaven() {
         String workPath = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "junit" + Config.FILE_SEPARATOR;
         if (!(new File(workPath)).exists()) {
             new File(workPath).mkdirs();
@@ -396,7 +422,7 @@ public class SemanticsConflictWriter {
     /**
      * 复制项目中自身冲突的依赖到指定文件夹中 升级更新：不复制到指定文件夹，直接定位到仓库位置
      */
-    public void copyConflictDependency() {
+    private void copyConflictDependency() {
         String dependencyConflictJarDir = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR
                 + "dependencyConflictJar" + Config.FILE_SEPARATOR;
         if (!(new File(dependencyConflictJarDir)).exists()) {
@@ -426,7 +452,7 @@ public class SemanticsConflictWriter {
         dependencyConflictJarsPath = new File(dependencyConflictJarDir).list();
     }
 
-    public void copyConflictFromMaven(DependencyInfo dependencyInfo, String dir) {
+    private void copyConflictFromMaven(DependencyInfo dependencyInfo, String dir) {
         String xmlFileName = ReadXML.copyPom(ReadXML.COPY_CONFLICT);
         ReadXML.setCopyDependency(dependencyInfo, xmlFileName);
         ReadXML.executeMavenCopy(xmlFileName, dir);
