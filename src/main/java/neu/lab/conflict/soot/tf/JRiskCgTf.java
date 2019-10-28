@@ -88,7 +88,7 @@ public abstract class JRiskCgTf extends SceneTransformer {
 		// this.depJarJRisk = depJarJRisk;
 		for (DepJar depJar : parentDepJars) {
 			parentDepJarClasses.addAll(depJar.getAllCls(true));
-			System.out.println("has add depJar all classes" + depJar.toString());
+//			System.out.println("has add depJar all classes" + depJar.toString());
 		}
 		riskMthds = thrownMethods;
 	}

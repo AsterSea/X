@@ -176,7 +176,7 @@ public class ClassInfo {
 
             if (this.isConcrete && !consesOfStatic.isEmpty()) {
                 //this class is concrete and has constructor of this type.
-                System.out.println(sig + " has static constructor.");
+//                System.out.println(sig + " has static constructor.");
                 return consesOfStatic;
             }
             for (ClassInfo child : children) {
@@ -184,7 +184,7 @@ public class ClassInfo {
             }
             if (!consesOfStatic.isEmpty()) {
                 //has constructor of this subType.
-                System.out.println(sig + " has static constructor of subType.");
+//                System.out.println(sig + " has static constructor of subType.");
                 return consesOfStatic;
             }
 
@@ -194,7 +194,7 @@ public class ClassInfo {
             List<MethodInfo> consesOfnew = getConsesOfnew();
             if (!consesOfnew.isEmpty()) {
                 //has constructor of this type.
-                System.out.println(sig + " has new constructor.");
+//                System.out.println(sig + " has new constructor.");
                 return consesOfnew;
 
             }
@@ -208,7 +208,7 @@ public class ClassInfo {
         }
         if (!consesOfnew.isEmpty()) {
             //has new constructor of subType.
-            System.out.println(sig + " has new constructor of subType.");
+//            System.out.println(sig + " has new constructor of subType.");
             return consesOfnew;
 
         }

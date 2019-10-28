@@ -69,8 +69,8 @@ public class SearchPrimitiveManager {
         return result;
     }
 
-    public static void main(String[] args) {
-        SearchPrimitiveManager.getInstance().search("/Users/wangchao/eclipse-workspace/Host/src");
-        System.out.println(SearchConstantPool.getInstance().getPoolValues("Host1"));
-    }
+//    public static void main(String[] args) {
+//        SearchPrimitiveManager.getInstance().search("/Users/wangchao/eclipse-workspace/Host/src");
+//        System.out.println(SearchConstantPool.getInstance().getPoolValues("Host1"));
+//    }
 }

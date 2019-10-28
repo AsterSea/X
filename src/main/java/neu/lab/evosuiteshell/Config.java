@@ -5,15 +5,16 @@ import java.io.File;
 import neu.lab.conflict.util.MavenUtil;
 
 public class Config {
-    private static String MAVEN_PATH = "mvn";
+    private static String MAVEN_PATH = "";
     public static String SENSOR_DIR = "sensor_testcase";
     public static String EVOSUITE_NAME = "evosuite-runtime-1.0.6.jar";
     public static String FILE_SEPARATOR = File.separator;
     public static String CLASSPATH_SEPARATOR = ";";
 
     static {
-        if (System.getProperty("os.name").equals("Mac OS X")) {
+        if (System.getProperty("os.name").contains("Mac")) {
             CLASSPATH_SEPARATOR = ":";
+            MAVEN_PATH = "mvn";
         }
     }
 
@@ -27,10 +28,9 @@ public class Config {
      */
     public static String getMaven() {
         if (!MAVEN_PATH.equals("")) {
-            return MAVEN_PATH;
+            return MAVEN_PATH + " ";
         }
         String properties = System.getProperty("java.library.path");
-        System.out.println(properties);
         String mavenPath = "";
         String[] paths = properties.split(";");
         for (String path : paths) {
@@ -53,9 +53,9 @@ public class Config {
         MAVEN_PATH = mavenPath;
     }
 
-    public static void main(String[] args) {
-        System.out.println(System.getProperty("os.name"));
-        System.out.println(getMaven());
-        System.out.println(CLASSPATH_SEPARATOR);
-    }
+//    public static void main(String[] args) {
+//        System.out.println(System.getProperty("os.name"));
+//        System.out.println(getMaven());
+//        System.out.println(CLASSPATH_SEPARATOR);
+//    }
 }

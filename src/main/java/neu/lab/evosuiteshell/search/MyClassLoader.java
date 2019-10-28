@@ -58,9 +58,9 @@ public class MyClassLoader {
         return c;
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
-//        MyClassLoader.classLoader(new File("/Users/wangchao/Host-1.0.jar"), "neu.lab.Host.Host");
-        MyClassLoader.jarLoader(new File("/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar"));
-        System.out.println(MyClassLoader.loaderClass("neu.lab.Host.Host"));
-    }
+//    public static void main(String[] args) throws ClassNotFoundException {
+////        MyClassLoader.classLoader(new File("/Users/wangchao/Host-1.0.jar"), "neu.lab.Host.Host");
+//        MyClassLoader.jarLoader(new File("/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar"));
+//        System.out.println(MyClassLoader.loaderClass("neu.lab.Host.Host"));
+//    }
 }

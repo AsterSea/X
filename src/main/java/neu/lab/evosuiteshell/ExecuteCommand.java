@@ -57,25 +57,25 @@ public class ExecuteCommand {
 		return lines;
 	}
 
-	public static void main(String[] args) throws ExecuteException, IOException {
-//		exeCmd("sh /Users/wangchao/eclipse-workspace/Host/sensor_testcase/test_method/getSize/neu/lab/Host/execute.sh");
-        System.out.println(exeBatAndGetResult("sh /Users/wangchao/eclipse-workspace/Host/sensor_testcase/test_method/getSize/neu/lab/Host/execute.sh"));
-//		String commandStr = Config.getMaven() + " -version";
-//		ArrayList<String> results = ExecuteCommand.exeCmdAndGetResult(commandStr);
-//		for (String line : results) {
-//			if (line.contains("3.6.0"))
-//				System.out.println(line);
-//		}
-//		String sensor_dir = "C:\\Users\\Flipped\\eclipse-workspace\\Host\\" + Config.SENSOR_DIR + "\\";
-//		String targetFile = ReadXML.copyPom(sensor_dir);
-//		List<DependencyInfo> DependencyInfos = new ArrayList<DependencyInfo>();
-//		DependencyInfo dependencyInfo = new DependencyInfo();
-//		dependencyInfo.setArtifactId("B");
-//		dependencyInfo.setGroupId("neu.lab");
-//		dependencyInfo.setVersion("1.0");
-//		DependencyInfos.add(dependencyInfo);
-//		ReadXML.setCopyDependency(DependencyInfos, targetFile);
-//		String mvnCmd = Config.getMaven() + Command.MVN_POM + targetFile + Command.MVN_COPY + sensor_dir + "jar\\";
-//		exeCmd(mvnCmd);
-	}
+//	public static void main(String[] args) throws ExecuteException, IOException {
+////		exeCmd("sh /Users/wangchao/eclipse-workspace/Host/sensor_testcase/test_method/getSize/neu/lab/Host/execute.sh");
+//        System.out.println(exeBatAndGetResult("sh /Users/wangchao/eclipse-workspace/Host/sensor_testcase/test_method/getSize/neu/lab/Host/execute.sh"));
+////		String commandStr = Config.getMaven() + " -version";
+////		ArrayList<String> results = ExecuteCommand.exeCmdAndGetResult(commandStr);
+////		for (String line : results) {
+////			if (line.contains("3.6.0"))
+////				System.out.println(line);
+////		}
+////		String sensor_dir = "C:\\Users\\Flipped\\eclipse-workspace\\Host\\" + Config.SENSOR_DIR + "\\";
+////		String targetFile = ReadXML.copyPom(sensor_dir);
+////		List<DependencyInfo> DependencyInfos = new ArrayList<DependencyInfo>();
+////		DependencyInfo dependencyInfo = new DependencyInfo();
+////		dependencyInfo.setArtifactId("B");
+////		dependencyInfo.setGroupId("neu.lab");
+////		dependencyInfo.setVersion("1.0");
+////		DependencyInfos.add(dependencyInfo);
+////		ReadXML.setCopyDependency(DependencyInfos, targetFile);
+////		String mvnCmd = Config.getMaven() + Command.MVN_POM + targetFile + Command.MVN_COPY + sensor_dir + "jar\\";
+////		exeCmd(mvnCmd);
+//	}
 }

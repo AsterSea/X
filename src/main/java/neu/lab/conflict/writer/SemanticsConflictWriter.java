@@ -176,14 +176,14 @@ public class SemanticsConflictWriter {
         TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
         setNodeProbDistance(pathBooks, riskMethod);
 //        Properties.SEED_TYPES = false;
-        seedingConstant(targetClass);// String 参数种植
+//        seedingConstant(targetClass);// String 参数种植
 //        System.out.println(targetClass);
         GenericPoolFromTestCase.receiveTargetClass(targetClass);
-//		Properties.MINIMIZE = false;
-        Properties.P_OBJECT_POOL = 1;
+        Properties.MINIMIZE = false;
+        Properties.P_OBJECT_POOL = 0.5;
         Properties.RISK_METHOD = riskMethod;
-//		Properties.MIN_INITIAL_TESTS = 10;
-        Properties.CRITERION = new Criterion[]{Criterion.METHODDESIGNATION, Criterion.METHOD};
+        Properties.MIN_INITIAL_TESTS = 10;
+        Properties.CRITERION = new Criterion[]{Criterion.METHODDESIGNATION, Criterion.METHOD, Criterion.BRANCH};
         Properties.NUM_TESTS = 10;
         Properties.TEST_DIR = testDir;
         Properties.JUNIT_CHECK = false;

@@ -2,7 +2,6 @@ package neu.lab.evosuiteshell.generate;
 
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.evosuiteshell.Config;
-import org.apache.maven.Maven;
 import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
 import org.evosuite.instrumentation.InstrumentingClassLoader;
@@ -18,6 +17,12 @@ public class GenericPoolFromTestCase {
 
     private static InstrumentingClassLoader instrumentingClassLoader = TestGenerationContext.getInstance().getClassLoaderForSUT();
 
+    /**
+     * 通过完全限定名来定位相应的测试类位置，并从测试用例中获取相对应的对象池数据
+     *
+     * @param fullyQualifiedName 完全限定名
+     *                           neu.lab.evosuiteshell.generate.GenericPoolFromTestCase
+     */
     public static void receiveTargetClass(String fullyQualifiedName) {
         File dir = new File(Config.PROJECT_TESTCASE_DIR);
         if (!dir.exists()) {
@@ -33,6 +38,7 @@ public class GenericPoolFromTestCase {
             return;
         }
         File[] testFiles = packageDir.listFiles();
+        if (testFiles == null) return;
         for (File testFile : testFiles) {
             if (testFile.getName().contains(className)) {
                 String testName = testFile.getName().replace(".java", "");
@@ -43,9 +49,6 @@ public class GenericPoolFromTestCase {
 
 
     private static void genericPool(String packageName, String className, String testName) {
-//        System.out.println(packageName);
-//        System.out.println(className);
-//        System.out.println(testName);
         String targetClass = packageName + className;
         String selectedJunit = packageName + testName;
         Properties.TARGET_CLASS = targetClass;
@@ -53,29 +56,15 @@ public class GenericPoolFromTestCase {
         Class<?> objectClass = null;
         Class<?> objectTestClass = null;
         try {
-//            System.out.println(targetClass);
             objectClass = instrumentingClassLoader.loadClass(targetClass);
             objectTestClass = classLoader.loadClass(selectedJunit);
         } catch (Exception e) {
             MavenUtil.i().getLog().error("load class error " + e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
             return;
         }
         ObjectPool pool = ObjectPool.getPoolFromJUnit(new GenericClass(objectClass), objectTestClass);
         MavenUtil.i().getLog().info("success get pool. size : " + pool.getNumberOfSequences());
         ObjectPoolManager.getInstance().addPool(pool);
-//        Properties.P_OBJECT_POOL = 0.5;
-    }
-
-    public static void main(String[] args) {
-        GenericPoolFromTestCase genericPoolFromTestCase = new GenericPoolFromTestCase();
-        genericPoolFromTestCase.receiveTargetClass("neu.lab.evosuiteshell.junit.My");
-//        File file = new File("/");
-//        if (file.exists()) {
-//            for (File f : file.listFiles()) {
-//                System.out.println(f.getPath());
-//            }
-//        }
-
     }
 }

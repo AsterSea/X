@@ -28,11 +28,10 @@ public class TestCaseUtil {
 		return paths;
 	}
 
-	public static void main(String[] args) {
-		for (String path : getFiles("C:\\Users\\Flipped\\eclipse-workspace\\Host\\src")) {
-			if (path.endsWith(".java"))
-				System.out.println(path);
-		}
-
-	}
+//	public static void main(String[] args) {
+//		for (String path : getFiles("/Users/wangchao/eclipse-workspace/Host/src")) {
+//			if (path.endsWith(".java"))
+//				System.out.println(path);
+//		}
+//	}
 }

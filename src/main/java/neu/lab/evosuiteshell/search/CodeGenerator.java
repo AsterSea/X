@@ -127,40 +127,40 @@ public class CodeGenerator {
                 + "]";
     }
 
-    public static void main(String[] args) {
-        //		String mthdSig = "<com.fasterxml.jackson.dataformat.yaml.YAMLFactory: com.fasterxml.jackson.dataformat.yaml.YAMLGenerator "
-        //				+ "_createGenerator(java.io.Writer,com.fasterxml.jackson.core.io.IOContext)>";
-        //		System.out.println(new CodeGenerator(mthdSig, null).toString());
-//		List<String> callPath = new ArrayList<String>();
-//		String[] classPaths = null;
+//    public static void main(String[] args) {
+//        //		String mthdSig = "<com.fasterxml.jackson.dataformat.yaml.YAMLFactory: com.fasterxml.jackson.dataformat.yaml.YAMLGenerator "
+//        //				+ "_createGenerator(java.io.Writer,com.fasterxml.jackson.core.io.IOContext)>";
+//        //		System.out.println(new CodeGenerator(mthdSig, null).toString());
+////		List<String> callPath = new ArrayList<String>();
+////		String[] classPaths = null;
+////
+////		int pathSeq = 0;
+////		try {
+////			BufferedReader reader = new BufferedReader(new FileReader(
+////					"D:\\ws_testcase\\image\\path\\p_com.google.truth.extensions+truth-liteproto-extension+0.41@com.google.guava+guava@25.1-android.txt"));
+////			String line = reader.readLine();
+////			while (line != null) {
+////				if (!line.equals("")) {
+////					if (line.startsWith("classPath:")) {
+////						classPaths = line.replace("classPath:", "").split(";");
+////					} else if (line.startsWith("pathLen:")) {
+////						pathSeq++;
+////						if (pathSeq == 2)
+////							break;
+////					} else if (pathSeq == 1) {
+////						callPath.add(line);
+////					}
+////
+////				}
+////				line = reader.readLine();
+////			}
+////			reader.close();
+////		} catch (Exception e) {
+////			e.printStackTrace();
+////		}
+//        List<String> callPath = new ArrayList<String>();
+//        callPath.add("<neu.lab.Host.Host: int onStart()>");
+//        System.out.println(new CodeGenerator(callPath, new String[]{"/Users/wangchao/个人文件/东北大学/实验室/实验室台式/eclipse/Host/target/Host-1.0.jar"}).getCode());
 //
-//		int pathSeq = 0;
-//		try {
-//			BufferedReader reader = new BufferedReader(new FileReader(
-//					"D:\\ws_testcase\\image\\path\\p_com.google.truth.extensions+truth-liteproto-extension+0.41@com.google.guava+guava@25.1-android.txt"));
-//			String line = reader.readLine();
-//			while (line != null) {
-//				if (!line.equals("")) {
-//					if (line.startsWith("classPath:")) {
-//						classPaths = line.replace("classPath:", "").split(";");
-//					} else if (line.startsWith("pathLen:")) {
-//						pathSeq++;
-//						if (pathSeq == 2)
-//							break;
-//					} else if (pathSeq == 1) {
-//						callPath.add(line);
-//					}
-//
-//				}
-//				line = reader.readLine();
-//			}
-//			reader.close();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-        List<String> callPath = new ArrayList<String>();
-        callPath.add("<neu.lab.Host.Host: int onStart()>");
-        System.out.println(new CodeGenerator(callPath, new String[]{"/Users/wangchao/个人文件/东北大学/实验室/实验室台式/eclipse/Host/target/Host-1.0.jar"}).getCode());
-
-    }
+//    }
 }

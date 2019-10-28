@@ -93,17 +93,17 @@ public class SootExe {
 		argsList.addAll(Arrays.asList(new String[] { "-f", "n", }));
 	}
 
-	public static void main(String[] args) throws IOException {
-        new SootExe().initProjectInfo(
-                new String[]{"/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar"});
-        ProjectInfo.i().setEntryCls("neu.lab.Host.Host");
-        MyClassLoader.jarLoader(new File("/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar"));
-//		System.out.println(ProjectInfo.i().getClassInfo("neu.lab.A.Principal"));
-        GenericObjectSet.getInstance().generateGenericObject("neu.lab.Host.Host");
-//		PrintWriter printer = new PrintWriter(new BufferedWriter(
-//				new FileWriter("/Users/wangchao/个人文件/东北大学/实验室/实验室台式/eclipse/Host/target/1.txt", false)));
-//		printer.println(ProjectInfo.i().getAllClassInfo());
-//		printer.close();
-    }
+//	public static void main(String[] args) throws IOException {
+//        new SootExe().initProjectInfo(
+//                new String[]{"/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar"});
+//        ProjectInfo.i().setEntryCls("neu.lab.Host.Host");
+//        MyClassLoader.jarLoader(new File("/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar"));
+////		System.out.println(ProjectInfo.i().getClassInfo("neu.lab.A.Principal"));
+//        GenericObjectSet.getInstance().generateGenericObject("neu.lab.Host.Host");
+////		PrintWriter printer = new PrintWriter(new BufferedWriter(
+////				new FileWriter("/Users/wangchao/个人文件/东北大学/实验室/实验室台式/eclipse/Host/target/1.txt", false)));
+////		printer.println(ProjectInfo.i().getAllClassInfo());
+////		printer.close();
+//    }
 
 }

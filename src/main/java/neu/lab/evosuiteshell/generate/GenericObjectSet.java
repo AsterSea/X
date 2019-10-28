@@ -4,6 +4,8 @@ import fj.Hash;
 import neu.lab.conflict.vo.ClassVO;
 import neu.lab.evosuiteshell.search.*;
 import org.evosuite.Properties;
+import org.evosuite.TestGenerationContext;
+import org.evosuite.TestSuiteGenerator;
 import org.evosuite.classpath.ClassPathHandler;
 import org.evosuite.coverage.method.designation.EvosuiteNeedObject;
 import org.evosuite.instrumentation.InstrumentingClassLoader;
@@ -181,12 +183,12 @@ public class GenericObjectSet {
         Properties.TARGET_CLASS = "neu.lab.Host.Host";
         Properties.CP = "/Users/wangchao/eclipse-workspace/Host/target/classes/:/Users/wangchao/.m2/repository/neu/lab/A/1.0/A-1.0.jar:/Users/wangchao/.m2/repository/neu/lab/B/2.0/B-2.0.jar:/Users/wangchao/eclipse-workspace/Host/target/test-classes/";
         Properties.SELECTED_JUNIT = "neu.lab.Host.HostTest";
-        InstrumentingClassLoader instrumentingClassLoader = new InstrumentingClassLoader();
+        InstrumentingClassLoader instrumentingClassLoader = TestGenerationContext.getInstance().getClassLoaderForSUT();
         final org.evosuite.testcarver.extraction.CarvingClassLoader classLoader = new org.evosuite.testcarver.extraction.CarvingClassLoader();
-        Class<?> Host = classLoader.loadClass("neu.lab.Host.Host");
-        Class<?> Hosttest = classLoader.loadClass("neu.lab.Host.HostTest");
+        Class<?> Host = instrumentingClassLoader.loadClass("neu.lab.Host.Host");
+        Class<?> Hosttest = instrumentingClassLoader.loadClass("neu.lab.Host.HostTest");
 
-        ObjectPool.getPoolFromJUnit(new GenericClass(Host), Hosttest);
+//        ObjectPool.getPoolFromJUnit(new GenericClass(Host), Hosttest);
         //        Class<?> clazz = instrumentingClassLoader.loadClass(neu.lab.evosuiteshell.Config.class.getCanonicalName());
 //        System.out.println(clazz);
 //        final org.evosuite.testcarver.extraction.CarvingClassLoader classLoader = new org.evosuite.testcarver.extraction.CarvingClassLoader();
