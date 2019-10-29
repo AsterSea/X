@@ -1,5 +1,6 @@
 package neu.lab.evosuiteshell.generate;
 
+import fj.Hash;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.evosuiteshell.Config;
 import org.evosuite.Properties;
@@ -10,6 +11,8 @@ import org.evosuite.seeding.ObjectPoolManager;
 import org.evosuite.utils.generic.GenericClass;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GenericPoolFromTestCase {
 
@@ -53,8 +56,12 @@ public class GenericPoolFromTestCase {
         String selectedJunit = packageName + testName;
         Properties.TARGET_CLASS = targetClass;
         Properties.SELECTED_JUNIT = selectedJunit;
-        Class<?> objectClass = null;
-        Class<?> objectTestClass = null;
+
+        Properties.CLASSPATH = Properties.CP.split(Config.CLASSPATH_SEPARATOR);
+        Properties.SOURCEPATH = Properties.CLASSPATH;
+
+        Class<?> objectClass;
+        Class<?> objectTestClass;
         try {
             objectClass = instrumentingClassLoader.loadClass(targetClass);
             objectTestClass = classLoader.loadClass(selectedJunit);
@@ -64,7 +71,58 @@ public class GenericPoolFromTestCase {
             return;
         }
         ObjectPool pool = ObjectPool.getPoolFromJUnit(new GenericClass(objectClass), objectTestClass);
-        MavenUtil.i().getLog().info("success get pool. size : " + pool.getNumberOfSequences());
+//        MavenUtil.i().getLog().info("success get pool. size : " + pool.getNumberOfSequences());
         ObjectPoolManager.getInstance().addPool(pool);
     }
+
+
+    /**
+     * 不好用
+     */
+    @Deprecated
+    public static void genericStringPool() {
+        Properties.TARGET_CLASS = "java.lang.String";
+        File dir = new File(Config.PROJECT_TESTCASE_DIR);
+        if (!dir.exists()) {
+            MavenUtil.i().getLog().info("project does not have test case");
+            return;
+        }
+        Set<String> fileAbsolutePathSet = new HashSet<>();
+        forEachTestDir(dir, fileAbsolutePathSet);
+        for (String fileAbsolutePath : fileAbsolutePathSet) {
+            String TestFullyQualifiedName = fileAbsolutePath.replace(Config.PROJECT_TESTCASE_DIR, "").replace(".java", "").replace("/", ".");
+            Properties.SELECTED_JUNIT = TestFullyQualifiedName;
+            Class<?> objectTestClass;
+            try {
+                objectTestClass = classLoader.loadClass(TestFullyQualifiedName);
+            } catch (Exception e) {
+                MavenUtil.i().getLog().error("load class error " + e.getMessage());
+                return;
+            }
+            ObjectPool pool = ObjectPool.getPoolFromJUnit(new GenericClass(String.class), objectTestClass);
+            if (pool.getNumberOfSequences() > 0) {
+                MavenUtil.i().getLog().info("success get pool. size : " + pool.getNumberOfSequences());
+                ObjectPoolManager.getInstance().addPool(pool);
+            }
+
+        }
+    }
+
+    private static void forEachTestDir(File dir, Set<String> fileAbsolutePathSet) {
+        File[] files = dir.listFiles();
+        if (files == null) return;
+        for (File file : files) {
+            if (file.isDirectory()) {
+                forEachTestDir(file, fileAbsolutePathSet);
+            }
+            if (file.getName().contains("Test")) {
+                fileAbsolutePathSet.add(file.getAbsolutePath());
+            }
+        }
+    }
+
+//    public static void main(String[] args) {
+//        Properties.CP = "/Users/wangchao/IdeaProjects/X/target/test-classes/:/Users/wangchao/IdeaProjects/X/target/classes/";
+//        receiveTargetClass("neu.lab.evosuiteshell.generate.GenericPoolFromTestCase");
+//    }
 }

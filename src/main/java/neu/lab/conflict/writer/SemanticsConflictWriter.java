@@ -55,6 +55,8 @@ public class SemanticsConflictWriter {
         try {
 //            System.out.println(outPath + "SemeanticsConflict.txt");
             printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "SemeanticsConflict.txt", false)));
+            copyDependency();
+            copyConflictDependency();
             runEvosuite(printer);
             printer.close();
         } catch (IOException e) {
@@ -67,7 +69,6 @@ public class SemanticsConflictWriter {
      * 得到依赖jar包的路径
      */
     private String getDependencyCP(Conflict conflict) {
-        copyDependency();
         StringBuffer CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "test-classes" + Config.CLASSPATH_SEPARATOR
                 + System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.EVOSUITE_NAME);
         String dependencyConflictJarDir = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR
@@ -78,7 +79,6 @@ public class SemanticsConflictWriter {
                 CP.append(Config.CLASSPATH_SEPARATOR + dependencyJar + dependency);
             }
         } else {
-            copyConflictDependency();
             for (String dependency : dependencyJarsPath) {
                 if (dependency.contains(conflict.getArtifactId()))
                     continue;
@@ -93,6 +93,9 @@ public class SemanticsConflictWriter {
     }
 
     private void runEvosuite(PrintWriter printer) {
+        Properties.getInstance();
+//        Properties.CP = getDependencyCP(null);
+//        GenericPoolFromTestCase.genericStringPool();
         for (Conflict conflict : Conflicts.i().getConflicts()) {
 //            System.out.println(conflict);
             riskMethodPair(conflict);
@@ -181,6 +184,7 @@ public class SemanticsConflictWriter {
         GenericPoolFromTestCase.receiveTargetClass(targetClass);
         Properties.MINIMIZE = false;
         Properties.P_OBJECT_POOL = 0.5;
+        System.out.println(riskMethod);
         Properties.RISK_METHOD = riskMethod;
         Properties.MIN_INITIAL_TESTS = 10;
         Properties.CRITERION = new Criterion[]{Criterion.METHODDESIGNATION, Criterion.METHOD, Criterion.BRANCH};

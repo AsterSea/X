@@ -85,9 +85,7 @@ public class TestCaseBuilder {
     }
 
     /**
-     *
-     * @param callee
-     *            <code>null</code> for state methods
+     * @param callee     <code>null</code> for state methods
      * @param method
      * @param parameters
      * @return <code>void reference</code> for void methods
@@ -267,9 +265,10 @@ public class TestCaseBuilder {
     /**
      * x.f1 := y.f2
      *
-     * @param var
-     * @param array
-     * @param index
+     * @param receiver
+     * @param field
+     * @param src
+     * @param fieldSrc
      */
     public void appendAssignment(VariableReference receiver, Field field,
                                  VariableReference src, Field fieldSrc) {
