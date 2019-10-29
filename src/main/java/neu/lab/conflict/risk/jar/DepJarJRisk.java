@@ -5,6 +5,7 @@ import java.util.*;
 
 import gumtree.spoon.AstComparator;
 import gumtree.spoon.diff.Diff;
+import gumtree.spoon.diff.operations.Operation;
 import neu.lab.conflict.GlobalVar;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.container.SemantemeMethods;
@@ -27,6 +28,7 @@ import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
 import neu.lab.conflict.util.*;
 import neu.lab.conflict.vo.DepJar;
 import neu.lab.conflict.vo.MethodCall;
+import neu.lab.conflict.writer.SemanticsConflictWriter;
 import neu.lab.evosuiteshell.Config;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.api.loader.Loader;
@@ -268,7 +270,7 @@ public class DepJarJRisk {
     public Graph4distance getMethodPathGraphForSemanteme() {
 
         Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
-        Set<String> riskMethods = new HashSet<String>();
+        Set<String> riskMethods;
 
         if (semantemeRiskMethods.size() > 0) {
 
@@ -297,6 +299,7 @@ public class DepJarJRisk {
     public void decompile() {
 
         depJarDecompressionPath = JARDecompressionTool.decompressionPath + depJar.getDepJarName() + Config.FILE_SEPARATOR;
+
         usedDepJarDecompressionPath = JARDecompressionTool.decompressionPath + usedDepJar.getDepJarName() + Config.FILE_SEPARATOR;
 
         JARDecompressionTool.decompress(depJar.getJarFilePaths(true).get(0), depJarDecompressionPath);
@@ -312,7 +315,7 @@ public class DepJarJRisk {
      */
     private Set<String> calculationDifference(Set<String> semantemeRiskMethods) {
 
-        Map<String, Integer> semantemeMethodForDifferences = new HashMap<String, Integer>(); // 语义方法的差异集合
+        Map<String, Integer> semantemeMethodForDifferences = new HashMap<>(); // 语义方法的差异集合
 
         Loader loaderDepJar = new JDCoreLoader(new File(depJarDecompressionPath));
         Loader loaderUsedDepJar = new JDCoreLoader(new File(usedDepJarDecompressionPath));
@@ -325,7 +328,7 @@ public class DepJarJRisk {
 
         // key class
         // value methods
-        Map<String, Set<String>> methodsFromClass = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> methodsFromClass = new HashMap<>();
         try {
             for (String method : semantemeRiskMethods) {
                 Set<String> methods = methodsFromClass.get(SootUtil.mthdSig2cls(method));
@@ -362,6 +365,13 @@ public class DepJarJRisk {
                         Diff diff = astComparator.compare(ctMethodFromDepJar, ctMethodFromUsedDepJar);
 
                         int differentSize = diff.getRootOperations().size();
+                        if (differentSize > 0) {
+                            //输出差异
+                            SemanticsConflictWriter.printer.println(method + "\n used compare shade diff:");
+                            for (Operation operation : diff.getRootOperations()) {
+                                SemanticsConflictWriter.printer.println(operation.toString());
+                            }
+                        }
 
                         semantemeMethodForDifferences.put(method, differentSize);
 
@@ -373,7 +383,7 @@ public class DepJarJRisk {
 
         } catch (Exception e) {
             MavenUtil.i().getLog().error(e.toString());
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
         return sortMap(semantemeMethodForDifferences, 100);

@@ -111,6 +111,8 @@ public abstract class ConflictMojo extends AbstractMojo {
 		Conf.callConflict = callConflict;
 		Conf.findAllpath = findAllPath;
 		Conf.outDir = resultPath;
+		Conf.append = append;
+
 		GlobalVar.useAllJar = useAllJar;
 
 		// 初始化NodeAdapters

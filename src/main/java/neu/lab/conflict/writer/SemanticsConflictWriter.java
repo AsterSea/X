@@ -50,19 +50,32 @@ import org.evosuite.utils.generic.GenericClass;
 public class SemanticsConflictWriter {
     private Map<String, IBook> pathBooks;
 
-    public void writeSemanticsConflict(String outPath) {
-        PrintWriter printer = null;
+    //    public static String outPath;
+    public static PrintWriter printer;
+
+    static {
         try {
-//            System.out.println(outPath + "SemeanticsConflict.txt");
-            printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "SemeanticsConflict.txt", false)));
-            copyDependency();
-            copyConflictDependency();
-            runEvosuite(printer);
-            printer.close();
+            printer = new PrintWriter(new BufferedWriter(new FileWriter(Conf.outDir + "SemeanticsConflict.txt", Conf.append)));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    ;
+
+    public void writeSemanticsConflict() {
+
+//        try {
+//            System.out.println(outPath + "SemeanticsConflict.txt");
+        //true 为追加内容  不会覆盖原始内容
+//            printer =
+        copyDependency();
+        copyConflictDependency();
+        runEvosuite();
+        printer.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }// PrintWriter printer
 
     /**
@@ -92,11 +105,12 @@ public class SemanticsConflictWriter {
         return CP.toString();
     }
 
-    private void runEvosuite(PrintWriter printer) {
+    private void runEvosuite() {
         Properties.getInstance();
 //        Properties.CP = getDependencyCP(null);
 //        GenericPoolFromTestCase.genericStringPool();
         for (Conflict conflict : Conflicts.i().getConflicts()) {
+            printer.println(conflict.toString());
 //            System.out.println(conflict);
             riskMethodPair(conflict);
             System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
@@ -109,7 +123,7 @@ public class SemanticsConflictWriter {
                 HashSet<String> riskMethodHosts = methodToHost.get(method);
                 for (String riskMethodHost : riskMethodHosts) {
                     String riskMethodClassHost = SootUtil.mthdSig2cls(riskMethodHost);
-                    printer.println(conflict.toString());
+
                     printer.println(riskMethodClassHost + "===>" + method);
                     testClassName = riskMethodClassHost + "_ESTest";
                     startEvolution(CP, testDir, riskMethodClassHost, method);
@@ -127,38 +141,38 @@ public class SemanticsConflictWriter {
         }
     }
 
-    public void initObjectPool(String className) {
-        /*
-        测试 getPoolFromJUnit
-         */
-//        final org.evosuite.testcarver.extraction.CarvingClassLoader classLoader = new org.evosuite.testcarver.extraction.CarvingClassLoader();
-//        InstrumentingClassLoader instrumentingClassLoader = new InstrumentingClassLoader();
-//        try {
-//            System.out.println(1111);
-//            Class<?> Host = instrumentingClassLoader.loadClass(className);
-////            Class<?> Host = instrumentingClassLoader.loadClassFromFile("neu.lab.Host.Host", "/Users/wangchao/eclipse-workspace/Host/target/classes/neu/lab/Host/Host.class");
-//            Class<?> Hosttest = instrumentingClassLoader.loadClassFromFile("neu.lab.Host.HostTest", "/Users/wangchao/eclipse-workspace/Host/target/test-classes/neu/lab/Host/HostTest.class");
-//            ObjectPool.getPoolFromJUnit(new GenericClass(Host), Hosttest);
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
+//    public void initObjectPool(String className) {
+//        /*
+//        测试 getPoolFromJUnit
+//         */
+////        final org.evosuite.testcarver.extraction.CarvingClassLoader classLoader = new org.evosuite.testcarver.extraction.CarvingClassLoader();
+////        InstrumentingClassLoader instrumentingClassLoader = new InstrumentingClassLoader();
+////        try {
+////            System.out.println(1111);
+////            Class<?> Host = instrumentingClassLoader.loadClass(className);
+//////            Class<?> Host = instrumentingClassLoader.loadClassFromFile("neu.lab.Host.Host", "/Users/wangchao/eclipse-workspace/Host/target/classes/neu/lab/Host/Host.class");
+////            Class<?> Hosttest = instrumentingClassLoader.loadClassFromFile("neu.lab.Host.HostTest", "/Users/wangchao/eclipse-workspace/Host/target/test-classes/neu/lab/Host/HostTest.class");
+////            ObjectPool.getPoolFromJUnit(new GenericClass(Host), Hosttest);
+////        } catch (ClassNotFoundException e) {
+////            e.printStackTrace();
+////        }
+////Properties.WRITE_POOL="aaa.txt";
+//
+//        String hostJarPath = DepJars.i().getHostDepJar().getJarFilePaths(true).toArray(new String[]{})[0];
+//        if (!(hostJarPath.endsWith(".jar"))) {
+//            for (File file : new File(hostJarPath).getParentFile().listFiles()) {
+//                if (file.getAbsolutePath().endsWith(".jar")) {
+//                    hostJarPath = file.getAbsolutePath();
+//                    break;
+//                }
+//            }
 //        }
-//Properties.WRITE_POOL="aaa.txt";
-
-        String hostJarPath = DepJars.i().getHostDepJar().getJarFilePaths(true).toArray(new String[]{})[0];
-        if (!(hostJarPath.endsWith(".jar"))) {
-            for (File file : new File(hostJarPath).getParentFile().listFiles()) {
-                if (file.getAbsolutePath().endsWith(".jar")) {
-                    hostJarPath = file.getAbsolutePath();
-                    break;
-                }
-            }
-        }
-        new SootExe().initProjectInfo(new String[]{hostJarPath});
-        ProjectInfo.i().setEntryCls(className);
-        MyClassLoader.jarLoader(new File(hostJarPath));
-//    System.out.println(ProjectInfo.i().getClassInfo("neu.lab.A.Principal"));
-        GenericObjectSet.getInstance().generateGenericObject(className);
-    }
+//        new SootExe().initProjectInfo(new String[]{hostJarPath});
+//        ProjectInfo.i().setEntryCls(className);
+//        MyClassLoader.jarLoader(new File(hostJarPath));
+////    System.out.println(ProjectInfo.i().getClassInfo("neu.lab.A.Principal"));
+//        GenericObjectSet.getInstance().generateGenericObject(className);
+//    }
 
     private void seedingConstant(String targetClass) {
         SearchPrimitiveManager.getInstance();
@@ -179,7 +193,7 @@ public class SemanticsConflictWriter {
         TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
         setNodeProbDistance(pathBooks, riskMethod);
 //        Properties.SEED_TYPES = false;
-//        seedingConstant(targetClass);// String 参数种植
+        seedingConstant(targetClass);// String 参数种植
 //        System.out.println(targetClass);
         GenericPoolFromTestCase.receiveTargetClass(targetClass);
         Properties.MINIMIZE = false;
@@ -309,28 +323,6 @@ public class SemanticsConflictWriter {
         for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
             Graph4distance pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
             Set<String> hostNodes = pathGraph.getHostNodes();
-//            System.out.println(hostNodes);
-//            for (String node : hostNodes) {
-//                String params = SootUtil.mthdSig2param(node);
-//                System.out.println(node);
-//                System.out.println(params);
-//                if (params.length() == 0) {
-//                    System.out.println("没有参数");
-//                } else if (!params.contains(",")) {
-//                    System.out.println("一个参数");
-//                    System.out.println(params);
-//                } else {
-//                    System.out.println("多个参数");
-//                    for (String param : params.split(",")) {
-//                        System.out.println(param);
-//                    }
-//                }
-//                if(params.length>0){
-//                    for (String param : params){
-//                        System.out.println(param);
-//                    }
-//                }
-//            }
             /**
              * 可以在这里修改寻找深度，改成10层
              */
