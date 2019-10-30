@@ -81,15 +81,15 @@ public class JRiskDistanceCgTf extends JRiskCgTf {
                     // filter relation inside conflictJar 过滤掉conflictJar中的类
                 } else {
                     if (!name2node.containsKey(srcMthdName)) {
-                        name2node.put(srcMthdName, new Node4distance(srcMthdName, isHostClass(srcClsName) && !edge.src().isPrivate(),
-                                riskMthds.contains(srcMthdName), getBranchNum(edge.src().getSignature())));
+                        name2node.put(srcMethodNameASMsignature, new Node4distance(srcMethodNameASMsignature, isHostClass(srcClsName) && !edge.src().isPrivate(),
+                                riskMthds.contains(srcMthdName), getBranchNum(srcMethodNameASMsignature)));
                     }
                     if (!name2node.containsKey(tgtMthdName)) {
-                        name2node.put(tgtMthdName, new Node4distance(tgtMthdName, isHostClass(tgtClsName) && !edge.tgt().isPrivate(),
-                                riskMthds.contains(tgtMthdName), getBranchNum(edge.tgt().getSignature())));
+                        name2node.put(tgtMethodNameASMsignature, new Node4distance(tgtMethodNameASMsignature, isHostClass(tgtClsName) && !edge.tgt().isPrivate(),
+                                riskMthds.contains(tgtMthdName), getBranchNum(tgtMethodNameASMsignature)));
                     }
-                    mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
-//					mthdRlts.add(new MethodCall(edge.src().getBytecodeSignature(), edge.tgt().getBytecodeSignature()));
+//                    mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
+                    mthdRlts.add(new MethodCall(edge.src().getBytecodeSignature(), edge.tgt().getBytecodeSignature()));
                 }
             }
 //			System.out.println(mthdRlts.size());
@@ -138,12 +138,13 @@ public class JRiskDistanceCgTf extends JRiskCgTf {
 
     @Override
     protected void initMthd2branch() {
-        mthd2branch = new HashMap<String, Integer>();
+        mthd2branch = new HashMap<>();
         for (SootClass sootClass : Scene.v().getApplicationClasses()) {
             List<SootMethod> mthds = new ArrayList<SootMethod>();
             mthds.addAll(sootClass.getMethods());
             for (SootMethod method : mthds) {
-                mthd2branch.put(method.getSignature(), calBranchNum(method));
+//                mthd2branch.put(method.getSignature(), calBranchNum(method));
+                mthd2branch.put(method.getBytecodeSignature(), calBranchNum(method));
             }
         }
     }

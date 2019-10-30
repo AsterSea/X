@@ -367,7 +367,7 @@ public class DepJarJRisk {
                         int differentSize = diff.getRootOperations().size();
                         if (differentSize > 0) {
                             //输出差异
-                            SemanticsConflictWriter.printer.println(method + "\n used compare shade diff:");
+                            SemanticsConflictWriter.printer.println(method + "\n used compare shield diff:");
                             for (Operation operation : diff.getRootOperations()) {
                                 SemanticsConflictWriter.printer.println(operation.toString());
                             }

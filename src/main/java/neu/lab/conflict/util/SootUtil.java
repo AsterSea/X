@@ -57,6 +57,19 @@ public class SootUtil {
     }
 
     /**
+     * 获取方法名，切分String 只留 返回值类型 方法名 byte格式
+     *
+     * @param methodSig
+     * @return e.g.
+     */
+    public static String bytemthdSig2methodName(String methodSig) {
+        return methodSig.split(" ")[1].replaceAll("\\(.*>", ""); // 返回值
+    }
+
+    public static String bytemthdSig2fullymethodName(String methodSig) {
+        return methodSig.split(" ")[1].replaceAll(">", ""); // 返回值
+    }
+    /**
      * 获取类名，切分String 只留 类名
      *
      * @param methodSig e.g.:<org.slf4j.event.SubstituteLoggingEvent:

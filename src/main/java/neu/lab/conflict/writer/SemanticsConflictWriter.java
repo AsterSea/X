@@ -116,6 +116,7 @@ public class SemanticsConflictWriter {
             System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
             for (String method : methodToHost.keySet()) {
 //                initObjectPool(SootUtil.mthdSig2cls(method));
+//                System.out.println(method);
                 String testDir = createMethodDir(method);
                 String CP = getDependencyCP(null);
                 String ConflictCP = getDependencyCP(conflict);
@@ -123,17 +124,17 @@ public class SemanticsConflictWriter {
                 HashSet<String> riskMethodHosts = methodToHost.get(method);
                 for (String riskMethodHost : riskMethodHosts) {
                     String riskMethodClassHost = SootUtil.mthdSig2cls(riskMethodHost);
-
+//                    System.out.println(riskMethodHost);
                     printer.println(riskMethodClassHost + "===>" + method);
                     testClassName = riskMethodClassHost + "_ESTest";
-                    startEvolution(CP, testDir, riskMethodClassHost, method);
+                    startEvolution(CP, testDir, riskMethodClassHost, method, riskMethodHost);
                     compileJunit(testDir, testClassName, CP);
                     ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
                     printer.println(handleResult(results));
                 }
                 testClassName = SootUtil.mthdSig2cls(method);
                 printer.println("target class ===> conflict class " + testClassName);
-                startEvolution(CP, testDir, testClassName, method);
+                startEvolution(CP, testDir, testClassName, method, method);
                 compileJunit(testDir, testClassName + "_ESTest", CP);
                 ArrayList<String> results = executeJunit(testDir, testClassName + "_ESTest", ConflictCP);
                 printer.println(handleResult(results));
@@ -188,20 +189,23 @@ public class SemanticsConflictWriter {
         }
     }
 
-    private void startEvolution(String CP, String testDir, String targetClass, String riskMethod) {
+    private void startEvolution(String CP, String testDir, String targetClass, String riskMethod, String byteRiskMethod) {
         Properties.CP = CP;
         TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
         setNodeProbDistance(pathBooks, riskMethod);
 //        Properties.SEED_TYPES = false;
-        seedingConstant(targetClass);// String 参数种植
+//        seedingConstant(targetClass);// String 参数种植
 //        System.out.println(targetClass);
         GenericPoolFromTestCase.receiveTargetClass(targetClass);
         Properties.MINIMIZE = false;
-        Properties.P_OBJECT_POOL = 0.5;
-        System.out.println(riskMethod);
+        Properties.MINIMIZE_VALUES = true;
+        Properties.P_OBJECT_POOL = 1;
+//        System.out.println(riskMethod);
         Properties.RISK_METHOD = riskMethod;
+        Properties.TARGET_METHOD = SootUtil.bytemthdSig2fullymethodName(byteRiskMethod);
+        System.out.println(Properties.TARGET_METHOD);
         Properties.MIN_INITIAL_TESTS = 10;
-        Properties.CRITERION = new Criterion[]{Criterion.METHODDESIGNATION, Criterion.METHOD, Criterion.BRANCH};
+        Properties.CRITERION = new Criterion[]{Criterion.METHOD, Criterion.BRANCH};
         Properties.NUM_TESTS = 10;
         Properties.TEST_DIR = testDir;
         Properties.JUNIT_CHECK = false;
@@ -210,6 +214,7 @@ public class SemanticsConflictWriter {
 
 //        CP.replaceAll(";",":");
 //        System.out.println(CP);
+//        System.out.println(targetClass);
         Properties.TARGET_CLASS = targetClass;
 //        initObjectPool(targetClass);
 //		Properties.TARGET_CLASS = SootUtil.mthdSig2cls(targetClass);
@@ -338,7 +343,7 @@ public class SemanticsConflictWriter {
                         Record4distance record = (Record4distance) iRecord;
                         HashSet<String> host = methodToHost.get(record.getRiskMethod());
                         if (host == null) {
-                            host = new HashSet<String>();
+                            host = new HashSet<>();
                             methodToHost.put(record.getRiskMethod(), host);
                         }
                         // 修改后 存的是host节点的完全名
@@ -355,7 +360,7 @@ public class SemanticsConflictWriter {
      */
     private String createMethodDir(String riskMethod) {
         String workPath = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "test_method" + Config.FILE_SEPARATOR;
-        riskMethod = SootUtil.mthdSig2methodName(riskMethod);
+        riskMethod = SootUtil.bytemthdSig2methodName(riskMethod);
         workPath = workPath + riskMethod + Config.FILE_SEPARATOR;
         File dir = new File(workPath);
         if (!dir.exists())
