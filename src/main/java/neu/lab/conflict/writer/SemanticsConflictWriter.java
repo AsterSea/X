@@ -51,12 +51,11 @@ public class SemanticsConflictWriter {
 
     public void writeSemanticsConflict() {
 
-
+        copyDependency();
+        copyConflictDependency();
         try {
             for (int time = 0; time < Conf.runTime; time++) {
                 runTime++;
-                copyDependency();
-                copyConflictDependency();
                 runEvosuite();
             }
         } catch (Exception e) {
@@ -114,7 +113,9 @@ public class SemanticsConflictWriter {
                 for (String riskMethodHost : riskMethodHosts) {
                     String riskMethodClassHost = SootUtil.mthdSig2cls(riskMethodHost);
 //                    System.out.println(riskMethodHost);
-                    printer.println(riskMethodHost + "===>" + method);
+                    printer.println("target class : " + riskMethodClassHost);
+                    printer.println("host method : " + riskMethodHost);
+                    printer.println("risk method : " + method);
                     testClassName = riskMethodClassHost + "_ESTest";
                     startEvolution(CP, testDir, riskMethodClassHost, method, riskMethodHost);
                     compileJunit(testDir, testClassName, CP);
@@ -123,12 +124,13 @@ public class SemanticsConflictWriter {
                     printer.println();
                 }
                 testClassName = SootUtil.mthdSig2cls(method);
-                printer.println("target class ===> " + testClassName);
+                printer.println("risk target class ===> " + testClassName);
+                printer.println("risk target method ===> " + method);
                 startEvolution(CP, testDir, testClassName, method, method);
                 compileJunit(testDir, testClassName + "_ESTest", CP);
                 ArrayList<String> results = executeJunit(testDir, testClassName + "_ESTest", ConflictCP);
                 printer.println(handleResult(results));
-                printer.println("method path:");
+                printer.println("risk method can be called, method path:");
                 printer.println(methodPath.get(method));
             }
             printer.println();
@@ -207,7 +209,7 @@ public class SemanticsConflictWriter {
         Properties.TARGET_METHOD = SootUtil.bytemthdSig2fullymethodName(byteRiskMethod);
 //        System.out.println(Properties.TARGET_METHOD);
         Properties.MIN_INITIAL_TESTS = 10;
-        Properties.CRITERION = new Criterion[]{Criterion.METHOD, Criterion.BRANCH};
+        Properties.CRITERION = new Criterion[]{Criterion.METHOD, Criterion.BRANCH, Criterion.LINE};
         Properties.NUM_TESTS = 10;
         Properties.TEST_DIR = testDir;
         Properties.JUNIT_CHECK = false;
@@ -251,7 +253,7 @@ public class SemanticsConflictWriter {
         double run = 0;
         double failures = 0;
         String handle = "";
-        double percent = 1;
+        double percent;
         for (String result : results) {
             if (result.contains("Tests")) {
                 String[] lines = result.split(",");
@@ -259,7 +261,7 @@ public class SemanticsConflictWriter {
                 failures = Double.parseDouble(lines[1].split(": ")[1]);
                 percent = failures / run;
                 handle = "test case nums : " + run + " * failures nums : " + failures + " * failures accounted for "
-                        + percent * 100 + "%";
+                        + String.format("%.2f", percent * 100) + "%";
                 break;
             }
             if (result.contains("OK")) {

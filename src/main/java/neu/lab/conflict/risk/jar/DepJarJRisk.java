@@ -319,6 +319,7 @@ public class DepJarJRisk {
             return new Graph4path(new HashMap<>(), new ArrayList<>());
         }
     }
+
     /**
      * 解压冲突jar包
      */
@@ -396,7 +397,7 @@ public class DepJarJRisk {
                         int differentSize = diff.getRootOperations().size();
                         if (differentSize > 0) {
                             //输出差异
-                            printer.println(method + "\n used compare shield diff:");
+                            printer.println(method + " ===> diff count : " + differentSize + "\n used compare shield diff:");
                             for (Operation operation : diff.getRootOperations()) {
                                 printer.println(operation.toString());
                             }
