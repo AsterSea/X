@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 
 import neu.lab.conflict.container.DepJars;
+import neu.lab.conflict.graph.*;
+import neu.lab.conflict.util.MySortedMap;
+import neu.lab.conflict.vo.DepJar;
 import neu.lab.evosuiteshell.generate.GenericObjectSet;
 import neu.lab.evosuiteshell.generate.GenericPoolFromTestCase;
 import neu.lab.evosuiteshell.search.*;
@@ -26,13 +29,7 @@ import com.google.common.io.Files;
 
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.distance.MethodProbDistances;
-import neu.lab.conflict.graph.Book4distance;
-import neu.lab.conflict.graph.Dog;
-import neu.lab.conflict.graph.IBook;
-import neu.lab.conflict.graph.IRecord;
-import neu.lab.conflict.graph.Record4distance;
 import neu.lab.conflict.graph.Dog.Strategy;
-import neu.lab.conflict.graph.Graph4distance;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
@@ -50,33 +47,22 @@ import org.evosuite.utils.generic.GenericClass;
 public class SemanticsConflictWriter {
     private Map<String, IBook> pathBooks;
 
-    //    public static String outPath;
-    public static PrintWriter printer;
-
-    static {
-        try {
-            printer = new PrintWriter(new BufferedWriter(new FileWriter(Conf.outDir + "SemeanticsConflict.txt", Conf.append)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    ;
+    private int runTime = 0;
 
     public void writeSemanticsConflict() {
 
-//        try {
-//            System.out.println(outPath + "SemeanticsConflict.txt");
-        //true 为追加内容  不会覆盖原始内容
-//            printer =
-        copyDependency();
-        copyConflictDependency();
-        runEvosuite();
-        printer.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-    }// PrintWriter printer
+
+        try {
+            for (int time = 0; time < Conf.runTime; time++) {
+                runTime++;
+                copyDependency();
+                copyConflictDependency();
+                runEvosuite();
+            }
+        } catch (Exception e) {
+            MavenUtil.i().getLog().error(e.getMessage());
+        }
+    }
 
     /**
      * 得到依赖jar包的路径
@@ -105,12 +91,15 @@ public class SemanticsConflictWriter {
         return CP.toString();
     }
 
-    private void runEvosuite() {
-        Properties.getInstance();
+    private void runEvosuite() throws Exception {
+
 //        Properties.CP = getDependencyCP(null);
 //        GenericPoolFromTestCase.genericStringPool();
         for (Conflict conflict : Conflicts.i().getConflicts()) {
+//            new File(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + ".txt").createNewFile();
+            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
             printer.println(conflict.toString());
+            DepJarJRisk.printer = printer;
 //            System.out.println(conflict);
             riskMethodPair(conflict);
             System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
@@ -125,20 +114,25 @@ public class SemanticsConflictWriter {
                 for (String riskMethodHost : riskMethodHosts) {
                     String riskMethodClassHost = SootUtil.mthdSig2cls(riskMethodHost);
 //                    System.out.println(riskMethodHost);
-                    printer.println(riskMethodClassHost + "===>" + method);
+                    printer.println(riskMethodHost + "===>" + method);
                     testClassName = riskMethodClassHost + "_ESTest";
                     startEvolution(CP, testDir, riskMethodClassHost, method, riskMethodHost);
                     compileJunit(testDir, testClassName, CP);
                     ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
                     printer.println(handleResult(results));
+                    printer.println();
                 }
                 testClassName = SootUtil.mthdSig2cls(method);
-                printer.println("target class ===> conflict class " + testClassName);
+                printer.println("target class ===> " + testClassName);
                 startEvolution(CP, testDir, testClassName, method, method);
                 compileJunit(testDir, testClassName + "_ESTest", CP);
                 ArrayList<String> results = executeJunit(testDir, testClassName + "_ESTest", ConflictCP);
                 printer.println(handleResult(results));
+                printer.println("method path:");
+                printer.println(methodPath.get(method));
             }
+            printer.println();
+            printer.close();
         }
     }
 
@@ -190,20 +184,28 @@ public class SemanticsConflictWriter {
     }
 
     private void startEvolution(String CP, String testDir, String targetClass, String riskMethod, String byteRiskMethod) {
+        Properties.getInstance();
         Properties.CP = CP;
         TestSuiteGenerator testSuiteGenerator = new TestSuiteGenerator();
-        setNodeProbDistance(pathBooks, riskMethod);
+//        setNodeProbDistance(pathBooks, riskMethod);
 //        Properties.SEED_TYPES = false;
-//        seedingConstant(targetClass);// String 参数种植
+        seedingConstant(targetClass);// String 参数种植
 //        System.out.println(targetClass);
         GenericPoolFromTestCase.receiveTargetClass(targetClass);
+
+
+        Properties.ASSERTION_STRATEGY = Properties.AssertionStrategy.ALL;
+
+        Properties.ASSERTION_MINIMIZATION_FALLBACK = 1;
+        Properties.ASSERTION_MINIMIZATION_FALLBACK_TIME = 1;
+
         Properties.MINIMIZE = false;
         Properties.MINIMIZE_VALUES = true;
         Properties.P_OBJECT_POOL = 1;
 //        System.out.println(riskMethod);
         Properties.RISK_METHOD = riskMethod;
         Properties.TARGET_METHOD = SootUtil.bytemthdSig2fullymethodName(byteRiskMethod);
-        System.out.println(Properties.TARGET_METHOD);
+//        System.out.println(Properties.TARGET_METHOD);
         Properties.MIN_INITIAL_TESTS = 10;
         Properties.CRITERION = new Criterion[]{Criterion.METHOD, Criterion.BRANCH};
         Properties.NUM_TESTS = 10;
@@ -216,6 +218,8 @@ public class SemanticsConflictWriter {
 //        System.out.println(CP);
 //        System.out.println(targetClass);
         Properties.TARGET_CLASS = targetClass;
+
+
 //        initObjectPool(targetClass);
 //		Properties.TARGET_CLASS = SootUtil.mthdSig2cls(targetClass);
 //		Properties.TARGET_METHOD = "onStart";
@@ -321,12 +325,14 @@ public class SemanticsConflictWriter {
 
     HashMap<String, HashSet<String>> methodToHost = new HashMap<String, HashSet<String>>();
 
+    HashMap<String, String> methodPath = new HashMap<>();
+
     /**
      * get Risk method pair to methodToHost
      */
     private void riskMethodPair(Conflict conflict) {
         for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
-            Graph4distance pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
+            Graph4path pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
             Set<String> hostNodes = pathGraph.getHostNodes();
             /**
              * 可以在这里修改寻找深度，改成10层
@@ -336,11 +342,14 @@ public class SemanticsConflictWriter {
 //			setNodeProbDistance(methodProbabilityDistances);
 //			System.out.println(getMethodProDistances(pathBooks));
 //            System.out.println(pathBooks.keySet());
+            MySortedMap<Integer, Record4path> dis2records = new MySortedMap<>();
+
             for (String topMthd : pathBooks.keySet()) {
                 if (hostNodes.contains(topMthd)) {
-                    Book4distance book = (Book4distance) (pathBooks.get(topMthd));
+                    Book4path book = (Book4path) pathBooks.get(topMthd);
                     for (IRecord iRecord : book.getRecords()) {
-                        Record4distance record = (Record4distance) iRecord;
+                        Record4path record = (Record4path) iRecord;
+                        dis2records.add(record.getPathlen(), record);
                         HashSet<String> host = methodToHost.get(record.getRiskMethod());
                         if (host == null) {
                             host = new HashSet<>();
@@ -350,16 +359,46 @@ public class SemanticsConflictWriter {
 //                        host.add(SootUtil.mthdSig2cls(topMthd));
                         host.add(topMthd);
                     }
+//                    Map<String, IBook> books4path = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH,
+//                            Strategy.NOT_RESET_BOOK);
+//                    Book4path book4path = (Book4path) books4path.get(topMthd);
+//                    for (IRecord iRecord : book4path.getRecords()) {
+//                        Record4path record4path = (Record4path) iRecord;
+//                        dis2records.add(record4path.getPathlen(), record4path);
+//                    }
+                }
+            }
+            if (dis2records.size() > 0) {
+                for (Record4path record : dis2records.flat()) {
+                    methodPath.put(record.getRiskMethod(), addJarPath(record.getPathStr()));
+//                    System.out.println(addJarPath(record.getPathStr()));
                 }
             }
         }
+    }
+
+    private String addJarPath(String mthdCallPath) {
+        StringBuilder sb = new StringBuilder();
+        String[] mthds = mthdCallPath.split("\\n");
+        for (int i = 0; i < mthds.length - 1; i++) {
+            // last method is risk method,don't need calculate.
+            String mthd = mthds[i];
+            String cls = SootUtil.mthdSig2cls(mthd);
+            DepJar depJar = DepJars.i().getClassJar(cls);
+            String jarPath = "";
+            if (depJar != null)
+                jarPath = depJar.getJarFilePaths(true).get(0);
+            sb.append(mthd + " " + jarPath + "\n");
+        }
+        sb.append(mthds[mthds.length - 1]);
+        return sb.toString();
     }
 
     /**
      * 创建测试方法目录
      */
     private String createMethodDir(String riskMethod) {
-        String workPath = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "test_method" + Config.FILE_SEPARATOR;
+        String workPath = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "test_method" + runTime + Config.FILE_SEPARATOR;
         riskMethod = SootUtil.bytemthdSig2methodName(riskMethod);
         workPath = workPath + riskMethod + Config.FILE_SEPARATOR;
         File dir = new File(workPath);

@@ -40,7 +40,9 @@ public class Conf {
 
     public static boolean CLASS_MISSING = false;
 
-    public static boolean append = true;
+    public static boolean append;
+
+    public static int runTime;
 }
 
 //public class Conf {

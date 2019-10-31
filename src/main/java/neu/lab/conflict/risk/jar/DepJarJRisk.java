@@ -1,6 +1,7 @@
 package neu.lab.conflict.risk.jar;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.*;
 
 import gumtree.spoon.AstComparator;
@@ -267,7 +268,7 @@ public class DepJarJRisk {
     private String usedDepJarDecompressionPath;
 
     // 得到语义冲突的路径图
-    public Graph4distance getMethodPathGraphForSemanteme() {
+    public Graph4distance getMethodDistanceGraphForSemanteme() {
 
         Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
         Set<String> riskMethods;
@@ -293,6 +294,31 @@ public class DepJarJRisk {
         }
     }
 
+    public Graph4path getMethodPathGraphForSemanteme() {
+
+        Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
+        Set<String> riskMethods;
+
+        if (semantemeRiskMethods.size() > 0) {
+
+            decompile();
+
+            riskMethods = calculationDifference(semantemeRiskMethods);
+
+            if (riskMethods.size() > 0) {
+                IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, riskMethods));
+                if (iGraph != null) {
+                    return (Graph4path) iGraph;
+                } else {
+                    return new Graph4path(new HashMap<>(), new ArrayList<>());
+                }
+            } else {
+                return new Graph4path(new HashMap<>(), new ArrayList<>());
+            }
+        } else {
+            return new Graph4path(new HashMap<>(), new ArrayList<>());
+        }
+    }
     /**
      * 解压冲突jar包
      */
@@ -306,6 +332,9 @@ public class DepJarJRisk {
 
         JARDecompressionTool.decompress(usedDepJar.getJarFilePaths(true).get(0), usedDepJarDecompressionPath);
     }
+
+
+    public static PrintWriter printer;
 
     /**
      * 计算共有方法对的ast tree的差异集合
@@ -367,9 +396,9 @@ public class DepJarJRisk {
                         int differentSize = diff.getRootOperations().size();
                         if (differentSize > 0) {
                             //输出差异
-                            SemanticsConflictWriter.printer.println(method + "\n used compare shield diff:");
+                            printer.println(method + "\n used compare shield diff:");
                             for (Operation operation : diff.getRootOperations()) {
-                                SemanticsConflictWriter.printer.println(operation.toString());
+                                printer.println(operation.toString());
                             }
                         }
 

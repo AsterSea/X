@@ -11,6 +11,7 @@ import neu.lab.conflict.graph.Graph4path;
 import neu.lab.conflict.graph.Node4path;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
+import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.MethodCall;
 import soot.Scene;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -50,6 +51,9 @@ public class JRiskMthdPathCgTf extends JRiskCgTf {
 
 				String srcMthdName = edge.src().getSignature();
 				String tgtMthdName = edge.tgt().getSignature();
+
+                String srcMethodNameASMsignature = edge.src().getBytecodeSignature();
+                String tgtMethodNameASMsignature = edge.tgt().getBytecodeSignature();
 				// //TODO1
 				// if("<com.fasterxml.jackson.core.JsonFactory: boolean
 				// requiresPropertyOrdering()>".equals(tgtMthdName)) {
@@ -57,30 +61,33 @@ public class JRiskMthdPathCgTf extends JRiskCgTf {
 				// }
 				String srcClsName = edge.src().getDeclaringClass().getName();
 				String tgtClsName = edge.tgt().getDeclaringClass().getName();
-				if (edge.src().isJavaLibraryMethod() || edge.tgt().isJavaLibraryMethod()) {
-					// filter relation contains javaLibClass
+                if (edge.src().isJavaLibraryMethod() || edge.tgt().isJavaLibraryMethod()) {
+                    // filter relation contains javaLibClass
 //				} else if (usedJarClses.contains(SootUtil.mthdSig2cls(srcMthdName))
 //						&& usedJarClses.contains(SootUtil.mthdSig2cls(tgtMthdName))) {
 //					 filter relation inside conflictJar
-				} else {
-					if (edge.src().isConcrete() || edge.tgt().isConcrete()) {
+                } else if (conflictJarClses.contains(SootUtil.mthdSig2cls(srcMthdName))
+                        && conflictJarClses.contains(SootUtil.mthdSig2cls(tgtMthdName))) {
+                    // filter relation inside conflictJar 过滤掉conflictJar中的类
+                } else {
+                    if (edge.src().isConcrete() || edge.tgt().isConcrete()) {
 //						if (riskMthds.contains(srcMthdName)) {
 //							System.out.println(edge.src().getSignature());
 //							System.out.println(edge.src().getActiveBody().getAllUnitBoxes());
 //						}
-						if (!name2node.containsKey(srcMthdName)) {
-							name2node.put(srcMthdName,
-									new Node4path(srcMthdName, isHostClass(srcClsName) && !edge.src().isPrivate(),
-											riskMthds.contains(srcMthdName)));
-						}
-						if (!name2node.containsKey(tgtMthdName)) {
-							name2node.put(tgtMthdName,
-									new Node4path(tgtMthdName, isHostClass(tgtClsName) && !edge.tgt().isPrivate(),
-											riskMthds.contains(tgtMthdName)));
-						}
-						mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
-					}
-				}
+                        if (!name2node.containsKey(srcMthdName)) {
+                            name2node.put(srcMethodNameASMsignature,
+                                    new Node4path(srcMethodNameASMsignature, isHostClass(srcClsName) && !edge.src().isPrivate(),
+                                            riskMthds.contains(srcMthdName)));
+                        }
+                        if (!name2node.containsKey(tgtMthdName)) {
+                            name2node.put(tgtMethodNameASMsignature,
+                                    new Node4path(tgtMethodNameASMsignature, isHostClass(tgtClsName) && !edge.tgt().isPrivate(),
+                                            riskMthds.contains(tgtMthdName)));
+                        }
+                        mthdRlts.add(new MethodCall(srcMethodNameASMsignature, tgtMethodNameASMsignature));
+                    }
+                }
 			}
 			graph = new Graph4path(name2node, mthdRlts);
 			MavenUtil.i().getLog().info("end form graph.");

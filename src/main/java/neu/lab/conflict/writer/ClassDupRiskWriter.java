@@ -100,9 +100,9 @@ public class ClassDupRiskWriter {
 			for (Record4path record : dis2records.flat()) {
 //				if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
 //				if(addJarPath(record.getPathStr()).contains(conflictDepJarVersion)) {
-				List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMthd());
+				List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMethod());
 				printer.println("\n" + "conflict:" + jarPair.getCommonMethodsString());
-				printer.println("risk method name:" + record.getRiskMthd());
+				printer.println("risk method name:" + record.getRiskMethod());
 				printer.println("差异:" + differenceAndSame.get(0));
 				printer.println("相同:" + differenceAndSame.get(1));
 				printer.println("pathLen:" + record.getPathlen() + "\n" + addJarPath(record.getPathStr()));

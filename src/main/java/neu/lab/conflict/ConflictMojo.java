@@ -97,6 +97,9 @@ public abstract class ConflictMojo extends AbstractMojo {
 	@Parameter(property = "findAllPath")
 	public boolean findAllPath = false;
 
+	@Parameter(property = "runTime")
+	public int runTime = 1;
+
 	public int systemSize = 0;
 
 	public long systemFileSize = 0;// byte
@@ -112,7 +115,7 @@ public abstract class ConflictMojo extends AbstractMojo {
 		Conf.findAllpath = findAllPath;
 		Conf.outDir = resultPath;
 		Conf.append = append;
-
+		Conf.runTime = runTime;
 		GlobalVar.useAllJar = useAllJar;
 
 		// 初始化NodeAdapters

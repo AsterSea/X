@@ -9,13 +9,8 @@ import java.util.Set;
 
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.container.DepJars;
-import neu.lab.conflict.graph.Book4path;
-import neu.lab.conflict.graph.Dog;
-import neu.lab.conflict.graph.IBook;
-import neu.lab.conflict.graph.IRecord;
-import neu.lab.conflict.graph.Record4path;
+import neu.lab.conflict.graph.*;
 import neu.lab.conflict.graph.Dog.Strategy;
-import neu.lab.conflict.graph.Graph4distance;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
@@ -42,7 +37,7 @@ public class SemanticsRiskWriter {
 
 			for (Conflict conflict : Conflicts.i().getConflicts()) {
 				for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
-					Graph4distance pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
+					Graph4path pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
 					Set<String> hostNodes = pathGraph.getHostNodes();
 					Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH,
 							Strategy.NOT_RESET_BOOK);
@@ -65,9 +60,9 @@ public class SemanticsRiskWriter {
 						for (Record4path record : dis2records.flat()) {
 //								if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
 //								if(addJarPath(record.getPathStr()).contains(conflictDepJarVersion)) {
-							List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMthd());
+							List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMethod());
 							printer.println("\n" + "conflict:" + conflict.toString());
-							printer.println("risk method name:" + record.getRiskMthd());
+							printer.println("risk method name:" + record.getRiskMethod());
 							printer.println("来自冲突版本:" + depJarRisk.getConflictDepJar().toString());
 							printer.println("差异:" + differenceAndSame.get(0));
 							printer.println("相同:" + differenceAndSame.get(1));

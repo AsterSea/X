@@ -89,7 +89,7 @@ public class JRiskDistanceCgTf extends JRiskCgTf {
                                 riskMthds.contains(tgtMthdName), getBranchNum(tgtMethodNameASMsignature)));
                     }
 //                    mthdRlts.add(new MethodCall(srcMthdName, tgtMthdName));
-                    mthdRlts.add(new MethodCall(edge.src().getBytecodeSignature(), edge.tgt().getBytecodeSignature()));
+                    mthdRlts.add(new MethodCall(srcMethodNameASMsignature, tgtMethodNameASMsignature));
                 }
             }
 //			System.out.println(mthdRlts.size());

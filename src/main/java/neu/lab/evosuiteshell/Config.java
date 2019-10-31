@@ -6,9 +6,10 @@ import neu.lab.conflict.util.MavenUtil;
 
 public class Config {
     private static String MAVEN_PATH = "";
+    public static String FILE_SEPARATOR = File.separator;
     public static String SENSOR_DIR = "sensor_testcase";
     public static String EVOSUITE_NAME = "evosuite-runtime-1.0.6.jar";
-    public static String FILE_SEPARATOR = File.separator;
+
     public static String CLASSPATH_SEPARATOR = ";";
 
     static {
