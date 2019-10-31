@@ -109,10 +109,10 @@ public class SootUtil {
             if (!path.endsWith("tar.gz") && !path.endsWith(".pom") && !path.endsWith(".war")) {
                 return SourceLocator.v().getClassesUnder(path);
             } else {
-                MavenUtil.i().getLog().warn(path + "is illegal classpath");
+                MavenUtil.i().getLog().warn(path + " is illegal classpath");
             }
         } else {
-            MavenUtil.i().getLog().warn(path + "doesn't exist in local");
+            MavenUtil.i().getLog().warn(path + " doesn't exist in local");
         }
         return new ArrayList<String>();
     }

@@ -48,6 +48,7 @@ public class SemanticsConflictWriter {
     private Map<String, IBook> pathBooks;
 
     private int runTime = 0;
+    private boolean hasNecessaryRunNextTime = true;
 
     public void writeSemanticsConflict() {
 
@@ -57,6 +58,10 @@ public class SemanticsConflictWriter {
             for (int time = 0; time < Conf.runTime; time++) {
                 runTime++;
                 runEvosuite();
+                if (!hasNecessaryRunNextTime) {
+                    MavenUtil.i().getLog().info("does not have necessary to run next time, exit!");
+                    break;
+                }
             }
         } catch (Exception e) {
             MavenUtil.i().getLog().error(e.getMessage());
@@ -91,10 +96,12 @@ public class SemanticsConflictWriter {
     }
 
     private void runEvosuite() throws Exception {
-
-//        Properties.CP = getDependencyCP(null);
-//        GenericPoolFromTestCase.genericStringPool();
+        HashSet<String> hasDetectConflict = new HashSet<>();
         for (Conflict conflict : Conflicts.i().getConflicts()) {
+            if (hasDetectConflict.contains(conflict.getUsedDepJar().toString())) {
+                continue;
+            }
+            hasDetectConflict.add(conflict.getUsedDepJar().toString());
 //            new File(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + ".txt").createNewFile();
             PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
             printer.println(conflict.toString());
@@ -135,6 +142,9 @@ public class SemanticsConflictWriter {
             }
             printer.println();
             printer.close();
+        }
+        if (methodToHost.keySet().size() == 0) {
+            hasNecessaryRunNextTime = false;
         }
     }
 
@@ -370,6 +380,7 @@ public class SemanticsConflictWriter {
 //                    }
                 }
             }
+            MavenUtil.i().getLog().info("can reach risk method size : " + methodToHost.keySet().size());
             if (dis2records.size() > 0) {
                 for (Record4path record : dis2records.flat()) {
                     methodPath.put(record.getRiskMethod(), addJarPath(record.getPathStr()));
@@ -472,23 +483,27 @@ public class SemanticsConflictWriter {
         }
         String conflictDependencyJar = MavenUtil.i().getMvnRep();
         for (Conflict conflict : Conflicts.i().getConflicts()) {
-            for (DepJarJRisk depJarJRisk : conflict.getJarRisks()) {
-                conflictDependencyJar += conflict.getGroupId().replace(".", Config.FILE_SEPARATOR) + Config.FILE_SEPARATOR
-                        + conflict.getArtifactId().replace(".", Config.FILE_SEPARATOR) + Config.FILE_SEPARATOR + depJarJRisk.getVersion() + Config.FILE_SEPARATOR
-                        + conflict.getArtifactId() + "-" + depJarJRisk.getVersion() + ".jar";
-                if (new File(conflictDependencyJar).exists()) {
-                    try {
-                        Files.copy(new File(conflictDependencyJar), new File(dependencyConflictJarDir + Config.FILE_SEPARATOR
-                                + conflict.getArtifactId() + "-" + depJarJRisk.getVersion() + ".jar"));
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+            try {
+                for (DepJarJRisk depJarJRisk : conflict.getJarRisks()) {
+                    conflictDependencyJar += conflict.getGroupId().replace(".", Config.FILE_SEPARATOR) + Config.FILE_SEPARATOR
+                            + conflict.getArtifactId().replace(".", Config.FILE_SEPARATOR) + Config.FILE_SEPARATOR + depJarJRisk.getVersion() + Config.FILE_SEPARATOR
+                            + conflict.getArtifactId() + "-" + depJarJRisk.getVersion() + ".jar";
+                    if (new File(conflictDependencyJar).exists()) {
+                        try {
+                            Files.copy(new File(conflictDependencyJar), new File(dependencyConflictJarDir + Config.FILE_SEPARATOR
+                                    + conflict.getArtifactId() + "-" + depJarJRisk.getVersion() + ".jar"));
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    } else {
+                        DependencyInfo dependencyInfo = new DependencyInfo(conflict.getGroupId(), conflict.getArtifactId(),
+                                depJarJRisk.getVersion());
+                        copyConflictFromMaven(dependencyInfo, dependencyConflictJarDir);
                     }
-                } else {
-                    DependencyInfo dependencyInfo = new DependencyInfo(conflict.getGroupId(), conflict.getArtifactId(),
-                            depJarJRisk.getVersion());
-                    copyConflictFromMaven(dependencyInfo, dependencyConflictJarDir);
                 }
+            } catch (Exception e) {
+                MavenUtil.i().getLog().error(e.getMessage());
             }
         }
         dependencyConflictJarsPath = new File(dependencyConflictJarDir).list();

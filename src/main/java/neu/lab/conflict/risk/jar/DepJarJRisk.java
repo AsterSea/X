@@ -297,13 +297,37 @@ public class DepJarJRisk {
     public Graph4path getMethodPathGraphForSemanteme() {
 
         Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
-        Set<String> riskMethods;
+        Set<String> riskMethods = new HashSet<>();
 
         if (semantemeRiskMethods.size() > 0) {
 
-            decompile();
+            GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
+                    new JRiskMethodOutPathCgTf(semantemeRiskMethods));
 
-            riskMethods = calculationDifference(semantemeRiskMethods);
+            GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
+                    .getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+
+            SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
+                    usedDepJarGraphForMethodOutPath.getSemantemeMethods());
+
+            semantemeMethods.CalculationDifference(); // 计算差异
+
+            //内部类会报错
+            semantemeMethods.deleteInnerClass();
+
+            semantemeRiskMethods = semantemeMethods.sortMap(100);
+
+            MavenUtil.i().getLog().info("filter risk method, after size : " + semantemeRiskMethods.size());
+
+            decompile();
+            try {
+                riskMethods = calculationDifference(semantemeRiskMethods);
+            } catch (Exception e) {
+                MavenUtil.i().getLog().error(e.getMessage());
+                return new Graph4path(new HashMap<>(), new ArrayList<>());
+            }
+
+            MavenUtil.i().getLog().info("risk method size : " + riskMethods.size());
 
             if (riskMethods.size() > 0) {
                 IGraph iGraph = SootJRiskCg.i().getGraph(this, new JRiskMthdPathCgTf(this, riskMethods));
@@ -369,17 +393,17 @@ public class DepJarJRisk {
                 methodsFromClass.put(SootUtil.mthdSig2cls(method), methods);
             }
 
+            MavenUtil.i().getLog().info("decompiler......");
             for (String methodClassSig : methodsFromClass.keySet()) {
 
                 decompiler.decompile(loaderDepJar, printerDepJar, methodClassSig.replace(".", File.separator));
                 decompiler.decompile(loaderUsedDepJar, printerUsedDepJar, methodClassSig.replace(".", File.separator));
-                MavenUtil.i().getLog().info("decompiler success");
+//                MavenUtil.i().getLog().info("decompiler success");
+
+                String depJarContent = printerDepJar.toString();
+                String usedDepJarContent = printerUsedDepJar.toString();
 
                 for (String method : methodsFromClass.get(methodClassSig)) {
-
-                    String depJarContent = printerDepJar.toString();
-                    String usedDepJarContent = printerUsedDepJar.toString();
-
                     try {
                         List<CtMethod<?>> depJarCtMethods = astComparator.getCtType(depJarContent).getMethodsByName(SootUtil.mthdSig2methodName(method));
 
@@ -399,14 +423,20 @@ public class DepJarJRisk {
                             //输出差异
                             printer.println(method + " ===> diff count : " + differentSize + "\n used compare shield diff:");
                             for (Operation operation : diff.getRootOperations()) {
-                                printer.println(operation.toString());
+                                try {
+                                    printer.println(operation.toString());
+                                } catch (Exception e) {
+//                                    e.printStackTrace();
+                                    break;
+                                }
                             }
+//                            System.out.println(method + differentSize);
+                            semantemeMethodForDifferences.put(method, differentSize);
                         }
-
-                        semantemeMethodForDifferences.put(method, differentSize);
-
                     } catch (Exception e) {
-                        MavenUtil.i().getLog().error(e.toString() + " method : " + method);
+//                        e.printStackTrace();
+//                        MavenUtil.i().getLog().error(e.toString() + " method : " + method);
+                        break;
                     }
                 }
             }
@@ -415,7 +445,7 @@ public class DepJarJRisk {
             MavenUtil.i().getLog().error(e.toString());
 //            e.printStackTrace();
         }
-
+        MavenUtil.i().getLog().info("decompiler complete");
         return sortMap(semantemeMethodForDifferences, 100);
     }
 
