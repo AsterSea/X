@@ -148,7 +148,7 @@ public class SootUtil {
         return false;
     }
 
-    public static void main(String[] args) {
-        System.out.println(mthdSig2param("<org.slf4j.event.SubstituteLoggingEvent: org.slf4j.event.Level getLevel(String,int)>"));
-    }
+//    public static void main(String[] args) {
+//        System.out.println(mthdSig2param("<org.slf4j.event.SubstituteLoggingEvent: org.slf4j.event.Level getLevel(String,int)>"));
+//    }
 }

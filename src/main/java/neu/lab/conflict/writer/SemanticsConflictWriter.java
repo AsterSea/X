@@ -133,8 +133,9 @@ public class SemanticsConflictWriter {
                     testClassName = riskMethodClassHost + "_ESTest";
                     startEvolution(CP, testDir, riskMethodClassHost, method, riskMethodHost);
                     compileJunit(testDir, testClassName, CP);
-                    ArrayList<String> results = executeJunit(testDir, testClassName, ConflictCP);
-                    printer.println(handleResult(results));
+                    ArrayList<String> results = executeJunit(testDir, testClassName, CP);
+                    ArrayList<String> conflictResults = executeJunit(testDir, testClassName, ConflictCP);
+                    printer.println(handleResult(results, conflictResults));
                     printer.println();
                 }
                 testClassName = SootUtil.mthdSig2cls(method);
@@ -142,8 +143,9 @@ public class SemanticsConflictWriter {
                 printer.println("risk target method ===> " + method);
                 startEvolution(CP, testDir, testClassName, method, method);
                 compileJunit(testDir, testClassName + "_ESTest", CP);
-                ArrayList<String> results = executeJunit(testDir, testClassName + "_ESTest", ConflictCP);
-                printer.println(handleResult(results));
+                ArrayList<String> results = executeJunit(testDir, testClassName + "_ESTest", CP);
+                ArrayList<String> conflictResults = executeJunit(testDir, testClassName + "_ESTest", CP);
+                printer.println(handleResult(results, conflictResults));
                 printer.println("risk method can be called, method path:");
                 printer.println(methodPath.get(method));
             }
@@ -268,27 +270,38 @@ public class SemanticsConflictWriter {
         return distances;
     }
 
-    private String handleResult(ArrayList<String> results) {
+    private String handleResult(ArrayList<String> results, ArrayList<String> conflictResults) {
         double run = 0;
         double failures = 0;
-        String handle = "";
+        double conflictRun = 0;
+        double conflictFailures = 0;
+        String handle;
         double percent;
         for (String result : results) {
             if (result.contains("Tests")) {
                 String[] lines = result.split(",");
                 run = Double.parseDouble(lines[0].split(": ")[1]);
                 failures = Double.parseDouble(lines[1].split(": ")[1]);
-                percent = failures / run;
-                handle = "test case nums : " + run + " * failures nums : " + failures + " * failures accounted for "
-                        + String.format("%.2f", percent * 100) + "%";
                 break;
             }
             if (result.contains("OK")) {
-                String line = result.substring(result.indexOf("(") + 1, result.indexOf(")"));
-                handle = "test case nums : " + line.split(" ")[0] + " * failures accounted for 0%";
                 break;
             }
         }
+        for (String conflictResult : conflictResults) {
+            if (conflictResult.contains("Tests")) {
+                String[] lines = conflictResult.split(",");
+                conflictRun = Double.parseDouble(lines[0].split(": ")[1]);
+                conflictFailures = Double.parseDouble(lines[1].split(": ")[1]);
+                break;
+            }
+            if (conflictResult.contains("OK")) {
+                break;
+            }
+        }
+        percent = (conflictFailures - failures) / (conflictRun - run);
+        handle = "test case nums : " + (conflictRun - run) + " * failures nums : " + (conflictFailures - failures) + " * failures accounted for "
+                + String.format("%.2f", percent * 100) + "%";
         return handle;
     }
 

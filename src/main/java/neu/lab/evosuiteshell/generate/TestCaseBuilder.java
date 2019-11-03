@@ -176,8 +176,7 @@ public class TestCaseBuilder {
     }
 
     public VariableReference appendEnumPrimitive(Enum<?> value) {
-        EnumPrimitiveStatement primitiveStmt = new EnumPrimitiveStatement(tc,
-                value);
+        EnumPrimitiveStatement primitiveStmt = new EnumPrimitiveStatement(tc, value);
         tc.addStatement(primitiveStmt);
         return primitiveStmt.getReturnValue();
     }
