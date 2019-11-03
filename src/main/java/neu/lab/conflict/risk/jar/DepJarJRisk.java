@@ -422,12 +422,14 @@ public class DepJarJRisk {
                         if (differentSize > 0) {
                             //输出差异
                             printer.println(method + " ===> diff count : " + differentSize + "\n used compare shield diff:");
-                            for (Operation operation : diff.getRootOperations()) {
-                                try {
-                                    printer.println(operation.toString());
-                                } catch (Exception e) {
+                            if (Conf.printDiff) {
+                                for (Operation operation : diff.getRootOperations()) {
+                                    try {
+                                        printer.println(operation.toString());
+                                    } catch (Exception e) {
 //                                    e.printStackTrace();
-                                    break;
+                                        break;
+                                    }
                                 }
                             }
 //                            System.out.println(method + differentSize);

@@ -13,8 +13,8 @@ public class ExecuteJunit {
      * @return fileName 带绝对路径
      * C:\\Users\\Flipped\\eclipse-workspace\\Host\\evosuite-tests\\B\\B\\executeCMD.bat
      */
-    public static String creatBat(String cmd, String dir) {
-        String fileName = dir + "executeCMD.bat";
+    public static String creatBat(String name, String cmd, String dir) {
+        String fileName = dir + name + "executeCMD.bat";
         try {
             FileWriter fileWriter = new FileWriter(fileName);
             fileWriter.write(cmd);
@@ -26,8 +26,8 @@ public class ExecuteJunit {
         return fileName;
     }
 
-    public static String creatShellScript(String cmd, String dir) {
-        String fileName = dir + "execute.sh";
+    public static String creatShellScript(String name, String cmd, String dir) {
+        String fileName = dir + name + "execute.sh";
         try {
             FileWriter fileWriter = new FileWriter(fileName);
             fileWriter.write("#!bin/sh\n" + cmd);

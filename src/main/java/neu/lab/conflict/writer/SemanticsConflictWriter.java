@@ -18,6 +18,7 @@ import neu.lab.conflict.vo.DepJar;
 import neu.lab.evosuiteshell.generate.GenericObjectSet;
 import neu.lab.evosuiteshell.generate.GenericPoolFromTestCase;
 import neu.lab.evosuiteshell.search.*;
+import org.apache.maven.Maven;
 import org.evosuite.Properties;
 import org.evosuite.TestSuiteGenerator;
 import org.evosuite.Properties.Criterion;
@@ -72,8 +73,14 @@ public class SemanticsConflictWriter {
      * 得到依赖jar包的路径
      */
     private String getDependencyCP(Conflict conflict) {
-        StringBuffer CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "test-classes" + Config.CLASSPATH_SEPARATOR
-                + System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.EVOSUITE_NAME);
+        StringBuffer CP = new StringBuffer();
+        if (new File(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "test-classes").exists()) {
+            CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "test-classes" + Config.CLASSPATH_SEPARATOR
+                    + System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.EVOSUITE_NAME);
+        } else {
+            CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR
+                    + System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.EVOSUITE_NAME);
+        }
         String dependencyConflictJarDir = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR
                 + "dependencyConflictJar" + Config.FILE_SEPARATOR;
         String dependencyJar = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "dependencyJar" + Config.FILE_SEPARATOR;
@@ -223,6 +230,8 @@ public class SemanticsConflictWriter {
         Properties.NUM_TESTS = 10;
         Properties.TEST_DIR = testDir;
         Properties.JUNIT_CHECK = false;
+        Properties.MOCK_IF_NO_GENERATOR = false;
+        Properties.FUNCTIONAL_MOCKING_PERCENT = 0;
 //        CP = CP.replace(";", ":");// + ":" + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "evosuite-shaded-1.0.6.jar";
 //        CP = CP.replaceAll("/Users/wangchao/eclipse-workspace/Host/", "");
 
@@ -284,6 +293,7 @@ public class SemanticsConflictWriter {
     }
 
     private void compileJunit(String testDir, String testClassName, String CP) {
+        MavenUtil.i().getLog().info("start to compile test case");
         if (!CP.contains("junit")) {
             CP += addJunitDependency();
         }
@@ -295,11 +305,17 @@ public class SemanticsConflictWriter {
         cmd.append(Command.CLASSPATH);
         cmd.append(CP + " ");
         cmd.append("*.java");
+        cmd.append(" >log.txt 2>&1");
 //		System.out.println(cmd + "\n" + fileDir);
-        ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatShellScript(cmd.toString(), fileDir));
+        if (Config.osName.contains("Windows")) {
+            ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatBat("c" + fileName, cmd.toString(), fileDir));
+        } else {
+            ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatShellScript("c" + fileName, cmd.toString(), fileDir));
+        }
     }
 
     private ArrayList<String> executeJunit(String testDir, String testClassName, String CP) {
+        MavenUtil.i().getLog().info("start to execute test case");
         if (!CP.contains("junit")) {
             CP += addJunitDependency();
         }
@@ -312,8 +328,15 @@ public class SemanticsConflictWriter {
         cmd.append(CP + Config.CLASSPATH_SEPARATOR + testDir);
         cmd.append(Command.JUNIT_CORE);
         cmd.append(testClassName);
+        cmd.append(" >log.txt 2>&1");
 //		System.out.println(cmd + "\n" + fileDir);
-        return ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatShellScript(cmd.toString(), fileDir));
+        if (Config.osName.contains("Windows")) {
+            MavenUtil.i().getLog().info("create bat in windows");
+            return ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatBat("e" + fileName, cmd.toString(), fileDir));
+        } else {
+            MavenUtil.i().getLog().info("create sh");
+            return ExecuteCommand.exeBatAndGetResult(ExecuteJunit.creatShellScript("e" + fileName, cmd.toString(), fileDir));
+        }
     }
 
     private String addJunitDependency() {
@@ -357,6 +380,10 @@ public class SemanticsConflictWriter {
             MySortedMap<Integer, Record4path> dis2records = new MySortedMap<>();
 
             for (String topMthd : pathBooks.keySet()) {
+                // 不保存内部类
+                if (SootUtil.mthdSig2cls(topMthd).contains("$")) {
+                    continue;
+                }
                 if (hostNodes.contains(topMthd)) {
                     Book4path book = (Book4path) pathBooks.get(topMthd);
                     for (IRecord iRecord : book.getRecords()) {
@@ -380,7 +407,7 @@ public class SemanticsConflictWriter {
 //                    }
                 }
             }
-            MavenUtil.i().getLog().info("can reach risk method size : " + methodToHost.keySet().size());
+            MavenUtil.i().getLog().info("risk method from host can reach size : " + methodToHost.keySet().size());
             if (dis2records.size() > 0) {
                 for (Record4path record : dis2records.flat()) {
                     methodPath.put(record.getRiskMethod(), addJarPath(record.getPathStr()));

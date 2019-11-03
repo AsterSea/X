@@ -12,6 +12,8 @@ public class Config {
 
     public static String CLASSPATH_SEPARATOR = ";";
 
+    public static String osName = System.getProperty("os.name");
+
     static {
         if (System.getProperty("os.name").contains("Mac")) {
             CLASSPATH_SEPARATOR = ":";
@@ -20,7 +22,7 @@ public class Config {
     }
 
     //项目junit测试用例目录
-    public static String PROJECT_TESTCASE_DIR = System.getProperty("user.dir") + "/src/test/java/";
+    public static String PROJECT_TESTCASE_DIR = System.getProperty("user.dir") + FILE_SEPARATOR + "src" + FILE_SEPARATOR + "test" + FILE_SEPARATOR + "java" + FILE_SEPARATOR;
 
     /**
      * get mvn.bat or mvn.cmd path

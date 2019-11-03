@@ -100,6 +100,9 @@ public abstract class ConflictMojo extends AbstractMojo {
 	@Parameter(property = "runTime")
 	public int runTime = 1;
 
+    @Parameter(property = "printDiff", defaultValue = "false")
+    public boolean printDiff;
+
 	public int systemSize = 0;
 
 	public long systemFileSize = 0;// byte
@@ -116,6 +119,7 @@ public abstract class ConflictMojo extends AbstractMojo {
 		Conf.outDir = resultPath;
 		Conf.append = append;
 		Conf.runTime = runTime;
+        Conf.printDiff = printDiff;
 		GlobalVar.useAllJar = useAllJar;
 
 		// 初始化NodeAdapters

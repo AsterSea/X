@@ -42,7 +42,9 @@ public class Conf {
 
     public static boolean append;
 
-    public static int runTime;
+    public static int runTime = 1;
+
+    public static boolean printDiff;
 }
 
 //public class Conf {
