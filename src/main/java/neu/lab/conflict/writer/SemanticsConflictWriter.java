@@ -271,7 +271,7 @@ public class SemanticsConflictWriter {
     }
 
     private String handleResult(ArrayList<String> results, ArrayList<String> conflictResults) {
-        double run = 0;
+//        double run = 0;
         double failures = 0;
         double conflictRun = 0;
         double conflictFailures = 0;
@@ -280,7 +280,7 @@ public class SemanticsConflictWriter {
         for (String result : results) {
             if (result.contains("Tests")) {
                 String[] lines = result.split(",");
-                run = Double.parseDouble(lines[0].split(": ")[1]);
+//                run = Double.parseDouble(lines[0].split(": ")[1]);
                 failures = Double.parseDouble(lines[1].split(": ")[1]);
                 break;
             }
@@ -299,8 +299,8 @@ public class SemanticsConflictWriter {
                 break;
             }
         }
-        percent = (conflictFailures - failures) / (conflictRun - run);
-        handle = "test case nums : " + (conflictRun - run) + " * failures nums : " + (conflictFailures - failures) + " * failures accounted for "
+        percent = (conflictFailures - failures) / conflictRun;
+        handle = "test case nums : " + conflictRun + " * failures nums : " + (conflictFailures - failures) + " * failures accounted for "
                 + String.format("%.2f", percent * 100) + "%";
         return handle;
     }
