@@ -297,7 +297,7 @@ public class DepJarJRisk {
     public Graph4path getMethodPathGraphForSemanteme() {
 
         Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
-        Set<String> riskMethods = new HashSet<>();
+        Set<String> riskMethods;
 
         if (semantemeRiskMethods.size() > 0) {
 
