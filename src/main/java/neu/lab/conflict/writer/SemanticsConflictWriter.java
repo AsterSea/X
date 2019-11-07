@@ -144,7 +144,7 @@ public class SemanticsConflictWriter {
                 startEvolution(CP, testDir, testClassName, method, method);
                 compileJunit(testDir, testClassName + "_ESTest", CP);
                 ArrayList<String> results = executeJunit(testDir, testClassName + "_ESTest", CP);
-                ArrayList<String> conflictResults = executeJunit(testDir, testClassName + "_ESTest", CP);
+                ArrayList<String> conflictResults = executeJunit(testDir, testClassName + "_ESTest", ConflictCP);
                 printer.println(handleResult(results, conflictResults));
                 printer.println("risk method can be called, method path:");
                 printer.println(methodPath.get(method));
@@ -296,10 +296,15 @@ public class SemanticsConflictWriter {
                 break;
             }
             if (conflictResult.contains("OK")) {
+                conflictRun = Double.parseDouble(conflictResult.split("\\(")[1].split(" ")[0]);
                 break;
             }
         }
-        percent = (conflictFailures - failures) / conflictRun;
+        if (conflictRun == 0) {
+            percent = 0;
+        } else {
+            percent = (conflictFailures - failures) / conflictRun;
+        }
         handle = "test case nums : " + conflictRun + " * failures nums : " + (conflictFailures - failures) + " * failures accounted for "
                 + String.format("%.2f", percent * 100) + "%";
         return handle;
