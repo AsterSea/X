@@ -5,12 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import gumtree.spoon.diff.operations.Operation;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.graph.*;
 import neu.lab.conflict.util.MySortedMap;
@@ -112,9 +109,9 @@ public class SemanticsConflictWriter {
 //            new File(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + ".txt").createNewFile();
             PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
             printer.println(conflict.toString());
-            DepJarJRisk.printer = printer;
 //            System.out.println(conflict);
             riskMethodPair(conflict);
+            printRiskMetodDiff(printer);
             System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
             for (String method : methodToHost.keySet()) {
 //                initObjectPool(SootUtil.mthdSig2cls(method));
@@ -380,12 +377,35 @@ public class SemanticsConflictWriter {
 
     HashMap<String, String> methodPath = new HashMap<>();
 
+    Map<String, List<Operation>> riskMethodDiffsMap = new HashMap<>();
+
+    private void printRiskMetodDiff(PrintWriter printer) {
+//        Set<Map.Entry<String, List<Operation>>> entrys = riskMethodDiffsMap.entrySet();
+        for (String riskMethod : riskMethodDiffsMap.keySet()) {
+            List<Operation> operations = riskMethodDiffsMap.get(riskMethod);
+            printer.println(riskMethod + " ===> diff count : " + operations.size() + "\n used compare shield diff:");
+            if (Conf.printDiff) {
+                for (Operation operation : operations) {
+                    try {
+                        printer.println(operation.toString());
+                    } catch (Exception e) {
+//                                    e.printStackTrace();
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
+
     /**
      * get Risk method pair to methodToHost
      */
     private void riskMethodPair(Conflict conflict) {
         for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
             Graph4path pathGraph = depJarRisk.getMethodPathGraphForSemanteme();
+            Map<String, String> methodMappingASMMethod = pathGraph.getMethodMappingASMMethod();
+            Map<String, List<Operation>> allRiskMethodDiffsMap = depJarRisk.getRiskMethodDiffsMap();
             Set<String> hostNodes = pathGraph.getHostNodes();
             /**
              * 可以在这里修改寻找深度，改成10层
@@ -397,13 +417,13 @@ public class SemanticsConflictWriter {
 //            System.out.println(pathBooks.keySet());
             MySortedMap<Integer, Record4path> dis2records = new MySortedMap<>();
 
-            for (String topMthd : pathBooks.keySet()) {
+            for (String topMethod : pathBooks.keySet()) {
                 // 不保存内部类
-                if (SootUtil.mthdSig2cls(topMthd).contains("$")) {
+                if (SootUtil.mthdSig2cls(topMethod).contains("$")) {
                     continue;
                 }
-                if (hostNodes.contains(topMthd)) {
-                    Book4path book = (Book4path) pathBooks.get(topMthd);
+                if (hostNodes.contains(topMethod)) {
+                    Book4path book = (Book4path) pathBooks.get(topMethod);
                     for (IRecord iRecord : book.getRecords()) {
                         Record4path record = (Record4path) iRecord;
                         dis2records.add(record.getPathlen(), record);
@@ -411,10 +431,11 @@ public class SemanticsConflictWriter {
                         if (host == null) {
                             host = new HashSet<>();
                             methodToHost.put(record.getRiskMethod(), host);
+                            riskMethodDiffsMap.put(record.getRiskMethod(), allRiskMethodDiffsMap.get(methodMappingASMMethod.get(record.getRiskMethod())));
                         }
                         // 修改后 存的是host节点的完全名
 //                        host.add(SootUtil.mthdSig2cls(topMthd));
-                        host.add(topMthd);
+                        host.add(topMethod);
                     }
 //                    Map<String, IBook> books4path = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH,
 //                            Strategy.NOT_RESET_BOOK);
@@ -427,10 +448,9 @@ public class SemanticsConflictWriter {
             }
             MavenUtil.i().getLog().info("risk method from host can reach size : " + methodToHost.keySet().size());
             if (dis2records.size() > 0) {
-                for (Record4path record : dis2records.flat()) {
-                    methodPath.put(record.getRiskMethod(), addJarPath(record.getPathStr()));
-//                    System.out.println(addJarPath(record.getPathStr()));
-                }
+                Record4path record = dis2records.flat().get(0);
+                // 只存最短一条
+                methodPath.put(record.getRiskMethod(), addJarPath(record.getPathStr()));
             }
         }
     }

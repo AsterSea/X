@@ -359,7 +359,13 @@ public class DepJarJRisk {
     }
 
 
-    public static PrintWriter printer;
+//    public static PrintWriter printer;
+
+    public Map<String, List<Operation>> getRiskMethodDiffsMap() {
+        return riskMethodDiffsMap;
+    }
+
+    private Map<String, List<Operation>> riskMethodDiffsMap = new HashMap<>();
 
     /**
      * 计算共有方法对的ast tree的差异集合
@@ -420,18 +426,19 @@ public class DepJarJRisk {
 
                         int differentSize = diff.getRootOperations().size();
                         if (differentSize > 0) {
+                            riskMethodDiffsMap.put(method, diff.getRootOperations());
                             //输出差异
-                            printer.println(method + " ===> diff count : " + differentSize + "\n used compare shield diff:");
-                            if (Conf.printDiff) {
-                                for (Operation operation : diff.getRootOperations()) {
-                                    try {
-                                        printer.println(operation.toString());
-                                    } catch (Exception e) {
-//                                    e.printStackTrace();
-                                        break;
-                                    }
-                                }
-                            }
+//                            printer.println(method + " ===> diff count : " + differentSize + "\n used compare shield diff:");
+//                            if (Conf.printDiff) {
+//                                for (Operation operation : diff.getRootOperations()) {
+//                                    try {
+//                                        printer.println(operation.toString());
+//                                    } catch (Exception e) {
+////                                    e.printStackTrace();
+//                                        break;
+//                                    }
+//                                }
+//                            }
 //                            System.out.println(method + differentSize);
                             semantemeMethodForDifferences.put(method, differentSize);
                         }

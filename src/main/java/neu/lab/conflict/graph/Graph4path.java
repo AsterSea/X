@@ -1,17 +1,14 @@
 package neu.lab.conflict.graph;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import neu.lab.conflict.vo.MethodCall;
 
 public class Graph4path implements IGraph {
 
     Map<String, Node4path> name2node;
+    Map<String, String> methodMappingASMMethod = new HashMap<>();
 
     public Graph4path(Map<String, Node4path> name2node, Collection<MethodCall> calls) {
         this.name2node = name2node;
@@ -20,8 +17,20 @@ public class Graph4path implements IGraph {
         }
     }
 
+    public Graph4path(Map<String, Node4path> name2node, Collection<MethodCall> calls, Map<String, String> map) {
+        this.name2node = name2node;
+        this.methodMappingASMMethod = map;
+        for (MethodCall call : calls) {
+            addEdge(call);
+        }
+    }
+
     public Graph4path(Map<String, Node4path> name2node) {
         this.name2node = name2node;
+    }
+
+    public Map<String, String> getMethodMappingASMMethod() {
+        return methodMappingASMMethod;
     }
 
     private void addEdge(MethodCall call) {
@@ -32,7 +41,7 @@ public class Graph4path implements IGraph {
 //        }
 
 //		if(name2node.get(call.getSrc()))
-		name2node.get(call.getSrc()).addOutNd(call.getTgt());
+        name2node.get(call.getSrc()).addOutNd(call.getTgt());
 //		name2node.get(call.getTgt()).addInNd(call.getSrc());
     }
 
