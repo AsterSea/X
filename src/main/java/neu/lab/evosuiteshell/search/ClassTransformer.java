@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.soot.JarAna;
 import neu.lab.conflict.vo.ClassVO;
 import soot.Scene;
@@ -13,11 +14,23 @@ import soot.SootClass;
 import soot.util.Chain;
 
 public class ClassTransformer extends SceneTransformer {
-//    private Map<String, ClassVO> allclasses = JarAna.i().deconstruct(Arrays.asList(new String[]{"/Users/wangchao/个人文件/东北大学/实验室/实验室台式/eclipse/Host/target/Host-1.0.jar"}));
+    //    private Map<String, ClassVO> allclasses = JarAna.i().deconstruct(Arrays.asList(new String[]{"/Users/wangchao/个人文件/东北大学/实验室/实验室台式/eclipse/Host/target/Host-1.0.jar"}));
+    public ClassTransformer() {
+
+    }
+
+    Set<String> classesSig = new HashSet<>();
+
+    public ClassTransformer(Set<String> classesSig) {
+        this.classesSig = classesSig;
+    }
 
     @Override
     protected void internalTransform(String arg0, Map<String, String> arg1) {
         // TODO Auto-generated method stub
+
+//        Set<String> entryClses = DepJars.i().getHostDepJar().getAllCls(true);
+
         Chain<SootClass> allClass = Scene.v().getClasses();
 //        HashSet<SootClass> filterAllclasses = new HashSet<SootClass>();
 //        for(SootClass sootClass : allClass){
@@ -27,9 +40,12 @@ public class ClassTransformer extends SceneTransformer {
 //        }
         for (SootClass sootClass : allClass) {
             ClassInfo clsVO = new ClassInfo(sootClass);
+//            if (!classesSig.contains(clsVO.getSig())) {
+//                continue;
+//            }
             ProjectInfo.i().addClass(clsVO);
-            for (MethodInfo mthd : clsVO.getMthds()) {
-                ProjectInfo.i().addMethod(mthd);
+            for (MethodInfo methodInfo : clsVO.getMthds()) {
+                ProjectInfo.i().addMethod(methodInfo);
             }
 //			for (SootMethod method : sootClass.getMethods()) {
 //				System.out.println("static:" + method.isStatic() + " " + "public:" + method.isPublic() + " "

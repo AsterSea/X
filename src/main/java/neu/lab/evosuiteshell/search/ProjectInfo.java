@@ -1,6 +1,8 @@
 package neu.lab.evosuiteshell.search;
 
 
+import neu.lab.conflict.util.MavenUtil;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -54,7 +56,8 @@ public class ProjectInfo {
 //			for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
 //				System.out.println("lzw trace:" + ele);
 //			}
-            System.out.println("can't find ClassInfo for:" + clsSig);
+            MavenUtil.i().getLog().warn("can't find ClassInfo for:" + clsSig);
+//            System.out.println("can't find ClassInfo for:" + clsSig);
         }
         return clsVO;
     }

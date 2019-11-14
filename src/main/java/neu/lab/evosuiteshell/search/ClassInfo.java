@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import fj.P;
 import soot.SootClass;
 import soot.SootMethod;
 
@@ -189,7 +190,8 @@ public class ClassInfo {
             }
 
         }
-        //find new constructor of this type.
+        //获取所有子类的构造方法，不仅限于此类如果是具体的就只返回此类中的构造方法
+//        find new constructor of this type.
         if (this.isConcrete) {
             List<MethodInfo> consesOfnew = getConsesOfnew();
             if (!consesOfnew.isEmpty()) {
@@ -201,9 +203,10 @@ public class ClassInfo {
         }
         //find new constructor of subType.
         List<MethodInfo> consesOfnew = new ArrayList<MethodInfo>();
+//        System.out.println(children.size());
         for (ClassInfo child : children) {
             if (child.isConcrete) {
-                consesOfnew.addAll(consesOfnew);
+                consesOfnew.addAll(child.getConsesOfnew());
             }
         }
         if (!consesOfnew.isEmpty()) {
@@ -225,6 +228,33 @@ public class ClassInfo {
         //		}
 
         return null;
+    }
+
+    /**
+     * type of this object may be not the type of construct.
+     * if this type is abstract,the type to construct should be its subType.
+     * get all construct contains static and children
+     *
+     * @param
+     * @return
+     */
+    public List<MethodInfo> getAllConstructorContainsChildren() {
+        //find static constructor.
+        List<MethodInfo> allMethodInfos = new ArrayList<>();
+
+        if (this.isConcrete) {
+            allMethodInfos.addAll(getConsesOfStatic());
+            allMethodInfos.addAll(getConsesOfnew());
+        }
+
+        //add all children static concrete method and concrete
+        for (ClassInfo child : children) {
+            if (child.isConcrete) {
+                allMethodInfos.addAll(child.getConsesOfStatic());
+                allMethodInfos.addAll(child.getConsesOfnew());
+            }
+        }
+        return allMethodInfos;
     }
 
     /**
@@ -258,16 +288,20 @@ public class ClassInfo {
     private List<MethodInfo> getConsesOfnew() {
         List<MethodInfo> publicCons = new ArrayList<MethodInfo>();
         //public constructor
-        for (MethodInfo MethodInfo : mthds) {
-            if (MethodInfo.isConstructor() && MethodInfo.isPublic()) {
-                publicCons.add(MethodInfo);
+        for (MethodInfo methodInfo : mthds) {
+            if (methodInfo.isConstructor() && methodInfo.isPublic()) {
+                publicCons.add(methodInfo);
             }
         }
         //if this type and entryClass is on same package,get default and protected new construct.
         if (ProjectInfo.i().isEntryPck(SootUtil.cls2pck(sig, "."))) {
-            for (MethodInfo MethodInfo : mthds) {
-                if (MethodInfo.isConstructor() && !MethodInfo.isPrivate()) {
-                    publicCons.add(MethodInfo);
+            for (MethodInfo methodInfo : mthds) {
+                if (methodInfo.isConstructor() && !methodInfo.isPrivate()) {
+                    //去重
+                    if (publicCons.contains(methodInfo)) {
+                        continue;
+                    }
+                    publicCons.add(methodInfo);
                 }
             }
         }
