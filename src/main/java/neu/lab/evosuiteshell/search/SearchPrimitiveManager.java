@@ -39,7 +39,7 @@ public class SearchPrimitiveManager {
         }
     }
 
-    private void search(String path) {
+    public void search(String path) {
         File file = new File(path);
         String fileName = file.getName().split("\\.")[0];
 //        System.out.println(fileName);
@@ -111,7 +111,7 @@ public class SearchPrimitiveManager {
     }
 
 
-    public static void main(String[] args) {
+//    public static void main(String[] args) {
 //        SearchPrimitiveManager.getInstance().search("/Users/wangchao/eclipse-workspace/Host/src/test/neu/lab/Host/HostTest.java");
 //        System.out.println(SearchConstantPool.getInstance().getPoolValues("Host1"));
 //        HashSet<String> filesPath = TestCaseUtil.getFiles("/Users/wangchao/eclipse-workspace/Host/src/");
@@ -119,5 +119,5 @@ public class SearchPrimitiveManager {
 //            SearchPrimitiveManager.getInstance().search(file);
 //        }
 //        SearchPrimitiveManager.getInstance().matchStringByClass("a new HashSet<>(\"asssffs\")");
-    }
+//    }
 }

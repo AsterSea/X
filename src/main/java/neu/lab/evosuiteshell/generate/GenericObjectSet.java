@@ -2,12 +2,17 @@ package neu.lab.evosuiteshell.generate;
 
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.util.MavenUtil;
+import neu.lab.evosuiteshell.TestCaseUtil;
 import neu.lab.evosuiteshell.search.*;
+import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
+import org.evosuite.classpath.ClassPathHandler;
+import org.evosuite.ga.ConstructionFailedException;
 import org.evosuite.instrumentation.InstrumentingClassLoader;
-import org.evosuite.seeding.ConstantPoolManager;
 import org.evosuite.seeding.ObjectPool;
 import org.evosuite.seeding.ObjectPoolManager;
+import org.evosuite.testcase.TestCase;
+import org.evosuite.testcase.statements.MethodStatement;
 import org.evosuite.testcase.variable.VariableReference;
 import org.evosuite.utils.Randomness;
 import org.evosuite.utils.generic.GenericClass;
@@ -33,12 +38,13 @@ public class GenericObjectSet {
         if (targetClassInfo == null) {
             return;
         }
-        System.out.println(1);
         ProjectInfo.i().setEntryCls(targetClass);
+        //获取所有构造方法包括子类
         List<MethodInfo> methodInfoList = targetClassInfo.getAllConstructorContainsChildren();
 
         //添加所有返回值为target class的方法
         for (MethodInfo methodInfo : ProjectInfo.i().getAllMethod()) {
+//            System.out.println(methodInfo.getSig() + " return : " + methodInfo.getReturnType());
             if (methodInfo.getReturnType().equals(targetClass)) {
                 if (methodInfoList.contains(methodInfo)) {
                     continue;
@@ -54,10 +60,18 @@ public class GenericObjectSet {
             boolean generate = false;
             if (num > 10) break;
 
-            if (methodInfo.getCls().getSig().equals(targetClass)) {
+            for (String type : methodInfo.getCls().getAllConcreteType()) {
+                System.out.println("type" + type);
+            }
+
+
+//            if (methodInfo.getCls().getAllConcreteType().contains(targetClass)) {
+            if (targetClassInfo.getAllConcreteType().contains(methodInfo.getCls().getSig())) {
+                System.out.println(1111);
                 generate = generate(targetClassInfo, methodInfo);
             } else if (methodInfo.getReturnType().equals(targetClass)) {
 //TODO 返回值为我们所需要的类，如何构造这个方法所在的类
+
             }
             if (generate) {
                 num++;
@@ -72,7 +86,19 @@ public class GenericObjectSet {
         for (String paramType : methodInfo.getParamTypes()) {
             neededParams.add(new NeededObj(paramType, 0));
         }
-        VariableReference variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams);
+        VariableReference variableReference;
+        if (classInfo.hasTargetChildren(methodInfo.getCls())) {
+            variableReference = structureParamTypes(testCaseBuilder, methodInfo.getCls(), neededParams);
+            // ？用classInfo 还是 methodInfo.getCls()
+            return addSequenceToPool(variableReference, methodInfo.getCls());
+        } else {
+            variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams);
+            return addSequenceToPool(variableReference, classInfo);
+        }
+
+    }
+
+    private boolean addSequenceToPool(VariableReference variableReference, ClassInfo classInfo) {
         if (variableReference == null) {
             return false;
         } else {
@@ -85,6 +111,7 @@ public class GenericObjectSet {
                 return false;
             }
             ObjectPoolManager.getInstance().addPool(objectPool);
+//            System.out.println(objectPool.getNumberOfSequences());
             return true;
         }
     }
@@ -96,6 +123,12 @@ public class GenericObjectSet {
         //单例模式，只用soot解析一次host包内所有的classinfo和methodinfo
         String hostJarPath = DepJars.i().getHostDepJar().getJarFilePaths(true).toArray(new String[]{})[0];
         new SootExe().initProjectInfo(new String[]{hostJarPath});
+    }
+
+    public GenericObjectSet(String a) {
+        //单例模式，只用soot解析一次host包内所有的classinfo和methodinfo
+//        String hostJarPath = DepJars.i().getHostDepJar().getJarFilePaths(true).toArray(new String[]{})[0];
+        new SootExe().initProjectInfo(new String[]{a});
     }
 
     public static GenericObjectSet getInstance() {
@@ -147,9 +180,12 @@ public class GenericObjectSet {
                         type = double.class;
                         break;
                     case "java.lang.String":
-                        String patamString = SearchConstantPool.getInstance().getPoolValueRandom(classInfo.getSig().split("\\.")[classInfo.getSig().split("\\.").length - 1]);
+                        String paramString = SearchConstantPool.getInstance().getPoolValueRandom(classInfo.getSig().split("\\.")[classInfo.getSig().split("\\.").length - 1]);
 //                        variableReference = testCaseBuilder.appendStringPrimitive(ConstantPoolManager.getInstance().getConstantPool().getRandomString());
-                        variableReference = testCaseBuilder.appendStringPrimitive(patamString);
+                        if (paramString == null) {
+                            paramString = Randomness.nextString(1);
+                        }
+                        variableReference = testCaseBuilder.appendStringPrimitive(paramString);
 //                        variableReference = testCaseBuilder.appendStringPrimitive("AWS-size");
                         type = String.class;
                         break;
@@ -185,13 +221,23 @@ public class GenericObjectSet {
         return variableReferenceConstructor;
     }
 
-    public static void main(String[] args) {
-        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, ConstructionFailedException {
+        HashSet<String> filesPath = TestCaseUtil.getFiles("/Users/wangchao/eclipse-workspace/Host/src/");
+        for (String file : filesPath) {
+            SearchPrimitiveManager.getInstance().search(file);
+        }
+        String cp = "/Users/wangchao/eclipse-workspace/Host/target/classes";
+        ClassPathHandler.getInstance().addElementToTargetProjectClassPath(cp);
+        Properties.CP = cp;
+//        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
         String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
-        new SootExe().initProjectInfo(new String[]{hostJar});
+//        new SootExe().initProjectInfo(new String[]{hostJar});
 //        System.out.println(ProjectInfo.i().getAllClassInfo().size());
-
-//        genericObjectSet.generateObject("neu.lab.Host.Host");
+        GenericObjectSet genericObjectSet = new GenericObjectSet(hostJar);
+        genericObjectSet.generateObject("neu.lab.Host.A");
+        TestCase tc = ObjectPoolManager.getInstance().getRandomSequence(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.A")));
+//        MethodStatement methodStatement = new MethodStatement()
+//        System.out.println(tc.addStatement());
 //        for (ClassInfo c : ProjectInfo.i().getAllClassInfo()) {
 //            System.out.println(c.getSig());
 //        }
@@ -199,29 +245,29 @@ public class GenericObjectSet {
 //        for (MethodInfo m : ProjectInfo.i().getAllMethod()) {
 //            System.out.println(m.getSig());
 //        }
-        ClassInfo classInfo = ProjectInfo.i().getClassInfo("neu.lab.Host.A");
-        if (classInfo == null) {
-            return;
-        }
-        System.out.println(classInfo.getSig());
-        ProjectInfo.i().setEntryCls("neu.lab.Host.A");
-        List<MethodInfo> methodInfoList = classInfo.getAllConstructorContainsChildren();
-        for (MethodInfo methodInfo : methodInfoList) {
-            System.out.println(methodInfo.getSig());
-        }
-//        System.out.println(methodInfoList.size());
-        //添加所有返回值为target class的方法
-        for (MethodInfo methodInfo : ProjectInfo.i().getAllMethod()) {
-            if (methodInfo.getReturnType().equals("neu.lab.Host.A")) {
-                if (methodInfoList.contains(methodInfo)) {
-                    continue;
-                }
-                methodInfoList.add(methodInfo);
-            }
-        }
-        for (MethodInfo methodInfo : methodInfoList) {
-            System.out.println(methodInfo.getSig());
-        }
+//        ClassInfo classInfo = ProjectInfo.i().getClassInfo("neu.lab.Host.A");
+//        if (classInfo == null) {
+//            return;
+//        }
+//        System.out.println(classInfo.getSig());
+//        ProjectInfo.i().setEntryCls("neu.lab.Host.A");
+//        List<MethodInfo> methodInfoList = classInfo.getAllConstructorContainsChildren();
+//        for (MethodInfo methodInfo : methodInfoList) {
+//            System.out.println(methodInfo.getSig());
+//        }
+////        System.out.println(methodInfoList.size());
+//        //添加所有返回值为target class的方法
+//        for (MethodInfo methodInfo : ProjectInfo.i().getAllMethod()) {
+//            if (methodInfo.getReturnType().equals("neu.lab.Host.A")) {
+//                if (methodInfoList.contains(methodInfo)) {
+//                    continue;
+//                }
+//                methodInfoList.add(methodInfo);
+//            }
+//        }
+//        for (MethodInfo methodInfo : methodInfoList) {
+//            System.out.println(methodInfo.getSig());
+//        }
 
 //        ClassInfo s = ProjectInfo.i().getClassInfo("");
 //        System.out.println(s.getSig());

@@ -44,6 +44,7 @@ public class SearchConstantPool {
 
     public String getPoolValueRandom(String name) {
         HashSet<String> values = pool.get(name);
+        if (values == null) return null;
         int num = Random.nextInt(values.size());
         int i = 0;
         String defaultValue = "";

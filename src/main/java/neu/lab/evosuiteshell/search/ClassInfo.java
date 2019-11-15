@@ -1,10 +1,6 @@
 package neu.lab.evosuiteshell.search;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import fj.P;
 import soot.SootClass;
@@ -84,6 +80,30 @@ public class ClassInfo {
         }
         return null;
     }
+
+    /**
+     * if class is concrete,then return.
+     * else return a concrete subclass.
+     *
+     * @return
+     */
+    public Set<String> getAllConcreteType() {
+        HashSet<String> sigs = new HashSet<>();
+        if (isConcrete()) {
+            sigs.add(sig);
+        }
+        for (ClassInfo childVO : children) {
+            if (childVO.isConcrete)
+                sigs.add(childVO.getSig());
+        }
+        return sigs;
+    }
+
+
+    public boolean hasTargetChildren(ClassInfo classInfo) {
+        return children.contains(classInfo);
+    }
+
 
     public boolean isConcrete() {
         return isConcrete;
