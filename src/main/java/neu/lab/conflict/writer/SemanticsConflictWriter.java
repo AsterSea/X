@@ -13,15 +13,12 @@ import neu.lab.conflict.graph.*;
 import neu.lab.conflict.util.MySortedMap;
 import neu.lab.conflict.vo.DepJar;
 import neu.lab.evosuiteshell.generate.GenericObjectSet;
-import neu.lab.evosuiteshell.generate.GenericPoolFromTestCase;
 import neu.lab.evosuiteshell.search.*;
-import org.apache.maven.Maven;
 import org.evosuite.Properties;
 import org.evosuite.TestSuiteGenerator;
 import org.evosuite.Properties.Criterion;
 import org.evosuite.coverage.method.designation.GlobalVar;
 import org.evosuite.coverage.method.designation.NodeProbDistance;
-import org.evosuite.instrumentation.InstrumentingClassLoader;
 import org.evosuite.seeding.ConstantPoolManager;
 import com.google.common.io.Files;
 
@@ -39,8 +36,6 @@ import neu.lab.evosuiteshell.Config;
 import neu.lab.evosuiteshell.ExecuteCommand;
 import neu.lab.evosuiteshell.ReadXML;
 import neu.lab.evosuiteshell.junit.ExecuteJunit;
-import org.evosuite.seeding.ObjectPool;
-import org.evosuite.utils.generic.GenericClass;
 
 public class SemanticsConflictWriter {
     private Map<String, IBook> pathBooks;
@@ -112,7 +107,7 @@ public class SemanticsConflictWriter {
 //            System.out.println(conflict);
             riskMethodPair(conflict);
             printRiskMetodDiff(printer);
-            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
+            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "debug");
             for (String method : methodToHost.keySet()) {
 //                initObjectPool(SootUtil.mthdSig2cls(method));
 //                System.out.println(method);
@@ -209,7 +204,7 @@ public class SemanticsConflictWriter {
 //        Properties.SEED_TYPES = false;
         seedingConstant(targetClass);// String 参数种植
 //        System.out.println(targetClass);
-        GenericPoolFromTestCase.receiveTargetClass(targetClass);
+//        GenericPoolFromTestCase.receiveTargetClass(targetClass);
 
 
         Properties.ASSERTION_STRATEGY = Properties.AssertionStrategy.ALL;
@@ -239,6 +234,7 @@ public class SemanticsConflictWriter {
 //        System.out.println(targetClass);
         Properties.TARGET_CLASS = targetClass;
 
+        GenericObjectSet.getInstance().generateObject(targetClass);
 
 //        initObjectPool(targetClass);
 //		Properties.TARGET_CLASS = SootUtil.mthdSig2cls(targetClass);

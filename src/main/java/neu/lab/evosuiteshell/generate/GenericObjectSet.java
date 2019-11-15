@@ -1,33 +1,17 @@
 package neu.lab.evosuiteshell.generate;
 
-import fj.Hash;
-import fj.P;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.util.MavenUtil;
-import neu.lab.conflict.vo.ClassVO;
 import neu.lab.evosuiteshell.search.*;
-import org.eclipse.core.internal.resources.Project;
-import org.evosuite.PackageInfo;
-import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
-import org.evosuite.TestSuiteGenerator;
-import org.evosuite.classpath.ClassPathHandler;
-import org.evosuite.coverage.method.designation.EvosuiteNeedObject;
 import org.evosuite.instrumentation.InstrumentingClassLoader;
+import org.evosuite.seeding.ConstantPoolManager;
 import org.evosuite.seeding.ObjectPool;
 import org.evosuite.seeding.ObjectPoolManager;
-import org.evosuite.testcase.DefaultTestCase;
-import org.evosuite.testcase.TestCase;
 import org.evosuite.testcase.variable.VariableReference;
 import org.evosuite.utils.Randomness;
 import org.evosuite.utils.generic.GenericClass;
-import soot.PackManager;
 
-import javax.swing.*;
-import java.io.File;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 
 public class GenericObjectSet {
@@ -49,6 +33,7 @@ public class GenericObjectSet {
         if (targetClassInfo == null) {
             return;
         }
+        System.out.println(1);
         ProjectInfo.i().setEntryCls(targetClass);
         List<MethodInfo> methodInfoList = targetClassInfo.getAllConstructorContainsChildren();
 
@@ -65,13 +50,14 @@ public class GenericObjectSet {
         int num = 0;
 
         for (MethodInfo methodInfo : methodInfoList) {
+            System.out.println(methodInfo.getSig());
             boolean generate = false;
             if (num > 10) break;
 
             if (methodInfo.getCls().getSig().equals(targetClass)) {
                 generate = generate(targetClassInfo, methodInfo);
             } else if (methodInfo.getReturnType().equals(targetClass)) {
-
+//TODO 返回值为我们所需要的类，如何构造这个方法所在的类
             }
             if (generate) {
                 num++;
@@ -94,7 +80,7 @@ public class GenericObjectSet {
             try {
                 objectPool.addSequence(new GenericClass(instrumentingClassLoader.loadClass(classInfo.getSig())), testCaseBuilder.getDefaultTestCase());
             } catch (Exception e) {
-//                e.printStackTrace();
+                e.printStackTrace();
                 MavenUtil.i().getLog().error(e);
                 return false;
             }
@@ -112,79 +98,12 @@ public class GenericObjectSet {
         new SootExe().initProjectInfo(new String[]{hostJarPath});
     }
 
-    private GenericObjectSet(String a) {
-        //测试方法
-        //单例模式，只用soot解析一次host包内所有的classinfo和methodinfo
-//        String hostJarPath = DepJars.i().getHostDepJar().getJarFilePaths(true).toArray(new String[]{})[0];
-        new SootExe().initProjectInfo(new String[]{a});
-    }
-
     public static GenericObjectSet getInstance() {
         if (instance == null)
             instance = new GenericObjectSet();
         return instance;
     }
 
-
-    public void generateGenericObject(String classSig) {
-        System.out.println(classSig);
-        TestCaseBuilder testCaseBuilder = new TestCaseBuilder();
-        ClassInfo classInfo = ProjectInfo.i().getClassInfo(classSig);
-        if (classInfo == null) {
-            return;
-        }
-////        System.out.println(classSig + "asdf");
-        List<MethodInfo> methodInfoList = classInfo.getAllConstructorContainsChildren();
-////        System.out.println(methodInfo.getSig());
-////        List<String> paramTypes = methodInfo.getParamTypes();
-        List<NeededObj> neededParams = new ArrayList<NeededObj>();
-        for (MethodInfo methodInfo : methodInfoList) {
-            for (String paramType : methodInfo.getParamTypes()) {
-                neededParams.add(new NeededObj(paramType, 0));
-            }
-//            EvosuiteNeedObject evosuiteNeedParamObject = structureParamTypes(classInfo, neededParams);
-////            System.out.println(evosuiteNeedParamObject.toString());
-        }
-//        VariableReference variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams);
-        ObjectPool objectPool = new ObjectPool();
-
-//        TestCaseBuilder t = new TestCaseBuilder();
-
-//        InstrumentingClassLoader instrumentingClassLoader = TestGenerationContext.getInstance().getClassLoaderForSUT();
-//        Class<?> clazzzzz=null;
-//        try {
-//            clazzzzz=instrumentingClassLoader.loadClassFromFile("neu.lab.Host.Host","/Users/wangchao/eclipse-workspace/Host/target/classes/neu/lab/Host/Host.class");
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
-        try {
-            objectPool.addSequence(new GenericClass(instrumentingClassLoader.loadClass(classSig)), testCaseBuilder.getDefaultTestCase());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        ObjectPoolManager.getInstance().addPool(objectPool);
-//        System.out.println(testCaseBuilder.getDefaultTestCase().getStatement(1).getReturnValue().getType().getTypeName());
-
-
-//        TestCase sequence = objectPool.getRandomSequence(new GenericClass(MyClassLoader.loaderClass(classInfo.getSig())));
-//        System.out.println(sequence.toCode());
-//        System.out.println("\n" + testCaseBuilder.toCode());
-    }
-
-//    public EvosuiteNeedObject structureParamTypes(ClassInfo classInfo, List<NeededObj> neededObjList) {
-////        EvosuiteNeedObject evosuiteNeedObject = new EvosuiteNeedObject(classInfo.getSig());
-////        for (NeededObj neededObj : neededObjList) {
-////            if (neededObj.isSimpleType()) {
-////                evosuiteNeedParamObject.addEvosuiteNeedParamObject(new EvosuiteNeedObject(neededObj.getClassSig()));
-////            } else {
-////                MethodInfo methodInfo = neededObj.getClassInfo().getBestCons(false);
-////                    evosuiteNeedParamObject.addEvosuiteNeedParamObject(structureParamTypes(neededObj.getClassInfo(), neededObj.getConsParamObs(methodInfo)));
-////            }
-////        }
-////        return evosuiteNeedParamObject;
-//        return null;
-//    }
 
     //构建参数列表
     public VariableReference structureParamTypes(TestCaseBuilder testCaseBuilder, ClassInfo classInfo, List<NeededObj> neededObjList) {
@@ -228,7 +147,10 @@ public class GenericObjectSet {
                         type = double.class;
                         break;
                     case "java.lang.String":
-                        variableReference = testCaseBuilder.appendStringPrimitive(Randomness.nextString(Randomness.nextInt()));
+                        String patamString = SearchConstantPool.getInstance().getPoolValueRandom(classInfo.getSig().split("\\.")[classInfo.getSig().split("\\.").length - 1]);
+//                        variableReference = testCaseBuilder.appendStringPrimitive(ConstantPoolManager.getInstance().getConstantPool().getRandomString());
+                        variableReference = testCaseBuilder.appendStringPrimitive(patamString);
+//                        variableReference = testCaseBuilder.appendStringPrimitive("AWS-size");
                         type = String.class;
                         break;
                 }
@@ -240,7 +162,7 @@ public class GenericObjectSet {
                 try {
                     type = instrumentingClassLoader.loadClass(classInfo.getSig());
                 } catch (ClassNotFoundException e) {
-//                    e.printStackTrace();
+                    e.printStackTrace();
                     MavenUtil.i().getLog().error(e);
                     return null;
                 }
@@ -255,6 +177,7 @@ public class GenericObjectSet {
             clazz = instrumentingClassLoader.loadClass(classInfo.getSig());
             variableReferenceConstructor = testCaseBuilder.appendConstructor(clazz.getConstructor(classList.toArray(new Class<?>[]{})), variableReferenceList.toArray(new VariableReference[]{}));
         } catch (Exception e) {
+            e.printStackTrace();
             MavenUtil.i().getLog().error(e);
             return null;
         }
@@ -263,8 +186,9 @@ public class GenericObjectSet {
     }
 
     public static void main(String[] args) {
+        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
         String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
-        GenericObjectSet genericObjectSet = new GenericObjectSet(hostJar);
+        new SootExe().initProjectInfo(new String[]{hostJar});
 //        System.out.println(ProjectInfo.i().getAllClassInfo().size());
 
 //        genericObjectSet.generateObject("neu.lab.Host.Host");
