@@ -93,7 +93,7 @@ public class ClassInfo {
             sigs.add(sig);
         }
         for (ClassInfo childVO : children) {
-            if (childVO.isConcrete)
+            if (childVO.isConcrete())
                 sigs.add(childVO.getSig());
         }
         return sigs;

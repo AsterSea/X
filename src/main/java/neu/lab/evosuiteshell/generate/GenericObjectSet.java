@@ -6,6 +6,7 @@ import neu.lab.evosuiteshell.TestCaseUtil;
 import neu.lab.evosuiteshell.search.*;
 import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
+import org.evosuite.assertion.NullAssertion;
 import org.evosuite.classpath.ClassPathHandler;
 import org.evosuite.ga.ConstructionFailedException;
 import org.evosuite.instrumentation.InstrumentingClassLoader;
@@ -17,6 +18,7 @@ import org.evosuite.testcase.variable.VariableReference;
 import org.evosuite.utils.Randomness;
 import org.evosuite.utils.generic.GenericClass;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class GenericObjectSet {
@@ -26,14 +28,6 @@ public class GenericObjectSet {
     private TestCaseBuilder testCaseBuilder;
 
     public void generateObject(String targetClass) {
-//        testCaseBuilder = new TestCaseBuilder();
-        Class<?> targetClazz;
-        try {
-            targetClazz = instrumentingClassLoader.loadClass(targetClass);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return;
-        }
         ClassInfo targetClassInfo = ProjectInfo.i().getClassInfo(targetClass);
         if (targetClassInfo == null) {
             return;
@@ -56,22 +50,16 @@ public class GenericObjectSet {
         int num = 0;
 
         for (MethodInfo methodInfo : methodInfoList) {
-            System.out.println(methodInfo.getSig());
             boolean generate = false;
             if (num > 10) break;
-
-            for (String type : methodInfo.getCls().getAllConcreteType()) {
-                System.out.println("type" + type);
-            }
-
-
-//            if (methodInfo.getCls().getAllConcreteType().contains(targetClass)) {
             if (targetClassInfo.getAllConcreteType().contains(methodInfo.getCls().getSig())) {
-                System.out.println(1111);
                 generate = generate(targetClassInfo, methodInfo);
-            } else if (methodInfo.getReturnType().equals(targetClass)) {
-//TODO 返回值为我们所需要的类，如何构造这个方法所在的类
-
+            } else {
+                String returnType = methodInfo.getReturnType();
+                ClassInfo returnTypeClass = ProjectInfo.i().getClassInfo(returnType);
+                if (returnTypeClass.getAllConcreteType().contains(targetClass)) {
+                    generate = generateMethodCall(targetClassInfo, methodInfo);
+                }
             }
             if (generate) {
                 num++;
@@ -79,6 +67,122 @@ public class GenericObjectSet {
         }
 
     }
+
+    private boolean generateMethodCall(ClassInfo classInfo, MethodInfo methodInfo) {
+        testCaseBuilder = new TestCaseBuilder();
+        ClassInfo methodClass = methodInfo.getCls();
+        MethodInfo bestConcreteForMethodClass = methodClass.getBestCons(false);
+        List<NeededObj> neededParamsForMethodClass = new ArrayList<>();
+
+        for (String paramType : bestConcreteForMethodClass.getParamTypes()) {
+            neededParamsForMethodClass.add(new NeededObj(paramType, 0));
+
+        }
+        VariableReference variableReferenceForMethodClass;
+
+        variableReferenceForMethodClass = structureParamTypes(testCaseBuilder, bestConcreteForMethodClass.getCls(), neededParamsForMethodClass);
+        if (variableReferenceForMethodClass == null) {
+            return false;
+        }
+        Method method;
+        List<VariableReference> variableReferenceList = new ArrayList<VariableReference>();
+        List<Class<?>> classList = new ArrayList<Class<?>>();
+        try {
+            Class<?> methodClazz = instrumentingClassLoader.loadClass(methodClass.getSig());
+            List<NeededObj> neededObjList = new ArrayList<>();
+            for (String paramType : methodInfo.getParamTypes()) {
+                neededObjList.add(new NeededObj(paramType, 0));
+
+            }
+
+            for (NeededObj neededObj : neededObjList) {
+                VariableReference variableReference = null;
+                Class<?> type = null;
+                if (neededObj.isSimpleType()) {
+                    switch (neededObj.getClassSig()) {
+                        case "boolean":
+                            variableReference = testCaseBuilder.appendBooleanPrimitive(Randomness.nextBoolean());
+                            type = boolean.class;
+                            break;
+                        case "byte":
+                            variableReference = testCaseBuilder.appendBytePrimitive(Randomness.nextByte());
+                            type = byte.class;
+                            break;
+                        case "char":
+                            variableReference = testCaseBuilder.appendCharPrimitive(Randomness.nextChar());
+                            type = char.class;
+                            break;
+                        case "short":
+                            variableReference = testCaseBuilder.appendShortPrimitive(Randomness.nextShort());
+                            type = short.class;
+                            break;
+                        case "int":
+                            variableReference = testCaseBuilder.appendIntPrimitive(Randomness.nextInt());
+                            type = int.class;
+                            break;
+                        case "long":
+                            variableReference = testCaseBuilder.appendLongPrimitive(Randomness.nextLong());
+                            type = long.class;
+                            break;
+                        case "float":
+                            variableReference = testCaseBuilder.appendFloatPrimitive(Randomness.nextFloat());
+                            type = float.class;
+                            break;
+                        case "double":
+                            variableReference = testCaseBuilder.appendDoublePrimitive(Randomness.nextDouble());
+                            type = double.class;
+                            break;
+                        case "java.lang.String":
+                            String paramString = SearchConstantPool.getInstance().getPoolValueRandom(classInfo.getSig().split("\\.")[classInfo.getSig().split("\\.").length - 1]);
+                            if (paramString == null) {
+                                paramString = Randomness.nextString(1);
+                            }
+                            variableReference = testCaseBuilder.appendStringPrimitive(paramString);
+                            type = String.class;
+                            break;
+                    }
+                    if (variableReference != null) {
+                        variableReferenceList.add(variableReference);
+                        classList.add(type);
+                    }
+                } else {//不是简单类型
+                    try {
+                        type = instrumentingClassLoader.loadClass(neededObj.getClassInfo().getSig());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                        MavenUtil.i().getLog().error(e);
+                    }
+                    classList.add(type);
+                    MethodInfo bestConcrete = neededObj.getClassInfo().getBestCons(false);
+                    variableReferenceList.add(structureParamTypes(testCaseBuilder, neededObj.getClassInfo(), neededObj.getConsParamObs(bestConcrete)));
+                }
+            }
+            method = methodClazz.getDeclaredMethod(methodInfo.getName(), classList.toArray(new Class[]{}));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+
+        VariableReference variableReference = testCaseBuilder.appendMethod(variableReferenceForMethodClass, method, variableReferenceList.toArray(new VariableReference[]{}));
+
+//        NullAssertion nullAssertion = new NullAssertion();
+//        nullAssertion.setSource(variableReference);
+//        nullAssertion.setValue(false);
+//
+//        testCaseBuilder.getDefaultTestCase().getStatement(variableReference.getStPosition()).addAssertion(nullAssertion);
+//
+//        System.out.println(testCaseBuilder.toCode());
+//        try {
+//            testCaseBuilder.appendMethod(variableReference,variableReference.getVariableClass().getDeclaredMethod("print"),new VariableReference[]{});
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+
+        return addSequenceToPool(variableReference, classInfo);
+    }
+
 
     private boolean generate(ClassInfo classInfo, MethodInfo methodInfo) {
         testCaseBuilder = new TestCaseBuilder();
@@ -90,12 +194,12 @@ public class GenericObjectSet {
         if (classInfo.hasTargetChildren(methodInfo.getCls())) {
             variableReference = structureParamTypes(testCaseBuilder, methodInfo.getCls(), neededParams);
             // ？用classInfo 还是 methodInfo.getCls()
-            return addSequenceToPool(variableReference, methodInfo.getCls());
+//            return addSequenceToPool(variableReference, methodInfo.getCls());
         } else {
             variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams);
-            return addSequenceToPool(variableReference, classInfo);
+//            return addSequenceToPool(variableReference, classInfo);
         }
-
+        return addSequenceToPool(variableReference, classInfo);
     }
 
     private boolean addSequenceToPool(VariableReference variableReference, ClassInfo classInfo) {
@@ -235,7 +339,11 @@ public class GenericObjectSet {
 //        System.out.println(ProjectInfo.i().getAllClassInfo().size());
         GenericObjectSet genericObjectSet = new GenericObjectSet(hostJar);
         genericObjectSet.generateObject("neu.lab.Host.A");
-        TestCase tc = ObjectPoolManager.getInstance().getRandomSequence(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.A")));
+//        TestCase tc = ObjectPoolManager.getInstance().getRandomSequence(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.A")));
+//        System.out.println(tc.toCode());
+        for (TestCase testCase : ObjectPoolManager.getInstance().getSequences(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.A")))) {
+            System.out.println(testCase.toCode());
+        }
 //        MethodStatement methodStatement = new MethodStatement()
 //        System.out.println(tc.addStatement());
 //        for (ClassInfo c : ProjectInfo.i().getAllClassInfo()) {
@@ -243,7 +351,8 @@ public class GenericObjectSet {
 //        }
 //
 //        for (MethodInfo m : ProjectInfo.i().getAllMethod()) {
-//            System.out.println(m.getSig());
+//            System.out.println("1"+m.getSig());
+//            System.out.println("2"+m.getName());
 //        }
 //        ClassInfo classInfo = ProjectInfo.i().getClassInfo("neu.lab.Host.A");
 //        if (classInfo == null) {
