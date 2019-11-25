@@ -43,22 +43,22 @@ public class SearchPrimitiveManager {
         File file = new File(path);
         String fileName = file.getName().split("\\.")[0];
 //        System.out.println(fileName);
-        if (fileName.endsWith("Test"))
-            fileName = fileName.replace("Test", "");
+//        if (fileName.endsWith("Test"))
+//            fileName = fileName.replace("Test", "");
         BufferedReader reader;
-        try {
-            reader = new BufferedReader(new FileReader(file));
-            String line = reader.readLine();
-            while (line != null) {
-                HashSet<String> result = matchString(line);
-                if (result.size() > 0)
-                    SearchConstantPool.getInstance().setPool(fileName, result);
-                line = reader.readLine();
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//        try {
+//            reader = new BufferedReader(new FileReader(file));
+//            String line = reader.readLine();
+//            while (line != null) {
+//                HashSet<String> result = matchString(line);
+//                if (result.size() > 0)
+//                    SearchConstantPool.getInstance().setPool(fileName, result);
+//                line = reader.readLine();
+//            }
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
 
 
         //精确定位每个类的生成

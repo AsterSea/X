@@ -163,22 +163,7 @@ public class GenericObjectSet {
             return false;
         }
 
-
         VariableReference variableReference = testCaseBuilder.appendMethod(variableReferenceForMethodClass, method, variableReferenceList.toArray(new VariableReference[]{}));
-
-//        NullAssertion nullAssertion = new NullAssertion();
-//        nullAssertion.setSource(variableReference);
-//        nullAssertion.setValue(false);
-//
-//        testCaseBuilder.getDefaultTestCase().getStatement(variableReference.getStPosition()).addAssertion(nullAssertion);
-//
-//        System.out.println(testCaseBuilder.toCode());
-//        try {
-//            testCaseBuilder.appendMethod(variableReference,variableReference.getVariableClass().getDeclaredMethod("print"),new VariableReference[]{});
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
 
         return addSequenceToPool(variableReference, classInfo);
     }
