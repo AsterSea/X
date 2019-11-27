@@ -323,10 +323,10 @@ public class GenericObjectSet {
 //        new SootExe().initProjectInfo(new String[]{hostJar});
 //        System.out.println(ProjectInfo.i().getAllClassInfo().size());
         GenericObjectSet genericObjectSet = new GenericObjectSet(hostJar);
-        genericObjectSet.generateObject("neu.lab.Host.A");
+        genericObjectSet.generateObject("neu.lab.Host.Host");
 //        TestCase tc = ObjectPoolManager.getInstance().getRandomSequence(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.A")));
 //        System.out.println(tc.toCode());
-        for (TestCase testCase : ObjectPoolManager.getInstance().getSequences(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.A")))) {
+        for (TestCase testCase : ObjectPoolManager.getInstance().getSequences(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.Host")))) {
             System.out.println(testCase.toCode());
         }
 //        MethodStatement methodStatement = new MethodStatement()

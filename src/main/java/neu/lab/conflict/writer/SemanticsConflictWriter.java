@@ -13,6 +13,7 @@ import neu.lab.conflict.graph.*;
 import neu.lab.conflict.util.MySortedMap;
 import neu.lab.conflict.vo.DepJar;
 import neu.lab.evosuiteshell.generate.GenericObjectSet;
+import neu.lab.evosuiteshell.generate.GenericPoolFromTestCase;
 import neu.lab.evosuiteshell.search.*;
 import org.evosuite.Properties;
 import org.evosuite.TestSuiteGenerator;
@@ -204,8 +205,7 @@ public class SemanticsConflictWriter {
 //        Properties.SEED_TYPES = false;
         seedingConstant(targetClass);// String 参数种植
 //        System.out.println(targetClass);
-//        GenericPoolFromTestCase.receiveTargetClass(targetClass);
-
+        GenericPoolFromTestCase.receiveTargetClass(targetClass);
 
         Properties.ASSERTION_STRATEGY = Properties.AssertionStrategy.ALL;
 
