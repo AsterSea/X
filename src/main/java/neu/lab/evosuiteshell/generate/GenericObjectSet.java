@@ -52,7 +52,7 @@ public class GenericObjectSet {
 
         for (MethodInfo methodInfo : methodInfoList) {
             boolean generate = false;
-            if (num > 10) break;
+//            if (num > 10) break;
             if (targetClassInfo.getAllConcreteType().contains(methodInfo.getCls().getSig())) {
                 generate = generate(targetClassInfo, methodInfo);
             } else {
@@ -297,7 +297,7 @@ public class GenericObjectSet {
                     return null;
                 }
                 classList.add(type);
-                MethodInfo bestConcrete = neededObj.getClassInfo().getBestCons(false);
+                MethodInfo bestConcrete = neededObj.getClassInfo().getBestCons(true);
                 variableReferenceList.add(structureParamTypes(testCaseBuilder, neededObj.getClassInfo(), neededObj.getConsParamObs(bestConcrete)));
             }
         }
@@ -331,7 +331,7 @@ public class GenericObjectSet {
 //        Properties.CP = cp;
 //        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
         String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
-        String test = "/Users/wangchao/eclipse-workspace/A/target/A-1.0.jar";
+        String test = "/Users/wangchao/个人文件/东北大学/实验室/decca部署/decca-1.0.jar";
         ClassPathHandler.getInstance().addElementToTargetProjectClassPath(test);
         Properties.CP = test;
 //        new SootExe().initProjectInfo(new String[]{hostJar});
