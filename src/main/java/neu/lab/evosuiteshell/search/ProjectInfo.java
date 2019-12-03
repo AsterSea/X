@@ -56,7 +56,7 @@ public class ProjectInfo {
 //			for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
 //				System.out.println("lzw trace:" + ele);
 //			}
-            MavenUtil.i().getLog().warn("can't find ClassInfo for:" + clsSig);
+//            MavenUtil.i().getLog().warn("can't find ClassInfo for:" + clsSig);
 //            System.out.println("can't find ClassInfo for:" + clsSig);
         }
         return clsVO;
@@ -84,6 +84,10 @@ public class ProjectInfo {
 
     public Collection<ClassInfo> getAllClassInfo() {
         return sig2class.values();
+    }
+
+    public Set<String> getAllClassSig() {
+        return sig2class.keySet();
     }
 
     public boolean isInvokeable(MethodInfo mthd) {

@@ -1,6 +1,7 @@
 package neu.lab.evosuiteshell.generate;
 
 import neu.lab.conflict.container.DepJars;
+import neu.lab.conflict.soot.JarAna;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.evosuiteshell.TestCaseUtil;
 import neu.lab.evosuiteshell.search.*;
@@ -214,9 +215,13 @@ public class GenericObjectSet {
         new SootExe().initProjectInfo(new String[]{hostJarPath});
     }
 
+    private Set<String> hostClassesSig;
+
     public GenericObjectSet(String a) {
+        hostClassesSig = new HashSet<>();
         //单例模式，只用soot解析一次host包内所有的classinfo和methodinfo
 //        String hostJarPath = DepJars.i().getHostDepJar().getJarFilePaths(true).toArray(new String[]{})[0];
+        hostClassesSig = JarAna.i().deconstruct(Arrays.asList(a)).keySet();
         new SootExe().initProjectInfo(new String[]{a});
     }
 
@@ -303,11 +308,17 @@ public class GenericObjectSet {
             variableReferenceConstructor = testCaseBuilder.appendConstructor(clazz.getConstructor(classList.toArray(new Class<?>[]{})), variableReferenceList.toArray(new VariableReference[]{}));
         } catch (Exception e) {
             e.printStackTrace();
-            MavenUtil.i().getLog().error(e);
+//            MavenUtil.i().getLog().error(e);
             return null;
         }
 
         return variableReferenceConstructor;
+    }
+
+    public void generateAllObjectForJar() {
+        for (String classSig : hostClassesSig) {
+            generateObject(classSig);
+        }
     }
 
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, ConstructionFailedException {
@@ -316,19 +327,28 @@ public class GenericObjectSet {
             SearchPrimitiveManager.getInstance().search(file);
         }
         String cp = "/Users/wangchao/eclipse-workspace/Host/target/classes";
-        ClassPathHandler.getInstance().addElementToTargetProjectClassPath(cp);
-        Properties.CP = cp;
+//        ClassPathHandler.getInstance().addElementToTargetProjectClassPath(cp);
+//        Properties.CP = cp;
 //        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
         String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
+        String test = "/Users/wangchao/eclipse-workspace/A/target/A-1.0.jar";
+        ClassPathHandler.getInstance().addElementToTargetProjectClassPath(test);
+        Properties.CP = test;
 //        new SootExe().initProjectInfo(new String[]{hostJar});
 //        System.out.println(ProjectInfo.i().getAllClassInfo().size());
-        GenericObjectSet genericObjectSet = new GenericObjectSet(hostJar);
-        genericObjectSet.generateObject("neu.lab.Host.Host");
+        GenericObjectSet genericObjectSet = new GenericObjectSet(test);
+        genericObjectSet.generateAllObjectForJar();
+//        genericObjectSet.generateObject("neu.lab.Host.Host");
 //        TestCase tc = ObjectPoolManager.getInstance().getRandomSequence(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.A")));
 //        System.out.println(tc.toCode());
-        for (TestCase testCase : ObjectPoolManager.getInstance().getSequences(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.Host")))) {
-            System.out.println(testCase.toCode());
+        int countNum = 0;
+        for (GenericClass genericClass : ObjectPoolManager.getInstance().getClasses()) {
+            for (TestCase testCase : ObjectPoolManager.getInstance().getSequences(genericClass)) {
+                System.out.println(testCase.toCode());
+                countNum++;
+            }
         }
+        System.out.println("count : " + countNum);
 //        MethodStatement methodStatement = new MethodStatement()
 //        System.out.println(tc.addStatement());
 //        for (ClassInfo c : ProjectInfo.i().getAllClassInfo()) {
