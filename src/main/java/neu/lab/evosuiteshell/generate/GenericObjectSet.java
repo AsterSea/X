@@ -19,6 +19,7 @@ import org.evosuite.testcase.variable.VariableReference;
 import org.evosuite.utils.Randomness;
 import org.evosuite.utils.generic.GenericClass;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -74,6 +75,10 @@ public class GenericObjectSet {
         ClassInfo methodClass = methodInfo.getCls();
         MethodInfo bestConcreteForMethodClass = methodClass.getBestCons(false);
         List<NeededObj> neededParamsForMethodClass = new ArrayList<>();
+
+        if (bestConcreteForMethodClass == null) {
+            return false;
+        }
 
         for (String paramType : bestConcreteForMethodClass.getParamTypes()) {
             neededParamsForMethodClass.add(new NeededObj(paramType, 0));
@@ -159,12 +164,17 @@ public class GenericObjectSet {
                 }
             }
             method = methodClazz.getDeclaredMethod(methodInfo.getName(), classList.toArray(new Class[]{}));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
             return false;
         }
+        VariableReference variableReference = null;
+        try {
+            variableReference = testCaseBuilder.appendMethod(variableReferenceForMethodClass, method, variableReferenceList.toArray(new VariableReference[]{}));
 
-        VariableReference variableReference = testCaseBuilder.appendMethod(variableReferenceForMethodClass, method, variableReferenceList.toArray(new VariableReference[]{}));
+        } catch (Exception e) {
+            return false;
+        }
 
         return addSequenceToPool(variableReference, classInfo);
     }
@@ -184,6 +194,9 @@ public class GenericObjectSet {
         } else {
             variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams);
 //            return addSequenceToPool(variableReference, classInfo);
+        }
+        if (variableReference == null) {
+            return false;
         }
         return addSequenceToPool(variableReference, classInfo);
     }
@@ -292,12 +305,19 @@ public class GenericObjectSet {
                 try {
                     type = instrumentingClassLoader.loadClass(classInfo.getSig());
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                    MavenUtil.i().getLog().error(e);
+//                    e.printStackTrace();
+//                    MavenUtil.i().getLog().error(e);
                     return null;
                 }
                 classList.add(type);
-                MethodInfo bestConcrete = neededObj.getClassInfo().getBestCons(true);
+                ClassInfo neededObjClassSig = neededObj.getClassInfo();
+                if (neededObjClassSig == null) {
+                    return null;
+                }
+                MethodInfo bestConcrete = neededObjClassSig.getBestCons(false);
+                if (bestConcrete == null) {
+                    return null;
+                }
                 variableReferenceList.add(structureParamTypes(testCaseBuilder, neededObj.getClassInfo(), neededObj.getConsParamObs(bestConcrete)));
             }
         }
@@ -305,9 +325,17 @@ public class GenericObjectSet {
         Class<?> clazz = null;
         try {
             clazz = instrumentingClassLoader.loadClass(classInfo.getSig());
-            variableReferenceConstructor = testCaseBuilder.appendConstructor(clazz.getConstructor(classList.toArray(new Class<?>[]{})), variableReferenceList.toArray(new VariableReference[]{}));
+//            System.out.println(clazz.getName());
+            Constructor<?> con = null;
+            try {
+                con = clazz.getConstructor(classList.toArray(new Class<?>[]{}));
+            } catch (Error e) {
+//                System.out.println(e);
+                return null;
+            }
+            variableReferenceConstructor = testCaseBuilder.appendConstructor(con, variableReferenceList.toArray(new VariableReference[]{}));
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
 //            MavenUtil.i().getLog().error(e);
             return null;
         }
@@ -331,7 +359,7 @@ public class GenericObjectSet {
 //        Properties.CP = cp;
 //        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
         String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
-        String test = "/Users/wangchao/个人文件/东北大学/实验室/decca部署/decca-1.0.jar";
+        String test = "/Users/wangchao/个人文件/东北大学/实验室/decca部署/备用jar包/Decca/script.jar";
         ClassPathHandler.getInstance().addElementToTargetProjectClassPath(test);
         Properties.CP = test;
 //        new SootExe().initProjectInfo(new String[]{hostJar});
@@ -342,12 +370,17 @@ public class GenericObjectSet {
 //        TestCase tc = ObjectPoolManager.getInstance().getRandomSequence(new GenericClass(genericObjectSet.instrumentingClassLoader.loadClass("neu.lab.Host.A")));
 //        System.out.println(tc.toCode());
         int countNum = 0;
+        int classesNum = 0;
         for (GenericClass genericClass : ObjectPoolManager.getInstance().getClasses()) {
-            for (TestCase testCase : ObjectPoolManager.getInstance().getSequences(genericClass)) {
-                System.out.println(testCase.toCode());
-                countNum++;
+            if (ObjectPoolManager.getInstance().getSequences(genericClass).size() > 0) {
+                classesNum++;
+                for (TestCase testCase : ObjectPoolManager.getInstance().getSequences(genericClass)) {
+                    System.out.println(testCase.toCode());
+                    countNum++;
+                }
             }
         }
+        System.out.println("classes : " + classesNum);
         System.out.println("count : " + countNum);
 //        MethodStatement methodStatement = new MethodStatement()
 //        System.out.println(tc.addStatement());

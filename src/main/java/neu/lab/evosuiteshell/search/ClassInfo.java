@@ -149,7 +149,7 @@ public class ClassInfo {
             List<MethodInfo> consesOfnew = getConsesOfnew();
             if (!consesOfnew.isEmpty()) {
                 //has constructor of this type.
-                System.out.println(sig + " has new constructor.");
+//                System.out.println(sig + " has new constructor.");
                 return getMinParamCons(consesOfnew);
 
             }
