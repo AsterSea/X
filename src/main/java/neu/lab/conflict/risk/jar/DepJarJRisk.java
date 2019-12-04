@@ -46,7 +46,7 @@ public class DepJarJRisk {
     private DepJar depJar; // 依赖jar
     private DepJar usedDepJar; // 依赖jar
     private Set<String> thrownMthds; // 抛弃的方法
-    private Set<String> semantemeRiskMethods; // 语义风险方法集合
+    //    private Set<String> semantemeRiskMethods; // 语义风险方法集合
     // private Set<String> rchedMthds;
     private Graph4distance graph4distance; // 图
 //	private Map<String, IBook> books; // book记录用
@@ -123,7 +123,7 @@ public class DepJarJRisk {
      * @return
      */
     public Set<String> getSemantemeRiskMethods() {
-        semantemeRiskMethods = usedDepJar.getCommonMethods(depJar.getallMethods());
+        Set<String> semantemeRiskMethods = usedDepJar.getCommonMethods(depJar.getallMethods());
         MavenUtil.i().getLog().info("semantemeRiskMethods size for common methods: " + semantemeRiskMethods.size());
         return semantemeRiskMethods;
     }
@@ -236,30 +236,33 @@ public class DepJarJRisk {
 //		return new Graph4path(new HashMap<String, Node4path>(), new ArrayList<MethodCall>());
     }
 
-    Map<String, List<Integer>> semantemeMethodForDifferences; // 语义方法的差异集合
+    private Map<String, List<Integer>> semantemeMethodForDifferences; // 语义方法的差异集合
 
     public Map<String, List<Integer>> getSemantemeMethodForDifferences() {
         return semantemeMethodForDifferences;
     }
 
-    public void getAllSemantemeMethodForDifferences() {
+    public Map<String, List<Operation>> getAllSemantemeMethodForDifferences() {
 
         Set<String> semantemeRiskMethods = getSemantemeRiskMethods();
-//		Set<String> riskMethods = new HashSet<String>();
         if (semantemeRiskMethods.size() > 0) {
-            GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
-                    new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+//            GraphForMethodOutPath depJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i().getGraph(depJar,
+//                    new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+//
+//            GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
+//                    .getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
+//
+//            SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
+//                    usedDepJarGraphForMethodOutPath.getSemantemeMethods());
+//
+//            semantemeMethods.CalculationDifference(); // 计算差异
+//
+//            semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
+            decompile();
 
-            GraphForMethodOutPath usedDepJarGraphForMethodOutPath = (GraphForMethodOutPath) SootJRiskCg.i()
-                    .getGraph(usedDepJar, new JRiskMethodOutPathCgTf(semantemeRiskMethods));
-
-            SemantemeMethods semantemeMethods = new SemantemeMethods(depJarGraphForMethodOutPath.getSemantemeMethods(),
-                    usedDepJarGraphForMethodOutPath.getSemantemeMethods());
-
-            semantemeMethods.CalculationDifference(); // 计算差异
-
-            semantemeMethodForDifferences = semantemeMethods.getSemantemeMethodForReturn();
+            calculationDifference(semantemeRiskMethods);
         }
+        return riskMethodDiffsMap;
     }
 
     // depJar 的反编译文件路径

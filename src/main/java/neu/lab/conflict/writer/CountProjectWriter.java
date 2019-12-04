@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import gumtree.spoon.diff.operations.Operation;
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.graph.GraphForMethodName;
@@ -20,62 +22,62 @@ import neu.lab.conflict.vo.DepJar;
 
 public class CountProjectWriter {
 
-	private List<Conflict> conflicts;
+    private List<Conflict> conflicts;
 
-	public CountProjectWriter() {
-		conflicts = Conflicts.i().getConflicts();
-	}
+    public CountProjectWriter() {
+        conflicts = Conflicts.i().getConflicts();
+    }
 
-	public void writeTofileForSourceObjectCount(String outPath) {
-		PrintWriter printer = null;
-		try {
-			printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "ObjectCount.txt", true)));
-			writeSourceInfo(printer);
-			printer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    public void writeTofileForSourceObjectCount(String outPath) {
+        PrintWriter printer = null;
+        try {
+            printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "ObjectCount.txt", true)));
+            writeSourceInfo(printer);
+            printer.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	public void writeToFileForCountInfo(String outPath) {
-		PrintWriter printer = null;
-		try {
-			printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "ConflictCount.txt", true)));
-			writeConflictSig(printer);
-			printer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    public void writeToFileForCountInfo(String outPath) {
+        PrintWriter printer = null;
+        try {
+            printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "ConflictCount.txt", true)));
+            writeConflictSig(printer);
+            printer.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	public void writeForRiskMethodInProject(String outPath) {
-		PrintWriter printer = null;
-		try {
-			printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "RiskMethodCount.txt", true)));
-			writeRiskMethodCountInProject(printer);
-			printer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    public void writeForRiskMethodInProject(String outPath) {
+        PrintWriter printer = null;
+        try {
+            printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "RiskMethodCount.txt", true)));
+            writeRiskMethodCountInProject(printer);
+            printer.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	private void writeConflictSig(PrintWriter printer) {
-		for (Conflict conflict : conflicts) {
-			printer.println(conflict.getSig());
-		}
-	}
+    private void writeConflictSig(PrintWriter printer) {
+        for (Conflict conflict : conflicts) {
+            printer.println(conflict.getSig());
+        }
+    }
 
-	private void writeRiskMethodCountInProject(PrintWriter printer) {
-		printer.println("projectInfo=" + MavenUtil.i().getProjectCor());
-		for (Conflict conflict : conflicts) {
-			printer.println("conflictSig=" + conflict.getSig());
-			for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
-				printer.println("conflictVersion=" + depJarRisk.toString());
+    private void writeRiskMethodCountInProject(PrintWriter printer) {
+        printer.println("projectInfo : " + MavenUtil.i().getProjectCor());
+        for (Conflict conflict : conflicts) {
+            printer.println("conflictSig : " + conflict.getSig());
+            for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
+                printer.println("conflictVersion : " + depJarRisk.toString());
 //				Graph4path pathGraph = 
-				depJarRisk.getAllSemantemeMethodForDifferences();
+                Map<String, List<Operation>> riskMethodDiffsMap = depJarRisk.getAllSemantemeMethodForDifferences();
 //				Set<String> hostNodes = pathGraph.getHostNodes();
 //				Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH,
 //						Strategy.NOT_RESET_BOOK);
@@ -89,11 +91,11 @@ public class CountProjectWriter {
 //						}
 //					}
 //				}
-				Map<String, List<Integer>> semantemeMethodForReturn = depJarRisk.getSemantemeMethodForDifferences();
-				for (String method : semantemeMethodForReturn.keySet()) {
-					printer.println("riskMethod=" + method);
-					printer.println("difference=" + semantemeMethodForReturn.get(method).get(0));
-				}
+//				Map<String, List<Integer>> semantemeMethodForReturn = depJarRisk.getSemantemeMethodForDifferences();
+                for (String method : riskMethodDiffsMap.keySet()) {
+                    printer.println("riskMethod : " + method);
+                    printer.println("difference : " + riskMethodDiffsMap.get(method).size());
+                }
 
 //				if (dis2records.size() > 0) {
 //					Set<String> hasWriterRiskMethodPath = new HashSet<String>();
@@ -105,30 +107,30 @@ public class CountProjectWriter {
 //						}
 //					}
 //				}
-			}
-		}
-		printer.println();
-	}
+            }
+        }
+        printer.println();
+    }
 
-	/**
-	 * 得到Source文件的对象多样化信息
-	 */
-	private void writeSourceInfo(PrintWriter printer) {
-		printer.println("projectInfo=" + MavenUtil.i().getProjectCor());
-		DepJar hostDepJar = DepJars.i().getHostDepJar();
-		int sum = 0;
-		GraphForMethodName graphForMethodName = (GraphForMethodName) SootJRiskCg.i()
-				.getGraph(hostDepJar.getJarFilePaths(true).toArray(new String[0]), new JRiskObjectCgTf());
-		HashMap<String, ArrayList<String>> accessibleMethods = graphForMethodName.getAccessibleMethod();
-		for (String accessibleMethod : accessibleMethods.keySet()) {
-			printer.println("可访问的类方法：" + accessibleMethod);
-			int size = accessibleMethods.get(accessibleMethod).size();
-			sum += size;
-			printer.println("\\+数目：" + size);
-			for (String method : accessibleMethods.get(accessibleMethod)) {
-				printer.println("\\+返回值为对象的方法：" + method);
-			}
-		}
-		printer.println("总数目：" + sum);
-	}
+    /**
+     * 得到Source文件的对象多样化信息
+     */
+    private void writeSourceInfo(PrintWriter printer) {
+        printer.println("projectInfo=" + MavenUtil.i().getProjectCor());
+        DepJar hostDepJar = DepJars.i().getHostDepJar();
+        int sum = 0;
+        GraphForMethodName graphForMethodName = (GraphForMethodName) SootJRiskCg.i()
+                .getGraph(hostDepJar.getJarFilePaths(true).toArray(new String[0]), new JRiskObjectCgTf());
+        HashMap<String, ArrayList<String>> accessibleMethods = graphForMethodName.getAccessibleMethod();
+        for (String accessibleMethod : accessibleMethods.keySet()) {
+            printer.println("可访问的类方法：" + accessibleMethod);
+            int size = accessibleMethods.get(accessibleMethod).size();
+            sum += size;
+            printer.println("\\+数目：" + size);
+            for (String method : accessibleMethods.get(accessibleMethod)) {
+                printer.println("\\+返回值为对象的方法：" + method);
+            }
+        }
+        printer.println("总数目：" + sum);
+    }
 }
