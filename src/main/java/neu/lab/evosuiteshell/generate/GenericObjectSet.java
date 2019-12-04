@@ -86,7 +86,7 @@ public class GenericObjectSet {
         }
         VariableReference variableReferenceForMethodClass;
 
-        variableReferenceForMethodClass = structureParamTypes(testCaseBuilder, bestConcreteForMethodClass.getCls(), neededParamsForMethodClass);
+        variableReferenceForMethodClass = structureParamTypes(testCaseBuilder, bestConcreteForMethodClass.getCls(), neededParamsForMethodClass, 0);
         if (variableReferenceForMethodClass == null) {
             return false;
         }
@@ -160,7 +160,7 @@ public class GenericObjectSet {
                     }
                     classList.add(type);
                     MethodInfo bestConcrete = neededObj.getClassInfo().getBestCons(false);
-                    variableReferenceList.add(structureParamTypes(testCaseBuilder, neededObj.getClassInfo(), neededObj.getConsParamObs(bestConcrete)));
+                    variableReferenceList.add(structureParamTypes(testCaseBuilder, neededObj.getClassInfo(), neededObj.getConsParamObs(bestConcrete), 0));
                 }
             }
             method = methodClazz.getDeclaredMethod(methodInfo.getName(), classList.toArray(new Class[]{}));
@@ -188,11 +188,11 @@ public class GenericObjectSet {
         }
         VariableReference variableReference;
         if (classInfo.hasTargetChildren(methodInfo.getCls())) {
-            variableReference = structureParamTypes(testCaseBuilder, methodInfo.getCls(), neededParams);
+            variableReference = structureParamTypes(testCaseBuilder, methodInfo.getCls(), neededParams, 0);
             // ？用classInfo 还是 methodInfo.getCls()
 //            return addSequenceToPool(variableReference, methodInfo.getCls());
         } else {
-            variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams);
+            variableReference = structureParamTypes(testCaseBuilder, classInfo, neededParams, 0);
 //            return addSequenceToPool(variableReference, classInfo);
         }
         if (variableReference == null) {
@@ -246,7 +246,10 @@ public class GenericObjectSet {
 
 
     //构建参数列表
-    public VariableReference structureParamTypes(TestCaseBuilder testCaseBuilder, ClassInfo classInfo, List<NeededObj> neededObjList) {
+    public VariableReference structureParamTypes(TestCaseBuilder testCaseBuilder, ClassInfo classInfo, List<NeededObj> neededObjList, int depth) {
+        if (depth > 2) {
+            return null;
+        }
         List<VariableReference> variableReferenceList = new ArrayList<VariableReference>();
         List<Class<?>> classList = new ArrayList<Class<?>>();
         for (NeededObj neededObj : neededObjList) {
@@ -290,7 +293,7 @@ public class GenericObjectSet {
                         String paramString = SearchConstantPool.getInstance().getPoolValueRandom(classInfo.getSig().split("\\.")[classInfo.getSig().split("\\.").length - 1]);
 //                        variableReference = testCaseBuilder.appendStringPrimitive(ConstantPoolManager.getInstance().getConstantPool().getRandomString());
                         if (paramString == null) {
-                            paramString = Randomness.nextString(1);
+                            paramString = Randomness.nextString((int) (Math.random() * 5) + 1);
                         }
                         variableReference = testCaseBuilder.appendStringPrimitive(paramString);
 //                        variableReference = testCaseBuilder.appendStringPrimitive("AWS-size");
@@ -318,7 +321,7 @@ public class GenericObjectSet {
                 if (bestConcrete == null) {
                     return null;
                 }
-                variableReferenceList.add(structureParamTypes(testCaseBuilder, neededObj.getClassInfo(), neededObj.getConsParamObs(bestConcrete)));
+                variableReferenceList.add(structureParamTypes(testCaseBuilder, neededObj.getClassInfo(), neededObj.getConsParamObs(bestConcrete), depth + 1));
             }
         }
         VariableReference variableReferenceConstructor = null;
