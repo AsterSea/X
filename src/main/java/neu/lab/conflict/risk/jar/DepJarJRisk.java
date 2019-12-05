@@ -3,10 +3,15 @@ package neu.lab.conflict.risk.jar;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import gumtree.spoon.AstComparator;
 import gumtree.spoon.diff.Diff;
 import gumtree.spoon.diff.operations.Operation;
+import neu.lab.conflict.ConflictMojo;
+import neu.lab.conflict.CountProjectMojo;
 import neu.lab.conflict.GlobalVar;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.container.SemantemeMethods;
@@ -382,9 +387,6 @@ public class DepJarJRisk {
 
         Loader loaderDepJar = new JDCoreLoader(new File(depJarDecompressionPath));
         Loader loaderUsedDepJar = new JDCoreLoader(new File(usedDepJarDecompressionPath));
-        Printer printerDepJar = new JDCorePrinter();
-        Printer printerUsedDepJar = new JDCorePrinter();
-
         ClassFileToJavaSourceDecompiler decompiler = new ClassFileToJavaSourceDecompiler();
 
         AstComparator astComparator = new AstComparator();
@@ -403,34 +405,57 @@ public class DepJarJRisk {
             }
 
             MavenUtil.i().getLog().info("decompiler......");
+            ExecutorService executor = Executors.newFixedThreadPool(32);
             for (String methodClassSig : methodsFromClass.keySet()) {
+                executor.execute(new Thread(new Runnable() {
+                    /**
+                     * When an object implementing interface <code>Runnable</code> is used
+                     * to create a thread, starting the thread causes the object's
+                     * <code>run</code> method to be called in that separately executing
+                     * thread.
+                     * <p>
+                     * The general contract of the method <code>run</code> is that it may
+                     * take any action whatsoever.
+                     *
+                     * @see Thread#run()
+                     */
+                    @Override
+                    public void run() {
 
-                decompiler.decompile(loaderDepJar, printerDepJar, methodClassSig.replace(".", File.separator));
-                decompiler.decompile(loaderUsedDepJar, printerUsedDepJar, methodClassSig.replace(".", File.separator));
-//                MavenUtil.i().getLog().info("decompiler success");
-
-                String depJarContent = printerDepJar.toString();
-                String usedDepJarContent = printerUsedDepJar.toString();
-
-                for (String method : methodsFromClass.get(methodClassSig)) {
-                    try {
-                        List<CtMethod<?>> depJarCtMethods = astComparator.getCtType(depJarContent).getMethodsByName(SootUtil.mthdSig2methodName(method));
-
-                        List<CtMethod<?>> usedDepJarCtMethods = astComparator.getCtType(usedDepJarContent).getMethodsByName(SootUtil.mthdSig2methodName(method));
-
-                        CtMethod ctMethodFromDepJar = getCtMethod(depJarCtMethods, SootUtil.mthdSig2param(method));
-
-                        CtMethod ctMethodFromUsedDepJar = getCtMethod(usedDepJarCtMethods, SootUtil.mthdSig2param(method));
-
-                        if (ctMethodFromDepJar == null || ctMethodFromUsedDepJar == null) {
-                            continue;
+                        Printer printerDepJar = new JDCorePrinter();
+                        Printer printerUsedDepJar = new JDCorePrinter();
+                        try {
+                            decompiler.decompile(loaderDepJar, printerDepJar, methodClassSig.replace(".", File.separator));
+                            decompiler.decompile(loaderUsedDepJar, printerUsedDepJar, methodClassSig.replace(".", File.separator));
+                        } catch (Exception e) {
+                            MavenUtil.i().getLog().error(e);
+                            return;
                         }
-                        Diff diff = astComparator.compare(ctMethodFromDepJar, ctMethodFromUsedDepJar);
+//                        MavenUtil.i().getLog().info("decompiler success");
 
-                        int differentSize = diff.getRootOperations().size();
-                        if (differentSize > 0) {
-                            riskMethodDiffsMap.put(method, diff.getRootOperations());
-                            //输出差异
+                        String depJarContent = printerDepJar.toString();
+                        String usedDepJarContent = printerUsedDepJar.toString();
+
+                        for (String method : methodsFromClass.get(methodClassSig)) {
+                            try {
+
+                                List<CtMethod<?>> depJarCtMethods = astComparator.getCtType(depJarContent).getMethodsByName(SootUtil.mthdSig2methodName(method));
+
+                                List<CtMethod<?>> usedDepJarCtMethods = astComparator.getCtType(usedDepJarContent).getMethodsByName(SootUtil.mthdSig2methodName(method));
+
+                                CtMethod ctMethodFromDepJar = getCtMethod(depJarCtMethods, SootUtil.mthdSig2param(method));
+
+                                CtMethod ctMethodFromUsedDepJar = getCtMethod(usedDepJarCtMethods, SootUtil.mthdSig2param(method));
+
+                                if (ctMethodFromDepJar == null || ctMethodFromUsedDepJar == null) {
+                                    continue;
+                                }
+                                Diff diff = astComparator.compare(ctMethodFromDepJar, ctMethodFromUsedDepJar);
+
+                                int differentSize = diff.getRootOperations().size();
+                                if (differentSize > 0) {
+                                    riskMethodDiffsMap.put(method, diff.getRootOperations());
+                                    //输出差异
 //                            printer.println(method + " ===> diff count : " + differentSize + "\n used compare shield diff:");
 //                            if (Conf.printDiff) {
 //                                for (Operation operation : diff.getRootOperations()) {
@@ -443,16 +468,22 @@ public class DepJarJRisk {
 //                                }
 //                            }
 //                            System.out.println(method + differentSize);
-                            semantemeMethodForDifferences.put(method, differentSize);
+                                    semantemeMethodForDifferences.put(method, differentSize);
+                                }
+                            } catch (Throwable e) {
+                                break;
+                            }
                         }
-                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        MavenUtil.i().getLog().error(e.toString() + " method : " + method);
-                        break;
                     }
-                }
+                }));
             }
+            executor.shutdown();
 
+            try {
+                executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             MavenUtil.i().getLog().error(e.toString());
 //            e.printStackTrace();
@@ -538,4 +569,19 @@ public class DepJarJRisk {
         return depJar.toString() + " in conflict " + usedDepJar.toString();
     }
 
+    public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
+        MavenUtil.i().setMojo(new CountProjectMojo());
+        List<String> JarFilePath = new ArrayList<>();
+        JarFilePath.add("/Users/wangchao/.m2/repository/log4j/log4j/1.2.15/log4j-1.2.15.jar");
+        DepJar usedDepJar = new DepJar("log4j", "log4j", "1.2.15", "", JarFilePath);
+        List<String> conflictJarFilePath = new ArrayList<>();
+        conflictJarFilePath.add("/Users/wangchao/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar");
+        DepJar conflictDepJar = new DepJar("log4j", "log4j", "1.2.17", "", conflictJarFilePath);
+        DepJarJRisk depJarJRisk = new DepJarJRisk(conflictDepJar, usedDepJar);
+        Map<String, List<Operation>> riskMethodDiffsMap = depJarJRisk.getAllSemantemeMethodForDifferences();
+        System.out.println("risk method size : " + riskMethodDiffsMap.keySet().size());
+        long endTime = System.currentTimeMillis();
+        System.out.println("运行时间 : " + (endTime - startTime) + "ms");
+    }
 }
