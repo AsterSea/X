@@ -78,6 +78,7 @@ public class CountProjectWriter {
                 printer.println("conflictVersion : " + depJarRisk.toString());
 //				Graph4path pathGraph = 
                 Map<String, List<Operation>> riskMethodDiffsMap = depJarRisk.getAllSemantemeMethodForDifferences();
+                printer.println("risk method size : " + riskMethodDiffsMap.keySet().size());
 //				Set<String> hostNodes = pathGraph.getHostNodes();
 //				Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH,
 //						Strategy.NOT_RESET_BOOK);

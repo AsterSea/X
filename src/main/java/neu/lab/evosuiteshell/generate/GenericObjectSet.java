@@ -48,9 +48,11 @@ public class GenericObjectSet {
                 methodInfoList.add(methodInfo);
             }
         }
+        for (MethodInfo methodInfo : methodInfoList) {
+            System.out.println(methodInfo.getSig());
+        }
         //methodInfoList 包括所有可用的构造方法和返回值为target class的方法
         int num = 0;
-
         for (MethodInfo methodInfo : methodInfoList) {
             boolean generate = false;
 //            if (num > 10) break;
@@ -337,7 +339,7 @@ public class GenericObjectSet {
                 return null;
             }
             variableReferenceConstructor = testCaseBuilder.appendConstructor(con, variableReferenceList.toArray(new VariableReference[]{}));
-        } catch (Exception e) {
+        } catch (Throwable e) {
 //            e.printStackTrace();
 //            MavenUtil.i().getLog().error(e);
             return null;
@@ -362,7 +364,7 @@ public class GenericObjectSet {
 //        Properties.CP = cp;
 //        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
         String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
-        String test = "/Users/wangchao/个人文件/东北大学/实验室/decca部署/备用jar包/Decca/script.jar";
+        String test = "/Users/wangchao/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar";
         ClassPathHandler.getInstance().addElementToTargetProjectClassPath(test);
         Properties.CP = test;
 //        new SootExe().initProjectInfo(new String[]{hostJar});
@@ -375,6 +377,7 @@ public class GenericObjectSet {
         int countNum = 0;
         int classesNum = 0;
         for (GenericClass genericClass : ObjectPoolManager.getInstance().getClasses()) {
+            System.out.println(genericClass.getClassName());
             if (ObjectPoolManager.getInstance().getSequences(genericClass).size() > 0) {
                 classesNum++;
                 for (TestCase testCase : ObjectPoolManager.getInstance().getSequences(genericClass)) {
