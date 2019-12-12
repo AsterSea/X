@@ -1,7 +1,9 @@
 package neu.lab.evosuiteshell.generate;
 
+import neu.lab.conflict.CountProjectMojo;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.soot.JarAna;
+import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.evosuiteshell.TestCaseUtil;
 import neu.lab.evosuiteshell.search.*;
@@ -22,14 +24,24 @@ import org.evosuite.utils.generic.GenericClass;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class GenericObjectSet {
 
     private InstrumentingClassLoader instrumentingClassLoader = TestGenerationContext.getInstance().getClassLoaderForSUT();
 
-    private TestCaseBuilder testCaseBuilder;
+//    private TestCaseBuilder testCaseBuilder;
+
+    private Map<String, List<Integer>> CountClassNum = new HashMap<>();
 
     public void generateObject(String targetClass) {
+        TestCaseBuilder testCaseBuilder = new TestCaseBuilder();
+        List<Integer> classNum = CountClassNum.get(targetClass);
+        if (classNum == null) {
+            classNum = new ArrayList<>();
+        }
         ClassInfo targetClassInfo = ProjectInfo.i().getClassInfo(targetClass);
         if (targetClassInfo == null) {
             return;
@@ -48,32 +60,37 @@ public class GenericObjectSet {
                 methodInfoList.add(methodInfo);
             }
         }
-        for (MethodInfo methodInfo : methodInfoList) {
-            System.out.println(methodInfo.getSig());
-        }
+        int constructorNum = 0;
+        int methodCallNum = 0;
         //methodInfoList 包括所有可用的构造方法和返回值为target class的方法
-        int num = 0;
         for (MethodInfo methodInfo : methodInfoList) {
-            boolean generate = false;
-//            if (num > 10) break;
+//            boolean generate = false;
             if (targetClassInfo.getAllConcreteType().contains(methodInfo.getCls().getSig())) {
-                generate = generate(targetClassInfo, methodInfo);
+//                generate = generate(targetClassInfo, methodInfo);
+                if (generate(testCaseBuilder, targetClassInfo, methodInfo)) {
+                    constructorNum++;
+                }
             } else {
                 String returnType = methodInfo.getReturnType();
                 ClassInfo returnTypeClass = ProjectInfo.i().getClassInfo(returnType);
                 if (returnTypeClass.getAllConcreteType().contains(targetClass)) {
-                    generate = generateMethodCall(targetClassInfo, methodInfo);
+//                    generate = generateMethodCall(targetClassInfo, methodInfo);
+                    if (generateMethodCall(testCaseBuilder, targetClassInfo, methodInfo)) {
+                        methodCallNum++;
+                    }
                 }
             }
-            if (generate) {
-                num++;
-            }
+//            if (generate) {
+//                num++;
+//            }
         }
-
+        classNum.add(constructorNum);
+        classNum.add(methodCallNum);
+        CountClassNum.put(targetClass, classNum);
     }
 
-    private boolean generateMethodCall(ClassInfo classInfo, MethodInfo methodInfo) {
-        testCaseBuilder = new TestCaseBuilder();
+    private boolean generateMethodCall(TestCaseBuilder testCaseBuilder, ClassInfo classInfo, MethodInfo methodInfo) {
+//        testCaseBuilder = new TestCaseBuilder();
         ClassInfo methodClass = methodInfo.getCls();
         MethodInfo bestConcreteForMethodClass = methodClass.getBestCons(false);
         List<NeededObj> neededParamsForMethodClass = new ArrayList<>();
@@ -174,15 +191,15 @@ public class GenericObjectSet {
         try {
             variableReference = testCaseBuilder.appendMethod(variableReferenceForMethodClass, method, variableReferenceList.toArray(new VariableReference[]{}));
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return false;
         }
 
-        return addSequenceToPool(variableReference, classInfo);
+        return addSequenceToPool(testCaseBuilder, variableReference, classInfo);
     }
 
 
-    private boolean generate(ClassInfo classInfo, MethodInfo methodInfo) {
+    private boolean generate(TestCaseBuilder testCaseBuilder, ClassInfo classInfo, MethodInfo methodInfo) {
         testCaseBuilder = new TestCaseBuilder();
         List<NeededObj> neededParams = new ArrayList<>();
         for (String paramType : methodInfo.getParamTypes()) {
@@ -200,18 +217,18 @@ public class GenericObjectSet {
         if (variableReference == null) {
             return false;
         }
-        return addSequenceToPool(variableReference, classInfo);
+        return addSequenceToPool(testCaseBuilder, variableReference, classInfo);
     }
 
-    private boolean addSequenceToPool(VariableReference variableReference, ClassInfo classInfo) {
+    private boolean addSequenceToPool(TestCaseBuilder testCaseBuilder, VariableReference variableReference, ClassInfo classInfo) {
         if (variableReference == null) {
             return false;
         } else {
             ObjectPool objectPool = new ObjectPool();
             try {
                 objectPool.addSequence(new GenericClass(instrumentingClassLoader.loadClass(classInfo.getSig())), testCaseBuilder.getDefaultTestCase());
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Throwable e) {
+//                e.printStackTrace();
                 MavenUtil.i().getLog().error(e);
                 return false;
             }
@@ -349,12 +366,38 @@ public class GenericObjectSet {
     }
 
     public void generateAllObjectForJar() {
+        MavenUtil.i().getLog().info("decompiler......");
+        MavenUtil.i().getLog().info("use thread num: " + Conf.nThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(Conf.nThreads);
         for (String classSig : hostClassesSig) {
-            generateObject(classSig);
+            executor.execute(new Thread(new Runnable() {
+                /**
+                 * When an object implementing interface <code>Runnable</code> is used
+                 * to create a thread, starting the thread causes the object's
+                 * <code>run</code> method to be called in that separately executing
+                 * thread.
+                 * <p>
+                 * The general contract of the method <code>run</code> is that it may
+                 * take any action whatsoever.
+                 *
+                 * @see Thread#run()
+                 */
+                @Override
+                public void run() {
+                    generateObject(classSig);
+                }
+            }));
+        }
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, ConstructionFailedException {
+        MavenUtil.i().setMojo(new CountProjectMojo());
         HashSet<String> filesPath = TestCaseUtil.getFiles("/Users/wangchao/eclipse-workspace/Host/src/");
         for (String file : filesPath) {
             SearchPrimitiveManager.getInstance().search(file);
@@ -364,7 +407,7 @@ public class GenericObjectSet {
 //        Properties.CP = cp;
 //        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
         String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
-        String test = "/Users/wangchao/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar";
+        String test = "/Users/wangchao/.m2/repository/org/scala-lang/scala-library/2.13.1/scala-library-2.13.1.jar";
         ClassPathHandler.getInstance().addElementToTargetProjectClassPath(test);
         Properties.CP = test;
 //        new SootExe().initProjectInfo(new String[]{hostJar});
@@ -388,6 +431,24 @@ public class GenericObjectSet {
         }
         System.out.println("classes : " + classesNum);
         System.out.println("count : " + countNum);
+
+        System.out.println("\n\n\n");
+
+        classesNum = 0;
+        int constructorNum = 0;
+        int methodCallNum = 0;
+        for (String className : genericObjectSet.CountClassNum.keySet()) {
+//            System.out.println(className);
+            List<Integer> classNum = genericObjectSet.CountClassNum.get(className);
+            if (classNum != null) {
+                classesNum++;
+                constructorNum += classNum.get(0);
+                methodCallNum += classNum.get(1);
+            }
+        }
+        System.out.println("classes : " + classesNum);
+        System.out.println("constructor num : " + constructorNum);
+        System.out.println("method return num : " + methodCallNum);
 //        MethodStatement methodStatement = new MethodStatement()
 //        System.out.println(tc.addStatement());
 //        for (ClassInfo c : ProjectInfo.i().getAllClassInfo()) {

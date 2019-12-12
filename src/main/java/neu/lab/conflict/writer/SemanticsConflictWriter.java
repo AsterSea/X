@@ -113,7 +113,7 @@ public class SemanticsConflictWriter {
             printer.println(conflict.toString());
             riskMethodPair(conflict);
             printRiskMetodDiff(printer);
-//            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "off");
+            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "off");
             for (String method : methodToHost.keySet()) {
 //                initObjectPool(SootUtil.mthdSig2cls(method));
 //                System.out.println(method);
