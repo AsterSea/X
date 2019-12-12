@@ -15,7 +15,7 @@ public class Config {
     public static String osName = System.getProperty("os.name");
 
     static {
-        if (System.getProperty("os.name").contains("Mac")) {
+        if (!System.getProperty("os.name").contains("Win")) {
             CLASSPATH_SEPARATOR = ":";
             MAVEN_PATH = "mvn";
         }

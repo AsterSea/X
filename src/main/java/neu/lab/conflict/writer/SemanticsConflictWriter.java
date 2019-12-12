@@ -43,9 +43,10 @@ public class SemanticsConflictWriter {
 
     private int runTime = 0;
     private boolean hasNecessaryRunNextTime = true;
+    private String outDir;
 
-    public void writeSemanticsConflict() {
-
+    public void writeSemanticsConflict(String outDir) {
+        this.outDir = outDir;
         copyDependency();
         copyConflictDependency();
         try {
@@ -103,12 +104,20 @@ public class SemanticsConflictWriter {
             }
             hasDetectConflict.add(conflict.getUsedDepJar().toString());
 //            new File(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + ".txt").createNewFile();
-            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
+//            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
+            //单独运行
+//            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
+            //服务器批量运行
+            PrintWriter printer = null;
+            if (new File(outDir + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR).mkdirs()) {
+                printer = new PrintWriter(new BufferedWriter(new FileWriter(outDir + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
+            } else {
+                printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
+            }
             printer.println(conflict.toString());
-//            System.out.println(conflict);
             riskMethodPair(conflict);
             printRiskMetodDiff(printer);
-            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "debug");
+            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
             for (String method : methodToHost.keySet()) {
 //                initObjectPool(SootUtil.mthdSig2cls(method));
 //                System.out.println(method);

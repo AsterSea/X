@@ -3,9 +3,7 @@ package neu.lab.conflict.risk.jar;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import gumtree.spoon.AstComparator;
 import gumtree.spoon.diff.Diff;
@@ -405,7 +403,9 @@ public class DepJarJRisk {
             }
 
             MavenUtil.i().getLog().info("decompiler......");
-            ExecutorService executor = Executors.newFixedThreadPool(32);
+            MavenUtil.i().getLog().info("use thread num: " + Conf.nThreads);
+            ExecutorService executor = Executors.newFixedThreadPool(Conf.nThreads);
+//            ThreadPoolExecutor executor = new ThreadPoolExecutor(Conf.nThreads+1, Conf.nThreads + 1, 1L, TimeUnit.SECONDS, new LinkedBlockingDeque<>(), new ThreadPoolExecutor.CallerRunsPolicy());
             for (String methodClassSig : methodsFromClass.keySet()) {
                 executor.execute(new Thread(new Runnable() {
                     /**
@@ -481,6 +481,8 @@ public class DepJarJRisk {
 
             try {
                 executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//                while (!executor.isTerminated()) {
+//                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -489,7 +491,7 @@ public class DepJarJRisk {
 //            e.printStackTrace();
         }
         MavenUtil.i().getLog().info("decompiler complete");
-        return sortMap(semantemeMethodForDifferences, 100);
+        return sortMap(semantemeMethodForDifferences, Conf.MAX_RISK_METHOD_NUM);
     }
 
     /**
