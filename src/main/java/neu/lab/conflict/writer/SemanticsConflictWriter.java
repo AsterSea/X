@@ -37,6 +37,7 @@ import neu.lab.evosuiteshell.Config;
 import neu.lab.evosuiteshell.ExecuteCommand;
 import neu.lab.evosuiteshell.ReadXML;
 import neu.lab.evosuiteshell.junit.ExecuteJunit;
+import org.evosuite.utils.LoggingUtils;
 
 public class SemanticsConflictWriter {
     private Map<String, IBook> pathBooks;
@@ -69,12 +70,11 @@ public class SemanticsConflictWriter {
     private String getDependencyCP(Conflict conflict) {
         StringBuffer CP = new StringBuffer();
         if (new File(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "test-classes").exists()) {
-            CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "test-classes" + Config.CLASSPATH_SEPARATOR
-                    + System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.EVOSUITE_NAME);
+            CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR + System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "test-classes");
         } else {
-            CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes" + Config.CLASSPATH_SEPARATOR
-                    + System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.EVOSUITE_NAME);
+            CP = new StringBuffer(System.getProperty("user.dir") + Config.FILE_SEPARATOR + "target" + Config.FILE_SEPARATOR + "classes");
         }
+        CP.append(addEvosuiteRuntimeDependency());
         String dependencyConflictJarDir = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR
                 + "dependencyConflictJar" + Config.FILE_SEPARATOR;
         String dependencyJar = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "dependencyJar" + Config.FILE_SEPARATOR;
@@ -108,16 +108,12 @@ public class SemanticsConflictWriter {
             //单独运行
 //            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
             //服务器批量运行
-            PrintWriter printer = null;
-            if (new File(outDir + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR).mkdirs()) {
-                printer = new PrintWriter(new BufferedWriter(new FileWriter(outDir + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
-            } else {
-                printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
-            }
+            new File(outDir + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR).mkdirs();
+            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(outDir + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
             printer.println(conflict.toString());
             riskMethodPair(conflict);
             printRiskMetodDiff(printer);
-            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "error");
+//            System.setProperty("org.slf4j.simpleLogger.log.org.evosuite", "off");
             for (String method : methodToHost.keySet()) {
 //                initObjectPool(SootUtil.mthdSig2cls(method));
 //                System.out.println(method);
@@ -368,6 +364,15 @@ public class SemanticsConflictWriter {
         return stringBuffer.toString();
     }
 
+    private String addEvosuiteRuntimeDependency() {
+        StringBuffer stringBuffer = new StringBuffer("");
+        for (String jarPath : evosuiteRuntieJarsPath) {
+            stringBuffer.append(Config.CLASSPATH_SEPARATOR);
+            stringBuffer.append(jarPath);
+        }
+        return stringBuffer.toString();
+    }
+
     public Set<String> readFiles(String path) {
         Set<String> paths = new HashSet<String>();
         File folder = new File(path);
@@ -492,6 +497,7 @@ public class SemanticsConflictWriter {
 
     private String[] dependencyJarsPath;
     private String[] junitJarsPath;
+    private String[] evosuiteRuntieJarsPath;
 
     /**
      * 复制项目自身的依赖到指定文件夹中
@@ -521,6 +527,7 @@ public class SemanticsConflictWriter {
         if (!existJunit) {
             copyJunitFormMaven();
         }
+        copyEvosuiteRuntimeFormMaven();
         dependencyJarsPath = file.list();
     }
 
@@ -535,8 +542,26 @@ public class SemanticsConflictWriter {
         String xmlFileName = ReadXML.copyPom(ReadXML.COPY_JUNIT);
         ReadXML.executeMavenCopy(xmlFileName, workPath);
         junitJarsPath = new File(workPath).list();
+        if (junitJarsPath == null) return;
         for (int i = 0; i < junitJarsPath.length; i++) {
             junitJarsPath[i] = workPath + junitJarsPath[i];
+        }
+    }
+
+    /**
+     * 手动导入EvosuiteRuntime的包依赖
+     */
+    private void copyEvosuiteRuntimeFormMaven() {
+        String workPath = System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR + Config.FILE_SEPARATOR + "EvosuiteRuntime" + Config.FILE_SEPARATOR;
+        if (!(new File(workPath)).exists()) {
+            new File(workPath).mkdirs();
+        }
+        String xmlFileName = ReadXML.copyPom(ReadXML.COYT_EVOSUITE);
+        ReadXML.executeMavenCopy(xmlFileName, workPath);
+        evosuiteRuntieJarsPath = new File(workPath).list();
+        if (evosuiteRuntieJarsPath == null) return;
+        for (int i = 0; i < evosuiteRuntieJarsPath.length; i++) {
+            evosuiteRuntieJarsPath[i] = workPath + evosuiteRuntieJarsPath[i];
         }
     }
 

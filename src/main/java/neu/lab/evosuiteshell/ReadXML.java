@@ -17,6 +17,7 @@ import neu.lab.conflict.vo.DependencyInfo;
 public class ReadXML {
     public static String COPY_CONFLICT = "copyConflictDependency.xml";
     public static String COPY_JUNIT = "copyJunit.xml";
+    public static String COYT_EVOSUITE = "copyEvosuiteRuntime.xml";
 
     /**
      * add dependency to new empty
