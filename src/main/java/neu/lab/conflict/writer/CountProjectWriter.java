@@ -52,6 +52,24 @@ public class CountProjectWriter {
         }
     }
 
+    public void writeDependencyCountInfo(String outPath) {
+        PrintWriter printer = null;
+        try {
+            printer = new PrintWriter(new BufferedWriter(new FileWriter(outPath + "DependencyCount.txt", true)));
+            writeDependencySig(printer);
+            printer.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void writeDependencySig(PrintWriter printWriter) {
+        for (DepJar depJar : DepJars.i().getUsedDepJars()) {
+            printWriter.println(depJar.getGroupId() + ":" + depJar.getArtifactId());
+        }
+    }
+
     public void writeForRiskMethodInProject(String outPath) {
         PrintWriter printer = null;
         try {

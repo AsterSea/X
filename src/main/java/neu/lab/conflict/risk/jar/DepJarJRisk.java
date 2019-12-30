@@ -1,14 +1,12 @@
 package neu.lab.conflict.risk.jar;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.*;
 
 import gumtree.spoon.AstComparator;
 import gumtree.spoon.diff.Diff;
 import gumtree.spoon.diff.operations.Operation;
-import neu.lab.conflict.ConflictMojo;
 import neu.lab.conflict.CountProjectMojo;
 import neu.lab.conflict.GlobalVar;
 import neu.lab.conflict.container.DepJars;
@@ -32,13 +30,11 @@ import neu.lab.conflict.soot.tf.JRiskMthdPathCgTf;
 import neu.lab.conflict.util.*;
 import neu.lab.conflict.vo.DepJar;
 import neu.lab.conflict.vo.MethodCall;
-import neu.lab.conflict.writer.SemanticsConflictWriter;
 import neu.lab.evosuiteshell.Config;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtParameter;
 
 /**
  * 依赖风险jar
@@ -546,7 +542,7 @@ public class DepJarJRisk {
         if (semantemeMethodForDifferences.size() == 0) {
             return null;
         }
-        Set<String> afterSortMethods = new HashSet<String>();
+        LinkedHashSet<String> afterSortMethods = new LinkedHashSet<>();
         List<Map.Entry<String, Integer>> entries = new ArrayList<Map.Entry<String, Integer>>(
                 semantemeMethodForDifferences.entrySet());
         Collections.sort(entries, new Comparator<Map.Entry<String, Integer>>() {

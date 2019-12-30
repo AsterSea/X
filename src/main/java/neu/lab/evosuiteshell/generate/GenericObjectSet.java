@@ -402,12 +402,12 @@ public class GenericObjectSet {
         for (String file : filesPath) {
             SearchPrimitiveManager.getInstance().search(file);
         }
-        String cp = "/Users/wangchao/eclipse-workspace/Host/target/classes";
+//        String cp = "/Users/wangchao/eclipse-workspace/Host/target/classes";
 //        ClassPathHandler.getInstance().addElementToTargetProjectClassPath(cp);
 //        Properties.CP = cp;
 //        System.out.println("a.b.c.d".split("\\.")["a.b.c.d".split("\\.").length - 1]);
-        String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
-        String test = "/Users/wangchao/.m2/repository/org/scala-lang/scala-library/2.13.1/scala-library-2.13.1.jar";
+//        String hostJar = "/Users/wangchao/eclipse-workspace/Host/target/Host-1.0.jar";
+        String test = "/Users/wangchao/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar";
         ClassPathHandler.getInstance().addElementToTargetProjectClassPath(test);
         Properties.CP = test;
 //        new SootExe().initProjectInfo(new String[]{hostJar});
