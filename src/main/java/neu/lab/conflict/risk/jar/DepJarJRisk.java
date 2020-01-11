@@ -1,6 +1,8 @@
 package neu.lab.conflict.risk.jar;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -567,19 +569,32 @@ public class DepJarJRisk {
         return depJar.toString() + " in conflict " + usedDepJar.toString();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         long startTime = System.currentTimeMillis();
         MavenUtil.i().setMojo(new CountProjectMojo());
         List<String> JarFilePath = new ArrayList<>();
-        JarFilePath.add("/Users/wangchao/.m2/repository/log4j/log4j/1.2.15/log4j-1.2.15.jar");
-        DepJar usedDepJar = new DepJar("log4j", "log4j", "1.2.15", "", JarFilePath);
+        JarFilePath.add(getRepositoryJarPath("com.ibm.icu", "icu4j", "52.2"));
+        DepJar usedDepJar = new DepJar("com.ibm.icu", "icu4j", "52.2", "", JarFilePath);
         List<String> conflictJarFilePath = new ArrayList<>();
-        conflictJarFilePath.add("/Users/wangchao/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar");
-        DepJar conflictDepJar = new DepJar("log4j", "log4j", "1.2.17", "", conflictJarFilePath);
+        conflictJarFilePath.add(getRepositoryJarPath("com.ibm.icu", "icu4j", "53.1"));
+        DepJar conflictDepJar = new DepJar("com.ibm.icu", "icu4j", "53.1", "", conflictJarFilePath);
         DepJarJRisk depJarJRisk = new DepJarJRisk(conflictDepJar, usedDepJar);
         Map<String, List<Operation>> riskMethodDiffsMap = depJarJRisk.getAllSemantemeMethodForDifferences();
         System.out.println("risk method size : " + riskMethodDiffsMap.keySet().size());
+        FileWriter fileWriter = new FileWriter("sensor_testcase/commonMethods.txt", false);
+        for (String method : riskMethodDiffsMap.keySet()) {
+            fileWriter.write(method + "@@" + riskMethodDiffsMap.get(method).size() + "\n");
+        }
+        fileWriter.close();
         long endTime = System.currentTimeMillis();
         System.out.println("运行时间 : " + (endTime - startTime) + "ms");
+    }
+
+    public static String getRepositoryJarPath(String groupId, String artifactId, String version) {
+        return "/Users/wangchao/.m2/repository/" +
+                groupId.replace(".", "/") + File.separator +
+                artifactId.replace(".", "/") + File.separator +
+                version + File.separator +
+                artifactId + "-" + version + ".jar";
     }
 }

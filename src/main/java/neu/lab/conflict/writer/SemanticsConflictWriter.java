@@ -12,6 +12,7 @@ import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.graph.*;
 import neu.lab.conflict.util.MySortedMap;
 import neu.lab.conflict.vo.DepJar;
+import neu.lab.evosuiteshell.*;
 import neu.lab.evosuiteshell.generate.GenericObjectSet;
 import neu.lab.evosuiteshell.generate.GenericPoolFromTestCase;
 import neu.lab.evosuiteshell.search.*;
@@ -32,10 +33,6 @@ import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.SootUtil;
 import neu.lab.conflict.vo.Conflict;
 import neu.lab.conflict.vo.DependencyInfo;
-import neu.lab.evosuiteshell.Command;
-import neu.lab.evosuiteshell.Config;
-import neu.lab.evosuiteshell.ExecuteCommand;
-import neu.lab.evosuiteshell.ReadXML;
 import neu.lab.evosuiteshell.junit.ExecuteJunit;
 import org.evosuite.utils.LoggingUtils;
 
@@ -47,6 +44,10 @@ public class SemanticsConflictWriter {
     private String outDir;
 
     public void writeSemanticsConflict(String outDir) {
+        if (new File((System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR)).exists()) {
+            TestCaseUtil.delete(System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR);
+        }
+
         this.outDir = outDir;
         copyDependency();
         copyConflictDependency();
@@ -108,8 +109,8 @@ public class SemanticsConflictWriter {
             //单独运行
 //            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(Config.SENSOR_DIR + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
             //服务器批量运行
-            new File(outDir + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR).mkdirs();
-            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(outDir + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
+            new File(outDir + Config.FILE_SEPARATOR + "sensor" + Config.FILE_SEPARATOR + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR).mkdirs();
+            PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(outDir + Config.FILE_SEPARATOR + "sensor" + Config.FILE_SEPARATOR + MavenUtil.i().getProjectCor().replaceAll("\\p{Punct}", "") + Config.FILE_SEPARATOR + "SemeanticsConflict_" + conflict.getSig().replaceAll("\\p{Punct}", "") + runTime + ".txt", Conf.append)));
             printer.println(conflict.toString());
             riskMethodPair(conflict);
             printRiskMetodDiff(printer);
@@ -366,7 +367,7 @@ public class SemanticsConflictWriter {
 
     private String addEvosuiteRuntimeDependency() {
         StringBuffer stringBuffer = new StringBuffer("");
-        for (String jarPath : evosuiteRuntieJarsPath) {
+        for (String jarPath : evosuiteRuntimeJarsPath) {
             stringBuffer.append(Config.CLASSPATH_SEPARATOR);
             stringBuffer.append(jarPath);
         }
@@ -497,7 +498,7 @@ public class SemanticsConflictWriter {
 
     private String[] dependencyJarsPath;
     private String[] junitJarsPath;
-    private String[] evosuiteRuntieJarsPath;
+    private String[] evosuiteRuntimeJarsPath;
 
     /**
      * 复制项目自身的依赖到指定文件夹中
@@ -558,10 +559,10 @@ public class SemanticsConflictWriter {
         }
         String xmlFileName = ReadXML.copyPom(ReadXML.COYT_EVOSUITE);
         ReadXML.executeMavenCopy(xmlFileName, workPath);
-        evosuiteRuntieJarsPath = new File(workPath).list();
-        if (evosuiteRuntieJarsPath == null) return;
-        for (int i = 0; i < evosuiteRuntieJarsPath.length; i++) {
-            evosuiteRuntieJarsPath[i] = workPath + evosuiteRuntieJarsPath[i];
+        evosuiteRuntimeJarsPath = new File(workPath).list();
+        if (evosuiteRuntimeJarsPath == null) return;
+        for (int i = 0; i < evosuiteRuntimeJarsPath.length; i++) {
+            evosuiteRuntimeJarsPath[i] = workPath + evosuiteRuntimeJarsPath[i];
         }
     }
 

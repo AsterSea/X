@@ -10,9 +10,9 @@
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
-            <groupId>org.evosuite</groupId>
-            <artifactId>evosuite-runtime</artifactId>
-            <version>1.0.6</version>
+            <groupId>neu.lab.evosuite</groupId>
+            <artifactId>evosuite-runtime-sensor</artifactId>
+            <version>1.0.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

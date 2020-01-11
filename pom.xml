@@ -19,6 +19,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>ca.mcgill.sable</groupId>
+            <artifactId>soot</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.upb.cs.swt</groupId>
+            <artifactId>heros</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.sensor</groupId>-->
+        <!--            <artifactId>soot</artifactId>-->
+        <!--            <version>3.2.0</version>-->
+        <!--        </dependency>-->
+        <dependency>
             <groupId>org.evosuite</groupId>
             <artifactId>evosuite-client-sensor</artifactId>
             <version>1.0.6</version>
@@ -58,11 +73,6 @@
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
             <version>3.0.24</version>
-        </dependency>
-        <dependency>
-            <groupId>neu.lab</groupId>
-            <artifactId>soot</artifactId>
-            <version>3.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
