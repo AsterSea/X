@@ -44,6 +44,7 @@ public class SemanticsConflictWriter {
     private String outDir;
 
     public void writeSemanticsConflict(String outDir) {
+        //删除原有的sensor_testcase文件夹，避免产生干扰
         if (new File((System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR)).exists()) {
             TestCaseUtil.delete(System.getProperty("user.dir") + Config.FILE_SEPARATOR + Config.SENSOR_DIR);
         }

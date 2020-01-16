@@ -573,11 +573,11 @@ public class DepJarJRisk {
         long startTime = System.currentTimeMillis();
         MavenUtil.i().setMojo(new CountProjectMojo());
         List<String> JarFilePath = new ArrayList<>();
-        JarFilePath.add(getRepositoryJarPath("com.ibm.icu", "icu4j", "52.2"));
-        DepJar usedDepJar = new DepJar("com.ibm.icu", "icu4j", "52.2", "", JarFilePath);
+        JarFilePath.add(getRepositoryJarPath("org.reactivestreams", "reactive-streams", "1.0.2"));
+        DepJar usedDepJar = new DepJar("org.reactivestreams", "reactive-streams", "1.0.2", "", JarFilePath);
         List<String> conflictJarFilePath = new ArrayList<>();
-        conflictJarFilePath.add(getRepositoryJarPath("com.ibm.icu", "icu4j", "53.1"));
-        DepJar conflictDepJar = new DepJar("com.ibm.icu", "icu4j", "53.1", "", conflictJarFilePath);
+        conflictJarFilePath.add(getRepositoryJarPath("org.reactivestreams", "reactive-streams", "0.4.0.M2"));
+        DepJar conflictDepJar = new DepJar("org.reactivestreams", "reactive-streams", "0.4.0.M2", "", conflictJarFilePath);
         DepJarJRisk depJarJRisk = new DepJarJRisk(conflictDepJar, usedDepJar);
         Map<String, List<Operation>> riskMethodDiffsMap = depJarJRisk.getAllSemantemeMethodForDifferences();
         System.out.println("risk method size : " + riskMethodDiffsMap.keySet().size());
