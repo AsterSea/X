@@ -51,6 +51,10 @@ public class Conf {
 
     //最大风险方法数 默认100
     public static int MAX_RISK_METHOD_NUM = 100;
+
+    public static int semanticsPrintNum;
+
+    public static String targetJar = null;
 }
 
 //public class Conf {

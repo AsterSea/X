@@ -319,7 +319,11 @@ public class DepJarJRisk {
             //内部类会报错
             semantemeMethods.deleteInnerClass();
 
-            semantemeRiskMethods = semantemeMethods.sortMap(100);
+            semantemeRiskMethods = semantemeMethods.sortMap(5000);
+
+            if (semantemeRiskMethods == null) {
+                return new Graph4path(new HashMap<>(), new ArrayList<>());
+            }
 
             MavenUtil.i().getLog().info("filter risk method, after size : " + semantemeRiskMethods.size());
 

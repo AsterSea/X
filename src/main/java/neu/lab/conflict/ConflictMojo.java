@@ -103,13 +103,18 @@ public abstract class ConflictMojo extends AbstractMojo {
     @Parameter(property = "printDiff", defaultValue = "false")
     public boolean printDiff;
 
+    @Parameter(property = "semanticsPrintNum")
+    public int semanticsPrintNum = Integer.MAX_VALUE;
+
+    @Parameter(property = "targetJar")
+    public String targetJar;
+
     public int systemSize = 0;
 
     public long systemFileSize = 0;// byte
 
     // 初始化全局变量
     protected void initGlobalVar() throws Exception {
-
         MavenUtil.i().setMojo(this);
         Conf.CLASS_MISSING = classMissing;
         Conf.DOG_DEP_FOR_DIS = disDepth;
@@ -120,6 +125,8 @@ public abstract class ConflictMojo extends AbstractMojo {
         Conf.append = append;
         Conf.runTime = runTime;
         Conf.printDiff = printDiff;
+        Conf.semanticsPrintNum = semanticsPrintNum;
+        Conf.targetJar = targetJar;
         GlobalVar.useAllJar = useAllJar;
 
         // 初始化NodeAdapters
