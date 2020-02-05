@@ -253,7 +253,7 @@ public class DepJar {
 
     @Override
     public String toString() {
-        return groupId + ":" + artifactId + ":" + version + ":" + classifier;
+        return groupId + ":" + artifactId + ":" + version;
     }
 
     public String getGroupId() {
