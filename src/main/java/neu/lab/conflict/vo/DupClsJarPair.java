@@ -53,6 +53,10 @@ public class DupClsJarPair {
         clsSigs = new HashSet<String>();
     }
 
+    public String getSig() {
+        return jar1.toString() + "-" + jar2.toString();
+    }
+
     public boolean isInDupCls(String rhcedMthd) {
         return clsSigs.contains(SootUtil.mthdSig2cls(rhcedMthd));
     }
@@ -96,7 +100,7 @@ public class DupClsJarPair {
 
     @Override
     public String toString() {
-        return "DupClsJarPair [jar1=" + jar1 + ", jar2=" + jar2 + "]";
+        return "jar1=" + jar1 + ", jar2=" + jar2;
     }
 
     private List<String> getOnlyMethod(DepJar total, DepJar some) {

@@ -67,7 +67,9 @@ public class ClassDupRiskWriter {
 
             for (DupClsJarPair jarPair : getJarPairs().getAllJarPair()) {
 //				printer.println("projectPath->" + MavenUtil.i().getProjectInfo());
-                write(jarPair, printer);
+                if (Conf.targetJar == null || "".equals(Conf.targetJar) || jarPair.getSig().contains(Conf.targetJar)) {
+                    write(jarPair, printer);
+                }
 //				printer.println(jarPair.getJar1().getJarFilePaths(false));
             }
         } catch (Exception e) {
@@ -101,7 +103,7 @@ public class ClassDupRiskWriter {
         if (dis2records.size() > 0) {
             Map<String, Integer> sortMap = new TreeMap<>();
             Set<String> hasWriterRiskMethodPath = new HashSet<>();
-            printer.println("conflict:" + jarPair.toString());
+            printer.println("conflict : " + jarPair.toString());
 //            printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
             for (Record4path record : dis2records.flat()) {
                 if (!hasWriterRiskMethodPath.contains(record.getRiskMethod())) {
