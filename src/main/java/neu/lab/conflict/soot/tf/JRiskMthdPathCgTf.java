@@ -12,6 +12,7 @@ import neu.lab.conflict.graph.Node4path;
 import neu.lab.conflict.risk.jar.DepJarJRisk;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.SootUtil;
+import neu.lab.conflict.vo.DupClsJarPair;
 import neu.lab.conflict.vo.MethodCall;
 import soot.Scene;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -31,6 +32,9 @@ public class JRiskMthdPathCgTf extends JRiskCgTf {
         super(depJarJRisk, entryMethods);
     }
 
+    public JRiskMthdPathCgTf(DupClsJarPair dupClsJarPair, Set<String> entryMethods) {
+        super(dupClsJarPair, entryMethods);
+    }
     public JRiskMthdPathCgTf(DepJarJRisk depJarJRisk, boolean filterusedDepJarParent, Set<String> entryMethods) {
         super(depJarJRisk, depJarJRisk.getUsedDepJar().getAllParentDepJar(), entryMethods);
     }

@@ -51,6 +51,7 @@ public class SemanticsPathWriter {
                             Map<String, Integer> sortMap = new TreeMap<>();
                             Set<String> hasWriterRiskMethodPath = new HashSet<>();
                             printer.println("conflict:" + conflict.toString());
+                            printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
                             for (Record4path record : dis2records.flat()) {
                                 if (!hasWriterRiskMethodPath.contains(record.getRiskMethod())) {
                                     int differenceAndSame = allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod()))).size();

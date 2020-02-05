@@ -4,10 +4,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import gumtree.spoon.diff.operations.Operation;
 import neu.lab.conflict.container.ClassDups;
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.container.DepJars;
@@ -64,7 +63,7 @@ public class ClassDupRiskWriter {
 					new FileWriter(new File(outPath + fileName.replace('.', '_') + "DupByJar.txt"), true)));
 
 			for (DupClsJarPair jarPair : getJarPairs().getAllJarPair()) {
-				printer.println("projectPath->" + MavenUtil.i().getProjectInfo());
+//				printer.println("projectPath->" + MavenUtil.i().getProjectInfo());
 				write(jarPair, printer);
 //				printer.println(jarPair.getJar1().getJarFilePaths(false));
 			}
@@ -78,6 +77,8 @@ public class ClassDupRiskWriter {
 //		printer.println(jarPair.getCommonMethods());
 		Graph4path pathGraph = jarPair.getMethoPathGraphForSemanteme();
 		Set<String> hostNodes = pathGraph.getHostNodes();
+        Map<String, String> methodMappingASMMethod = pathGraph.getMethodMappingASMMethod();
+        Map<String, List<Operation>> allRiskMethodDiffsMap = jarPair.getRiskMethodDiffsMap();
 //		System.out.println(hostNodes.toString());
 		Map<String, IBook> pathBooks = new Dog(pathGraph).findRlt(hostNodes, Conf.DOG_DEP_FOR_PATH,
 				Strategy.NOT_RESET_BOOK);
@@ -91,26 +92,48 @@ public class ClassDupRiskWriter {
 				}
 			}
 		}
-		Map<String, List<Integer>> semantemeMethodForDifferences = jarPair.getSemantemeMethodForDifferences();
+//		Map<String, List<Integer>> semantemeMethodForDifferences = jarPair.getSemantemeMethodForDifferences();
+        int num = 0;
 		if (dis2records.size() > 0) {
-//			Set<String> hasWriterRiskMethodPath = new HashSet<String>();
-			printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
-			printer.println("pomPath:" + MavenUtil.i().getBaseDir());
-			
-			for (Record4path record : dis2records.flat()) {
-//				if (!hasWriterRiskMethodPath.contains(record.getRiskMthd())) {
-//				if(addJarPath(record.getPathStr()).contains(conflictDepJarVersion)) {
-				List<Integer> differenceAndSame = semantemeMethodForDifferences.get(record.getRiskMethod());
-				printer.println("\n" + "conflict:" + jarPair.getCommonMethodsString());
-				printer.println("risk method name:" + record.getRiskMethod());
-				printer.println("差异:" + differenceAndSame.get(0));
-				printer.println("相同:" + differenceAndSame.get(1));
-				printer.println("pathLen:" + record.getPathlen() + "\n" + addJarPath(record.getPathStr()));
-//					hasWriterRiskMethodPath.add(record.getRiskMthd());
-//				}
-//				}
-			}
-		}
+            Map<String, Integer> sortMap = new TreeMap<>();
+            Set<String> hasWriterRiskMethodPath = new HashSet<>();
+            printer.println("conflict:" + jarPair.toString());
+//            printer.println("classPath:" + DepJars.i().getUsedJarPathsStr());
+            for (Record4path record : dis2records.flat()) {
+                if (!hasWriterRiskMethodPath.contains(record.getRiskMethod())) {
+                    int differenceAndSame = allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod()))).size();
+                    StringBuffer stringBuffer = new StringBuffer();
+                    List<Operation> operationList = allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod())));
+                    stringBuffer.append("risk method name : " + record.getRiskMethod() + "\n");
+                    stringBuffer.append("diff size : " + differenceAndSame + "\n");
+                    stringBuffer.append("diff :\n");
+                    for (Operation operation : operationList) {
+                        stringBuffer.append(operation.toString());
+                    }
+                    stringBuffer.append("path length : " + record.getPathlen() + "\npath :\n" + addJarPath(record.getPathStr()) + "\n\n\n");
+                    sortMap.put(stringBuffer.toString(), differenceAndSame);
+                    hasWriterRiskMethodPath.add(record.getRiskMethod());
+//                                    num++;
+                }
+//								}
+            }
+
+            List<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>(sortMap.entrySet());
+
+            Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+                public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                    return -o1.getValue().compareTo(o2.getValue());
+                }
+            });
+            for (Map.Entry<String, Integer> e : list) {
+                if (num < Conf.semanticsPrintNum) {
+                    printer.println(e.getKey());
+                    num++;
+                } else {
+                    break;
+                }
+            }
+        }
 	}
 
 //
