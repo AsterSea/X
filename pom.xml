@@ -13,8 +13,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- <mavenVersion>3.5.4</mavenVersion> -->
-        <!--        <evosuite.version>1.0.6</evosuite.version>-->
     </properties>
 
     <dependencies>
