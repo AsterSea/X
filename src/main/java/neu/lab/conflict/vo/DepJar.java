@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import neu.lab.conflict.GlobalVar;
 import neu.lab.conflict.container.AllCls;
 import neu.lab.conflict.container.AllRefedCls;
 import neu.lab.conflict.container.DepJars;
 import neu.lab.conflict.container.NodeAdapters;
 import neu.lab.conflict.soot.JarAna;
+import neu.lab.conflict.util.Conf;
 import neu.lab.conflict.util.MavenUtil;
 import neu.lab.conflict.util.SootUtil;
 
@@ -529,5 +531,26 @@ public class DepJar {
 
     public String getDepJarName() {
         return (groupId + artifactId + version).replaceAll("\\p{Punct}", "");
+    }
+
+    public Collection<String> getPrcDirPaths() {
+        List<String> classpaths = new ArrayList<String>();
+        MavenUtil.i().getLog().info("not add all jar to process");
+        try{
+            classpaths.addAll(this.getJarFilePaths(true));
+            classpaths.addAll(this.getOnlyFatherJarCps(true));
+        }catch(NullPointerException e){
+            classpaths = new ArrayList<String>();
+        }
+//        MavenUtil.i().getLog().info("class path size : " + classpaths.size());
+        return classpaths;
+    }
+
+    public Set<String> getOnlyFatherJarCps(boolean includeSelf) {
+        Set<String> fatherJarCps = new HashSet<String>();
+        for (NodeAdapter node : this.nodeAdapters) {
+            fatherJarCps.addAll(node.getImmediateAncestorJarCps(includeSelf));
+        }
+        return fatherJarCps;
     }
 }
