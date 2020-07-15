@@ -1,5 +1,12 @@
 package neu.lab.conflict.util;
 
+import neu.lab.conflict.vo.NodeAdapter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Conf {
     public static final boolean CLASS_DUP = false;
     public static final boolean FLT_INTERFACE = false;
@@ -55,6 +62,15 @@ public class Conf {
     public static int semanticsPrintNum;
 
     public static String targetJar = null;
+
+    // to record exclude
+    public static Map<String, List<NodeAdapter>> dependencyMap = new HashMap<>();
+
+    // first level
+    public static List<NodeAdapter> needAddNodeList = new ArrayList<>();
+
+    // second level
+    public static List<NodeAdapter> firstLevelNeedAddNodeList = new ArrayList<>();
 }
 
 //public class Conf {
