@@ -1,6 +1,7 @@
 package neu.lab.conflict.soot;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import neu.lab.conflict.GlobalVar;
@@ -107,7 +108,9 @@ public class SootJRiskCg extends SootAna {
 //			if(needParentDepJar) {
 //				soot.Main.main(getArgs(entryDepJar.getAllParentJarClassPaths(true).toArray(new String[0])).toArray(new String[0]));
 //			}else {
-            soot.Main.main(getArgs(entryDepJar.getJarFilePaths(true).toArray(new String[0])).toArray(new String[0]));
+
+//            soot.Main.main(getArgs(entryDepJar.getJarFilePaths(true).toArray(new String[0])).toArray(new String[0]));
+            soot.Main.main(getArgs(entryDepJar.getPrcDirPaths().toArray(new String[0])).toArray(new String[0]));
 //			}
 
             graph = transformer.getGraph();
