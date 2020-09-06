@@ -16,18 +16,8 @@
     </properties>
 
     <dependencies>
-        <!--                <dependency>-->
-        <!--                    <groupId>ca.mcgill.sable</groupId>-->
-        <!--                    <artifactId>soot</artifactId>-->
-        <!--                    <version>4.0.0</version>-->
-        <!--                </dependency>-->
-        <!--                <dependency>-->
-        <!--                    <groupId>de.upb.cs.swt</groupId>-->
-        <!--                    <artifactId>heros</artifactId>-->
-        <!--                    <version>1.2.0</version>-->
-        <!--                </dependency>-->
         <dependency>
-            <groupId>org.sensor</groupId>
+            <groupId>neu.lab</groupId>
             <artifactId>soot</artifactId>
             <version>3.2.0</version>
         </dependency>
