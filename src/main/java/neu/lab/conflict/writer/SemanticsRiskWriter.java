@@ -81,8 +81,9 @@ public class SemanticsRiskWriter {
 
         } catch (Exception e) {
             MavenUtil.i().getLog().error(e);
+        } finally {
+            printer.close();
         }
-        printer.close();
     }
 
     private String addJarPath(String mthdCallPath) {

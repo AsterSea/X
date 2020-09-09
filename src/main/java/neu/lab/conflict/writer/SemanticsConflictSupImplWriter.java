@@ -55,7 +55,7 @@ public class SemanticsConflictSupImplWriter {
                 }
             }
         } catch (Exception e) {
-            MavenUtil.i().getLog().error(e);
+            MavenUtil.i().getLog().error(e.getMessage());
         } finally {
             printer.close();
         }

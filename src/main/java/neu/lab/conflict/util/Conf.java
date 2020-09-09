@@ -53,8 +53,8 @@ public class Conf {
 
     public static boolean printDiff;
 
-    //default 线程数为cpu+1
-    public static int nThreads = Runtime.getRuntime().availableProcessors() + 1;
+    //default 线程数为cpu+1 服务器为5
+    public static int nThreads = 5;//Runtime.getRuntime().availableProcessors() + 1;
 
     //最大风险方法数 默认100
     public static int MAX_RISK_METHOD_NUM = 100;
