@@ -1,5 +1,6 @@
 package neu.lab.conflict;
 
+import fj.Hash;
 import gumtree.spoon.diff.operations.Operation;
 import neu.lab.conflict.container.Conflicts;
 import neu.lab.conflict.container.DepJars;
@@ -17,6 +18,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,21 +67,24 @@ public class PrintAPIDataInfoMojo extends ConflictMojo {
                         }
                     }
                     if (dis2records.size() > 0) {
+                        HashSet<String> has = new HashSet<>();
                         for (Record4path record : dis2records.flat()) {
-                            int differenceAndSame = allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod()))).size();
-                            printer.println("\n" + "Conflicting library : " + conflict.toString());
-                            printer.println("Conflicting API pair : " + record.getRiskMethod());
-                            printer.println("Diff size : " + differenceAndSame);
-                            printer.println("====================");
-                            printer.println("Diff : ");
-                            for (Operation operation : allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod())))) {
-                                printer.print(operation.toString());
+                            if (!has.contains(record.getRiskMethod())) {
+                                int differenceAndSame = allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod()))).size();
+                                printer.println("\n" + "Conflicting library : " + conflict.toString());
+                                printer.println("Conflicting API pair : " + record.getRiskMethod());
+                                printer.println("Diff size : " + differenceAndSame);
+                                printer.println("====================");
+                                printer.println("Diff : ");
+                                for (Operation operation : allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod())))) {
+                                    printer.print(operation.toString());
+                                }
+                                printer.println("====================");
+                                printer.println("Path length : " + record.getPathlen());
+                                printer.println("Invocation path : " + "\n" + addJarPath(record.getPathStr()));
+                                printer.println("====================");
+                                has.add(record.getRiskMethod());
                             }
-                            printer.println("====================");
-                            printer.println("Path length : " + record.getPathlen());
-                            printer.println("Invocation path : " + "\n" + addJarPath(record.getPathStr()));
-                            printer.println("====================");
-                            break;//只输出一条路径
                         }
                     }
                 }
