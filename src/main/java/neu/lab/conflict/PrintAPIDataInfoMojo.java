@@ -73,8 +73,8 @@ public class PrintAPIDataInfoMojo extends ConflictMojo {
                                 int differenceAndSame = allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod()))).size();
                                 printer.println("\n" + "Conflicting library : " + conflict.toString());
                                 printer.println("Conflicting API pair : " + record.getRiskMethod());
-                                printer.println("Diff size : " + differenceAndSame);
                                 printer.println("====================");
+                                printer.println("Diff size : " + differenceAndSame);
                                 printer.println("Diff : ");
                                 for (Operation operation : allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod())))) {
                                     printer.print(operation.toString());
@@ -83,9 +83,11 @@ public class PrintAPIDataInfoMojo extends ConflictMojo {
                                 printer.println("Path length : " + record.getPathlen());
                                 printer.println("Invocation path : " + "\n" + addJarPath(record.getPathStr()));
                                 printer.println("====================");
+                                printer.println();
                                 has.add(record.getRiskMethod());
                             }
                         }
+                        printer.println("\n" + has.size());
                     }
                 }
             }
