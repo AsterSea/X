@@ -70,7 +70,13 @@ public class PrintAPIDataInfoMojo extends ConflictMojo {
                         HashSet<String> has = new HashSet<>();
                         for (Record4path record : dis2records.flat()) {
                             if (!has.contains(record.getRiskMethod())) {
-                                int differenceAndSame = allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod()))).size();
+                                int differenceAndSame;
+                                try {
+                                    differenceAndSame = allRiskMethodDiffsMap.get((methodMappingASMMethod.get(record.getRiskMethod()))).size();
+                                } catch (Exception e) {
+                                    MavenUtil.i().getLog().error(e + "\n" + record.getRiskMethod());
+                                    continue;
+                                }
                                 printer.println("\n" + "Conflicting library : " + conflict.toString());
                                 printer.println("Conflicting API pair : " + record.getRiskMethod());
                                 printer.println("====================");
