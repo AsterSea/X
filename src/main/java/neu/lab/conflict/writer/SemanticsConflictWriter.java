@@ -13,6 +13,7 @@ import neu.lab.conflict.graph.*;
 import neu.lab.conflict.util.MySortedMap;
 import neu.lab.conflict.vo.DepJar;
 import neu.lab.evosuiteshell.*;
+import neu.lab.evosuiteshell.generate.GenericAPISet;
 import neu.lab.evosuiteshell.generate.GenericObjectSet;
 import neu.lab.evosuiteshell.generate.GenericPoolFromTestCase;
 import neu.lab.evosuiteshell.search.*;
@@ -242,6 +243,7 @@ public class SemanticsConflictWriter {
         Properties.TARGET_CLASS = targetClass;
 
         GenericObjectSet.getInstance().generateObject(targetClass);
+        GenericAPISet.getInstance().generateAllAPI();
 
 //        initObjectPool(targetClass);
 //		Properties.TARGET_CLASS = SootUtil.mthdSig2cls(targetClass);
