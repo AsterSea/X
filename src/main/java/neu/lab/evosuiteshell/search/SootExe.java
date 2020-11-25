@@ -17,11 +17,11 @@ public class SootExe {
     public void initProjectInfo(String[] jarFilePath) {
 //		System.out.println("jarFilePath size"+ jarFilePath);
         List<String> args = getArgs(jarFilePath);
-//        Set<String> classesSig = JarAna.i().deconstruct(Arrays.asList(jarFilePath)).keySet();
+        Set<String> classesSig = JarAna.i().deconstruct(Arrays.asList(jarFilePath)).keySet();
 //		System.out.println("args size"+ args);
         if (args.size() != 0) {
 
-            ClassTransformer transformer = new ClassTransformer();
+            ClassTransformer transformer = new ClassTransformer(classesSig);
 
             PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", transformer));
 

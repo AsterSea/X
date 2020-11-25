@@ -31,7 +31,7 @@ import java.util.Set;
 public class PrintAPIDataInfoMojo extends ConflictMojo {
     @Override
     public void run() {
-        writeSemanticsRiskToFile(Conf.outDir);
+        writeSemanticsPath(Conf.outDir);
     }
 
     /**
@@ -100,6 +100,56 @@ public class PrintAPIDataInfoMojo extends ConflictMojo {
 
         } catch (Exception e) {
             MavenUtil.i().getLog().error(e);
+        } finally {
+            printer.close();
+        }
+    }
+
+    public void writeSemanticsPath(String outPath) {
+        PrintWriter printer = null;
+        try {
+            String fileName = MavenUtil.i().getProjectGroupId() + ":" + MavenUtil.i().getProjectArtifactId() + ":"
+                    + MavenUtil.i().getProjectVersion();
+            printer = new PrintWriter(new BufferedWriter(
+                    new FileWriter(outPath + "supImplSemantics_" + fileName.replace('.', '_').replace(':', '_') + ".txt", true)));
+
+            for (Conflict conflict : Conflicts.i().getConflicts()) {
+                if (Conf.targetJar == null || "".equals(Conf.targetJar) || conflict.getSig().contains(Conf.targetJar)) {
+                    for (DepJarJRisk depJarRisk : conflict.getJarRisks()) {
+                        Graph4path graph4path = depJarRisk.getGraph4mthdPath();
+                        Map<String, IBook> pathBooks = new Dog(graph4path).findRlt(graph4path.getAllNode(), Conf.DOG_DEP_FOR_PATH,
+                                Dog.Strategy.NOT_RESET_BOOK);
+                        MySortedMap<Integer, Record4path> dis2records = new MySortedMap<Integer, Record4path>();
+                        for (String topMethod : pathBooks.keySet()) {
+                            if (graph4path.getHostNodes().contains(topMethod)) {
+                                Book4path book = (Book4path) (pathBooks.get(topMethod));
+                                for (IRecord iRecord : book.getRecords()) {
+                                    Record4path record = (Record4path) iRecord;
+                                    dis2records.add(record.getPathlen(), record);
+                                }
+                            }
+                        }
+                        if (dis2records.size() > 0) {
+                            HashSet<String> has = new HashSet<>();
+                            for (Record4path record : dis2records.flat()) {
+                                if (!has.contains(record.getRiskMethod())) {
+                                    printer.println("\n" + "Conflicting library : " + conflict.toString());
+                                    printer.println("Conflicting API pair : " + record.getRiskMethod());
+                                    printer.println("====================");
+                                    printer.println("Path length : " + record.getPathlen());
+                                    printer.println("Invocation path : " + "\n" + addJarPath(record.getPathStr()));
+                                    printer.println("====================");
+                                    printer.println();
+                                    has.add(record.getRiskMethod());
+                                }
+                            }
+                            printer.println("\n" + has.size());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            MavenUtil.i().getLog().error(e.getMessage());
         } finally {
             printer.close();
         }

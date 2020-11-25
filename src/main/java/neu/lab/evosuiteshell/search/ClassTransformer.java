@@ -40,9 +40,9 @@ public class ClassTransformer extends SceneTransformer {
 //        }
         for (SootClass sootClass : allClass) {
             ClassInfo clsVO = new ClassInfo(sootClass);
-//            if (!classesSig.contains(clsVO.getSig())) {
-//                continue;
-//            }
+            if (!classesSig.contains(clsVO.getSig())) {
+                continue;
+            }
             ProjectInfo.i().addClass(clsVO);
             for (MethodInfo methodInfo : clsVO.getMthds()) {
                 ProjectInfo.i().addMethod(methodInfo);
